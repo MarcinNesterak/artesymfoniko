@@ -1,0 +1,120 @@
+.participation-container {
+  display: flex;
+  justify-content: center;
+  padding: 30px 0;
+}
+
+.participation-card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  padding: 25px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.participation-card h1 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: var(--accent-secondary);
+}
+
+.event-summary {
+  margin-bottom: 30px;
+}
+
+.event-summary h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.event-date,
+.event-description,
+.event-schedule,
+.event-program {
+  margin-bottom: 15px;
+}
+
+.event-date strong,
+.event-description strong,
+.event-schedule strong,
+.event-program strong {
+  display: inline-block;
+  margin-bottom: 5px;
+  color: var(--text-secondary);
+}
+
+.event-schedule pre,
+.event-program pre {
+  background-color: var(--bg-tertiary);
+  padding: 10px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  font-family: inherit;
+  margin: 0;
+}
+
+.response-section {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.response-section p {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.response-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn-accept,
+.btn-decline {
+  padding: 10px 25px;
+  border-radius: 4px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-accept {
+  background-color: var(--success);
+  color: #000;
+}
+
+.btn-accept:hover {
+  background-color: #02c4b0;
+}
+
+.btn-decline {
+  background-color: var(--error);
+  color: #fff;
+}
+
+.btn-decline:hover {
+  background-color: #b85969;
+}
+
+.error-container {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.btn-back {
+  margin-top: 20px;
+  padding: 8px 15px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-back:hover {
+  background-color: var(--bg-tertiary);
+}

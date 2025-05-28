@@ -1,0 +1,180 @@
+.event-details {
+  padding: 20px 0;
+}
+
+.event-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.event-details-header h1 {
+  margin: 0;
+}
+
+.event-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-back {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-back:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.btn-delete {
+  background-color: var(--error);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 0.9rem;
+}
+
+.btn-delete:hover {
+  background-color: #b85969;
+}
+
+.btn-delete:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+.event-details-content {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+}
+
+.event-info-card,
+.musicians-card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+  height: 100%;
+}
+
+.info-item {
+  margin-bottom: 20px;
+}
+
+.info-item strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--accent-secondary);
+}
+
+.info-item pre {
+  background-color: var(--bg-tertiary);
+  padding: 10px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  font-family: inherit;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.musicians-list {
+  margin-top: 15px;
+}
+
+.musician-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.musician-item:last-child {
+  border-bottom: none;
+}
+
+.musician-name {
+  font-weight: 500;
+}
+
+.musician-instrument {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 3px;
+}
+
+.invitation-status {
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.status-pending {
+  background-color: rgba(255, 214, 0, 0.2);
+  color: var(--warning);
+}
+
+.status-confirmed {
+  background-color: rgba(3, 218, 198, 0.2);
+  color: var(--success);
+}
+
+.status-declined {
+  background-color: rgba(207, 102, 121, 0.2);
+  color: var(--error);
+}
+
+.add-musicians-section {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.add-musicians-section h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.add-musicians-section select {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .event-details-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .event-actions {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .btn-delete,
+  .btn-back {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .event-details-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+}

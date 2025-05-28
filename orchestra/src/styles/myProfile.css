@@ -1,0 +1,175 @@
+.my-profile {
+  padding: 20px 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.profile-header h1 {
+  margin: 0;
+}
+
+.profile-section {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: var(--card-shadow);
+}
+
+.profile-section h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.profile-section h3 {
+  margin-top: 25px;
+  margin-bottom: 15px;
+  color: var(--accent-secondary);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header h2 {
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.password-form,
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-group input {
+  padding: 10px 12px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: var(--accent-secondary);
+  outline: none;
+}
+
+.form-group small {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item strong {
+  color: var(--text-secondary);
+  min-width: 150px;
+}
+
+.info-item span {
+  text-align: right;
+}
+
+.status-badge {
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background-color: rgba(3, 218, 198, 0.2);
+  color: var(--success);
+}
+
+.status-badge.inactive {
+  background-color: rgba(207, 102, 121, 0.2);
+  color: var(--error);
+}
+
+@media (max-width: 768px) {
+  .my-profile {
+    padding: 20px 10px;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .info-item span {
+    text-align: left;
+  }
+}
