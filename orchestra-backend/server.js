@@ -182,6 +182,7 @@ const createTestAccounts = async () => {
         role: 'musician',
         instrument: 'skrzypce',
         active: true,
+          createdBy: conductor._id,
         personalData: {
           firstName: 'Skrzypce',
           lastName: 'Testowe'
