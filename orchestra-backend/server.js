@@ -34,12 +34,12 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Database connection - bez deprecated options
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ MongoDB connected successfully');
     console.log(`📊 Database: ${mongoose.connection.name}`);
+    createTestAccounts();
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
     process.exit(1);
@@ -148,3 +148,49 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+
+// Funkcja tworząca testowe konta
+const createTestAccounts = async () => {
+  try {
+    const User = (await import('./models/User.js')).default;
+    
+    // Sprawdź czy testowe konta już istnieją
+    const conductor = await User.findOne({ email: 'dyrygent@test.pl' });
+    const musician = await User.findOne({ email: 'skrzypce@test.pl' });
+    
+    if (!conductor) {
+      const testConductor = new User({
+        email: 'dyrygent@test.pl',
+        name: 'Dyrygent Testowy',
+        password: 'haslo123',
+        role: 'conductor',
+        active: true,
+        personalData: {
+          firstName: 'Dyrygent',
+          lastName: 'Testowy'
+        }
+      });
+      await testConductor.save();
+      console.log('✅ Utworzono testowe konto dyrygenta');
+    }
+    
+    if (!musician) {
+      const testMusician = new User({
+        email: 'skrzypce@test.pl',
+        name: 'Skrzypce Testowe',
+        password: 'LXXF9YJI',
+        role: 'musician',
+        instrument: 'skrzypce',
+        active: true,
+        personalData: {
+          firstName: 'Skrzypce',
+          lastName: 'Testowe'
+        }
+      });
+      await testMusician.save();
+      console.log('✅ Utworzono testowe konto muzyka');
+    }
+  } catch (error) {
+    console.error('❌ Błąd tworzenia testowych kont:', error);
+  }
+};
