@@ -40,7 +40,7 @@ const handleResponse = async (response) => {
 export const authAPI = {
   // Logowanie
   login: async (email, password) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: getHeaders(false),
       body: JSON.stringify({ email, password }),
@@ -50,7 +50,7 @@ export const authAPI = {
 
   // Rejestracja (tylko pierwszy dyrygent)
   register: async (email, password, name) => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: getHeaders(false),
       body: JSON.stringify({ email, password, name }),
@@ -60,7 +60,7 @@ export const authAPI = {
 
   // Tworzenie muzyka (tylko dyrygent)
   createMusician: async (musicianData) => {
-    const response = await fetch(`${API_BASE_URL}/auth/create-musician`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/create-musician`, {
       method: 'POST',
       headers: getHeaders(true),
       body: JSON.stringify(musicianData),
@@ -70,7 +70,7 @@ export const authAPI = {
 
   // Zmiana hasła
   changePassword: async (currentPassword, newPassword) => {
-    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
       method: 'PATCH',
       headers: getHeaders(true),
       body: JSON.stringify({ currentPassword, newPassword }),
@@ -80,7 +80,7 @@ export const authAPI = {
 
   // Sprawdź aktualnego użytkownika
   getCurrentUser: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
       method: 'GET',
       headers: getHeaders(true),
     });
@@ -92,7 +92,7 @@ export const authAPI = {
 export const usersAPI = {
   // Pobierz wszystkich muzyków (tylko dyrygent)
   getMusicians: async () => {
-    const response = await fetch(`${API_BASE_URL}/users`, {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
       method: 'GET',
       headers: getHeaders(true),
     });
@@ -101,7 +101,7 @@ export const usersAPI = {
 
   // Pobierz konkretnego muzyka (tylko dyrygent)
   getMusician: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
       method: 'GET',
       headers: getHeaders(true),
     });
@@ -110,7 +110,7 @@ export const usersAPI = {
 
   // Aktualizuj dane muzyka (tylko dyrygent)
   updateMusician: async (id, musicianData) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
       method: 'PUT',
       headers: getHeaders(true),
       body: JSON.stringify(musicianData),
@@ -120,7 +120,7 @@ export const usersAPI = {
 
   // Resetuj hasło muzyka (tylko dyrygent)
   resetMusicianPassword: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}/reset-password`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}/reset-password`, {
       method: 'PATCH',
       headers: getHeaders(true),
     });
@@ -129,7 +129,7 @@ export const usersAPI = {
 
   // Aktywuj/dezaktywuj muzyka (tylko dyrygent)
   toggleMusicianStatus: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}/toggle-status`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}/toggle-status`, {
       method: 'PATCH',
       headers: getHeaders(true),
     });
@@ -138,7 +138,7 @@ export const usersAPI = {
 
   // Usuń muzyka (tylko dyrygent)
   deleteMusician: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {
       method: 'DELETE',
       headers: getHeaders(true),
     });
@@ -147,7 +147,7 @@ export const usersAPI = {
 
   // Aktualizuj własny profil (muzyk)
   updateProfile: async (profileData) => {
-    const response = await fetch(`${API_BASE_URL}/users/profile`, {
+    const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
       method: 'PATCH',
       headers: getHeaders(true),
       body: JSON.stringify(profileData),
@@ -160,7 +160,7 @@ export const usersAPI = {
 export const eventsAPI = {
   // Pobierz wydarzenia
   getEvents: async (archived = false) => {
-    const url = `${API_BASE_URL}/events${archived !== undefined ? `?archived=${archived}` : ''}`;
+    const url = `${API_BASE_URL}/api/events${archived !== undefined ? `?archived=${archived}` : ''}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: getHeaders(true),
@@ -170,7 +170,7 @@ export const eventsAPI = {
 
   // Pobierz konkretne wydarzenie
   getEvent: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/events/${id}`, {
       method: 'GET',
       headers: getHeaders(true),
     });
@@ -179,7 +179,7 @@ export const eventsAPI = {
 
   // Utwórz wydarzenie (tylko dyrygent)
   createEvent: async (eventData) => {
-    const response = await fetch(`${API_BASE_URL}/events`, {
+    const response = await fetch(`${API_BASE_URL}/api/events`, {
       method: 'POST',
       headers: getHeaders(true),
       body: JSON.stringify(eventData),
@@ -189,7 +189,7 @@ export const eventsAPI = {
 
   // Aktualizuj wydarzenie (tylko dyrygent-właściciel)
   updateEvent: async (id, eventData) => {
-    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/events/${id}`, {
       method: 'PUT',
       headers: getHeaders(true),
       body: JSON.stringify(eventData),
@@ -199,7 +199,7 @@ export const eventsAPI = {
 
   // Usuń wydarzenie (tylko dyrygent-właściciel)
   deleteEvent: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/events/${id}`, {
       method: 'DELETE',
       headers: getHeaders(true),
     });
@@ -208,7 +208,7 @@ export const eventsAPI = {
 
   // Zaproś muzyków do wydarzenia (tylko dyrygent-właściciel)
   inviteMusicians: async (eventId, userIds) => {
-    const response = await fetch(`${API_BASE_URL}/events/${eventId}/invite`, {
+    const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/invite`, {
       method: 'POST',
       headers: getHeaders(true),
       body: JSON.stringify({ userIds }),
