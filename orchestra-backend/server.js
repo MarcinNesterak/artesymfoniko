@@ -13,7 +13,6 @@ import Event from './models/Event.js';
 import Invitation from './models/Invitation.js';
 import Participation from './models/Participation.js';
 
-require('dotenv').config();
 // Load environment variables
 dotenv.config();
 
