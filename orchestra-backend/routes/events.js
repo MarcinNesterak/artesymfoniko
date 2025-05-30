@@ -16,18 +16,25 @@ router.get('/', requireUser, async (req, res) => {
       // Dyrygent widzi swoje wydarzenia
       query.conductorId = req.user._id;
     } else {
-      // Muzyk widzi wydarzenia gdzie został zaproszony lub uczestniczy
-      const userParticipations = await Participation.find({ 
-        userId: req.user._id 
-      }).distinct('eventId');
-      
-      const userInvitations = await Invitation.find({ 
-        userId: req.user._id 
-      }).distinct('eventId');
-      
-      const eventIds = [...new Set([...userParticipations, ...userInvitations])];
-      query._id = { $in: eventIds };
-    }
+  // Muzyk widzi tylko wydarzenia gdzie:
+  // 1. Potwierdził udział (participation status = 'confirmed')
+  // 2. Ma oczekujące zaproszenie (invitation status = 'pending')
+  
+  // Wydarzenia gdzie potwierdził udział
+  const confirmedParticipations = await Participation.find({ 
+    userId: req.user._id,
+    status: 'confirmed'
+  }).distinct('eventId');
+  
+  // Wydarzenia z oczekującymi zaproszeniami
+  const pendingInvitations = await Invitation.find({ 
+    userId: req.user._id,
+    status: 'pending'
+  }).distinct('eventId');
+  
+  const eventIds = [...new Set([...confirmedParticipations, ...pendingInvitations])];
+  query._id = { $in: eventIds };
+}
     
     // Filtruj według archived jeśli podano
     if (req.query.archived !== undefined) {
