@@ -441,4 +441,111 @@ router.post('/:id/respond', requireUser, async (req, res) => {
   }
 });
 
+// DELETE /api/events/:id/invitations/:invitationId - odwołaj zaproszenie
+router.delete('/:id/invitations/:invitationId', requireConductor, async (req, res) => {
+  try {
+    const { id: eventId, invitationId } = req.params;
+    
+    // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Wydarzenie nie zostało znalezione'
+      });
+    }
+    
+    if (!event.conductorId.equals(req.user._id)) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Możesz odwoływać zaproszenia tylko do swoich wydarzeń'
+      });
+    }
+    
+    // Usuń zaproszenie
+    const deletedInvitation = await Invitation.findByIdAndDelete(invitationId);
+    
+    if (!deletedInvitation) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Zaproszenie nie zostało znalezione'
+      });
+    }
+    
+    // Aktualizuj licznik zaproszeń
+    const totalInvitations = await Invitation.countDocuments({ eventId });
+    event.invitedCount = totalInvitations;
+    await event.save();
+    
+    res.json({
+      message: 'Zaproszenie zostało odwołane',
+      deletedInvitation: {
+        id: deletedInvitation._id,
+        userId: deletedInvitation.userId
+      }
+    });
+  } catch (error) {
+    console.error('Cancel invitation error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas odwoływania zaproszenia'
+    });
+  }
+});
+
+// DELETE /api/events/:id/participants/:participantId - usuń uczestnika
+router.delete('/:id/participants/:participantId', requireConductor, async (req, res) => {
+  try {
+    const { id: eventId, participantId } = req.params;
+    
+    // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Wydarzenie nie zostało znalezione'
+      });
+    }
+    
+    if (!event.conductorId.equals(req.user._id)) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Możesz usuwać uczestników tylko ze swoich wydarzeń'
+      });
+    }
+    
+    // Usuń uczestnictwo
+    const deletedParticipation = await Participation.findByIdAndDelete(participantId);
+    
+    if (!deletedParticipation) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Uczestnictwo nie zostało znalezione'
+      });
+    }
+    
+    // Aktualizuj licznik potwierdzonych uczestników
+    const confirmedCount = await Participation.countDocuments({ 
+      eventId, 
+      status: 'confirmed' 
+    });
+    event.confirmedCount = confirmedCount;
+    await event.save();
+    
+    res.json({
+      message: 'Uczestnik został usunięty z wydarzenia',
+      deletedParticipation: {
+        id: deletedParticipation._id,
+        userId: deletedParticipation.userId
+      }
+    });
+  } catch (error) {
+    console.error('Remove participant error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas usuwania uczestnika'
+    });
+  }
+});
+
 export default router;
