@@ -171,15 +171,7 @@ const ManageMusicians = () => {
     }
   };
   
-  const copyToClipboard = async (password, musicianName) => {
-    try {
-      await navigator.clipboard.writeText(password);
-      alert(`Hasło dla ${musicianName} zostało skopiowane do schowka!`);
-    } catch (err) {
-      // Fallback dla starszych przeglądarek
-      prompt(`Skopiuj hasło dla ${musicianName}:`, password);
-    }
-  };
+  
   
   return (
     <div className="manage-musicians">
@@ -330,34 +322,15 @@ const ManageMusicians = () => {
                   </span>
                 </div>
                 <div className="musician-password" data-label="Hasło">
-                  {musician.isTemporaryPassword ? (
-                    <div className="temp-password-display">
-                      <span 
-                        className="password-text" 
-                        title="Kliknij, aby skopiować"
-                        onClick={() => copyToClipboard(musician.password, musician.name)}
-                      >
-                        {musician.password}
-                      </span>
-                      <button 
-                        onClick={() => copyToClipboard(musician.password, musician.name)}
-                        className="btn-copy-password"
-                        title="Skopiuj hasło"
-                      >
-                        📋
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="password-changed">********</span>
-                  )}
-                  <button 
-                    onClick={() => handleResetPassword(musician)}
-                    className="btn-reset-password"
-                    title="Resetuj hasło"
-                  >
-                    Resetuj
-                  </button>
-                </div>
+  <span className="password-display">********</span>
+  <button 
+    onClick={() => handleResetPassword(musician)}
+    className="btn-reset-password"
+    title="Resetuj hasło"
+  >
+    Resetuj
+  </button>
+</div>
                 <div className="musician-actions" data-label="Akcje">
                   <button 
                     onClick={() => handleEditMusician(musician)}
