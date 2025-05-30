@@ -353,6 +353,7 @@ router.post('/:id/invite', requireConductor, async (req, res) => {
 });
 
 // POST /api/events/:id/respond - odpowiedz na zaproszenie (tylko muzyk)
+// POST /api/events/:id/respond - odpowiedz na zaproszenie (tylko muzyk)
 router.post('/:id/respond', requireUser, async (req, res) => {
   try {
     const { status } = req.body;
@@ -400,6 +401,9 @@ router.post('/:id/respond', requireUser, async (req, res) => {
       });
     }
     
+    // Mapuj status na response
+    const response = status === 'confirmed' ? 'accepted' : 'declined';
+    
     // Utwórz uczestnictwo
     const participation = new Participation({
       eventId: req.params.id,
@@ -409,8 +413,10 @@ router.post('/:id/respond', requireUser, async (req, res) => {
     
     await participation.save();
     
-    // Aktualizuj status zaproszenia
-    invitation.status = status;
+    // Aktualizuj status zaproszenia - poprawiona wersja
+    invitation.status = 'responded';
+    invitation.response = response;
+    invitation.responseDate = new Date();
     await invitation.save();
     
     // Aktualizuj liczniki w wydarzeniu
