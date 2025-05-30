@@ -43,7 +43,7 @@ router.get('/', requireUser, async (req, res) => {
     
     const events = await Event.find(query)
       .populate('conductorId', 'name email')
-      .sort({ date: -1 });
+      .sort({ date: 1 });
     
     res.json({
       message: 'Lista wydarzeń',
