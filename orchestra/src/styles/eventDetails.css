@@ -65,7 +65,6 @@
   border-radius: 8px;
   padding: 20px;
   box-shadow: var(--card-shadow);
-  height: 100%;
 }
 
 .info-item {
