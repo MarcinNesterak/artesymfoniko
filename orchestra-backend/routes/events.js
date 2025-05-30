@@ -7,34 +7,61 @@ import { authenticate, requireConductor, requireUser } from '../middleware/auth.
 
 const router = express.Router();
 
+// Automatyczne archiwizowanie wydarzeń
+const autoArchiveEvents = async () => {
+  try {
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000); // 30 minut temu
+    
+    const result = await Event.updateMany(
+      {
+        date: { $lt: thirtyMinutesAgo }, // Wydarzenia starsze niż 30 min od rozpoczęcia
+        archived: false // Tylko nieaktywne
+      },
+      {
+        archived: true
+      }
+    );
+    
+    // Log tylko jeśli coś zostało zarchiwizowane
+    if (result.modifiedCount > 0) {
+      console.log(`🗂️ Auto-archived ${result.modifiedCount} events (30+ minutes after start time)`);
+    }
+  } catch (error) {
+    console.error('❌ Auto-archive error:', error);
+  }
+};
+
 // GET /api/events - pobierz wydarzenia
 router.get('/', requireUser, async (req, res) => {
   try {
+    // Automatyczne archiwizowanie przed pobraniem listy
+    await autoArchiveEvents();
+    
     let query = {};
     
     if (req.user.role === 'conductor') {
       // Dyrygent widzi swoje wydarzenia
       query.conductorId = req.user._id;
     } else {
-  // Muzyk widzi tylko wydarzenia gdzie:
-  // 1. Potwierdził udział (participation status = 'confirmed')
-  // 2. Ma oczekujące zaproszenie (invitation status = 'pending')
-  
-  // Wydarzenia gdzie potwierdził udział
-  const confirmedParticipations = await Participation.find({ 
-    userId: req.user._id,
-    status: 'confirmed'
-  }).distinct('eventId');
-  
-  // Wydarzenia z oczekującymi zaproszeniami
-  const pendingInvitations = await Invitation.find({ 
-    userId: req.user._id,
-    status: 'pending'
-  }).distinct('eventId');
-  
-  const eventIds = [...new Set([...confirmedParticipations, ...pendingInvitations])];
-  query._id = { $in: eventIds };
-}
+      // Muzyk widzi tylko wydarzenia gdzie:
+      // 1. Potwierdził udział (participation status = 'confirmed')
+      // 2. Ma oczekujące zaproszenie (invitation status = 'pending')
+      
+      // Wydarzenia gdzie potwierdził udział
+      const confirmedParticipations = await Participation.find({ 
+        userId: req.user._id,
+        status: 'confirmed'
+      }).distinct('eventId');
+      
+      // Wydarzenia z oczekującymi zaproszeniami
+      const pendingInvitations = await Invitation.find({ 
+        userId: req.user._id,
+        status: 'pending'
+      }).distinct('eventId');
+      
+      const eventIds = [...new Set([...confirmedParticipations, ...pendingInvitations])];
+      query._id = { $in: eventIds };
+    }
     
     // Filtruj według archived jeśli podano
     if (req.query.archived !== undefined) {
@@ -43,7 +70,7 @@ router.get('/', requireUser, async (req, res) => {
     
     const events = await Event.find(query)
       .populate('conductorId', 'name email')
-      .sort({ date: 1 });
+      .sort({ date: 1 }); // Chronologicznie - najbliższe pierwsze
     
     res.json({
       message: 'Lista wydarzeń',
@@ -62,6 +89,9 @@ router.get('/', requireUser, async (req, res) => {
 // GET /api/events/:id - pobierz konkretne wydarzenie
 router.get('/:id', requireUser, async (req, res) => {
   try {
+    // Automatyczne archiwizowanie przed pobraniem szczegółów
+    await autoArchiveEvents();
+    
     const event = await Event.findById(req.params.id)
       .populate('conductorId', 'name email');
     
@@ -120,6 +150,9 @@ router.get('/:id', requireUser, async (req, res) => {
 // POST /api/events - utwórz nowe wydarzenie (tylko dyrygent)
 router.post('/', requireConductor, async (req, res) => {
   try {
+    // Automatyczne archiwizowanie przed utworzeniem nowego
+    await autoArchiveEvents();
+    
     const { title, date, description, schedule, program, inviteUserIds } = req.body;
     
     if (!title || !date) {
@@ -185,6 +218,9 @@ router.post('/', requireConductor, async (req, res) => {
 // PUT /api/events/:id - aktualizuj wydarzenie (tylko dyrygent-właściciel)
 router.put('/:id', requireConductor, async (req, res) => {
   try {
+    // Automatyczne archiwizowanie przed edycją
+    await autoArchiveEvents();
+    
     const event = await Event.findById(req.params.id);
     
     if (!event) {
@@ -204,8 +240,8 @@ router.put('/:id', requireConductor, async (req, res) => {
     
     const { title, date, description, schedule, program } = req.body;
     
-    // Walidacja daty jeśli została zmieniona
-    if (date) {
+    // Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
+    if (date && !event.archived) {
       const eventDate = new Date(date);
       if (eventDate <= new Date()) {
         return res.status(400).json({
@@ -214,6 +250,9 @@ router.put('/:id', requireConductor, async (req, res) => {
         });
       }
       event.date = eventDate;
+    } else if (date && event.archived) {
+      // Dla zarchiwizowanych wydarzeń można zmienić datę bez walidacji przyszłości
+      event.date = new Date(date);
     }
     
     // Aktualizuj pola
@@ -240,9 +279,14 @@ router.put('/:id', requireConductor, async (req, res) => {
   }
 });
 
+// Pozostałe endpointy pozostają bez zmian...
+// (DELETE, POST invite, POST respond, DELETE invitations, DELETE participants)
+
 // DELETE /api/events/:id - usuń wydarzenie (tylko dyrygent-właściciel)
 router.delete('/:id', requireConductor, async (req, res) => {
   try {
+    await autoArchiveEvents(); // Auto-archive before deletion
+    
     const event = await Event.findById(req.params.id);
     
     if (!event) {
@@ -287,6 +331,8 @@ router.delete('/:id', requireConductor, async (req, res) => {
 // POST /api/events/:id/invite - zaproś muzyków do wydarzenia
 router.post('/:id/invite', requireConductor, async (req, res) => {
   try {
+    await autoArchiveEvents(); // Auto-archive before inviting
+    
     const { userIds } = req.body;
     
     if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
@@ -360,9 +406,10 @@ router.post('/:id/invite', requireConductor, async (req, res) => {
 });
 
 // POST /api/events/:id/respond - odpowiedz na zaproszenie (tylko muzyk)
-// POST /api/events/:id/respond - odpowiedz na zaproszenie (tylko muzyk)
 router.post('/:id/respond', requireUser, async (req, res) => {
   try {
+    await autoArchiveEvents(); // Auto-archive before responding
+    
     const { status } = req.body;
     
     if (!status || !['confirmed', 'declined'].includes(status)) {
@@ -451,6 +498,8 @@ router.post('/:id/respond', requireUser, async (req, res) => {
 // DELETE /api/events/:id/invitations/:invitationId - odwołaj zaproszenie
 router.delete('/:id/invitations/:invitationId', requireConductor, async (req, res) => {
   try {
+    await autoArchiveEvents(); // Auto-archive before canceling invitation
+    
     const { id: eventId, invitationId } = req.params;
     
     // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
@@ -503,6 +552,8 @@ router.delete('/:id/invitations/:invitationId', requireConductor, async (req, re
 // DELETE /api/events/:id/participants/:participantId - usuń uczestnika
 router.delete('/:id/participants/:participantId', requireConductor, async (req, res) => {
   try {
+    await autoArchiveEvents(); // Auto-archive before removing participant
+    
     const { id: eventId, participantId } = req.params;
     
     // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
