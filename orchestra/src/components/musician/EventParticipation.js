@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { eventsAPI } from '../../services/api';
+import { eventsAPI, API_BASE_URL } from '../../services/api';
 import '../../styles/eventParticipation.css';
 
 const EventParticipation = () => {
@@ -60,7 +60,7 @@ const EventParticipation = () => {
     try {
       // Nowy backend prawdopodobnie ma endpoint do odpowiedzi na zaproszenie
       // Będę używać ogólnego API call - może trzeba będzie dodać nowy endpoint
-      const response = await fetch(`http://localhost:3002/api/events/${eventId}/respond`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/events/${eventId}/respond`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
