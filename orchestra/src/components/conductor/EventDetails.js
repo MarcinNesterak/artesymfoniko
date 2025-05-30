@@ -13,6 +13,17 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
+  // Modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editData, setEditData] = useState({
+    title: '',
+    date: '',
+    description: '',
+    schedule: '',
+    program: ''
+  });
+  
   useEffect(() => {
     fetchEventData();
   }, [id]);
@@ -27,6 +38,16 @@ const EventDetails = () => {
       setEvent(eventResponse.event);
       setInvitations(eventResponse.invitations || []);
       setParticipations(eventResponse.participations || []);
+      
+      // Ustaw dane do edycji
+      const eventData = eventResponse.event;
+      setEditData({
+        title: eventData.title || '',
+        date: eventData.date ? new Date(eventData.date).toISOString().slice(0, 16) : '',
+        description: eventData.description || '',
+        schedule: eventData.schedule || '',
+        program: eventData.program || ''
+      });
       
       // Pobierz wszystkich muzyków dla selecta
       const musiciansResponse = await usersAPI.getMusicians();
@@ -48,6 +69,34 @@ const EventDetails = () => {
       minute: '2-digit'
     };
     return new Date(dateString).toLocaleDateString('pl-PL', options);
+  };
+  
+  const handleEditEvent = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    
+    try {
+      const updateData = {
+        title: editData.title,
+        date: editData.date,
+        description: editData.description,
+        schedule: editData.schedule,
+        program: editData.program
+      };
+      
+      await eventsAPI.updateEvent(id, updateData);
+      
+      // Odśwież dane wydarzenia
+      await fetchEventData();
+      
+      setShowEditModal(false);
+      alert('Wydarzenie zostało zaktualizowane pomyślnie!');
+    } catch (error) {
+      console.error('Error updating event:', error);
+      alert('Wystąpił błąd podczas aktualizacji wydarzenia.');
+    } finally {
+      setEditLoading(false);
+    }
   };
   
   const handleDeleteEvent = async () => {
@@ -96,6 +145,42 @@ const EventDetails = () => {
     }
   };
   
+  const cancelInvitation = async (invitationId, musicianName) => {
+    if (!window.confirm(`Czy na pewno chcesz odwołać zaproszenie dla ${musicianName}?`)) {
+      return;
+    }
+    
+    try {
+      // Wywołaj endpoint do odwołania zaproszenia
+      await eventsAPI.cancelInvitation(id, invitationId);
+      alert('Zaproszenie zostało odwołane.');
+      
+      // Odśwież dane wydarzenia
+      fetchEventData();
+    } catch (error) {
+      console.error('Error canceling invitation:', error);
+      alert('Wystąpił błąd podczas odwoływania zaproszenia.');
+    }
+  };
+  
+  const removeParticipant = async (participantId, musicianName) => {
+    if (!window.confirm(`Czy na pewno chcesz usunąć ${musicianName} z uczestników wydarzenia?`)) {
+      return;
+    }
+    
+    try {
+      // Wywołaj endpoint do usunięcia uczestnika
+      await eventsAPI.removeParticipant(id, participantId);
+      alert('Uczestnik został usunięty z wydarzenia.');
+      
+      // Odśwież dane wydarzenia
+      fetchEventData();
+    } catch (error) {
+      console.error('Error removing participant:', error);
+      alert('Wystąpił błąd podczas usuwania uczestnika.');
+    }
+  };
+  
   const getParticipationStatus = (userId) => {
     // Sprawdź czy muzyk odpowiedział na zaproszenie
     const participation = participations.find(p => p.userId._id === userId);
@@ -136,6 +221,13 @@ const EventDetails = () => {
             Powrót do listy
           </button>
           <button 
+            onClick={() => setShowEditModal(true)} 
+            className="btn-edit"
+            disabled={loading}
+          >
+            Edytuj Wydarzenie
+          </button>
+          <button 
             onClick={handleDeleteEvent} 
             className="btn-delete"
             disabled={loading}
@@ -145,6 +237,103 @@ const EventDetails = () => {
           </button>
         </div>
       </div>
+      
+      {/* Modal edycji wydarzenia */}
+      {showEditModal && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edytuj Wydarzenie</h2>
+              <button 
+                className="modal-close" 
+                onClick={() => setShowEditModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditEvent} className="edit-event-form">
+              <div className="form-group">
+                <label htmlFor="edit-title">Tytuł wydarzenia*</label>
+                <input
+                  type="text"
+                  id="edit-title"
+                  value={editData.title}
+                  onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
+                  disabled={editLoading}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="edit-date">Data i godzina*</label>
+                <input
+                  type="datetime-local"
+                  id="edit-date"
+                  value={editData.date}
+                  onChange={(e) => setEditData(prev => ({ ...prev, date: e.target.value }))}
+                  disabled={editLoading}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="edit-description">Opis wydarzenia</label>
+                <textarea
+                  id="edit-description"
+                  value={editData.description}
+                  onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                  disabled={editLoading}
+                  rows="3"
+                  placeholder="Opcjonalny opis wydarzenia..."
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="edit-schedule">Harmonogram</label>
+                <textarea
+                  id="edit-schedule"
+                  value={editData.schedule}
+                  onChange={(e) => setEditData(prev => ({ ...prev, schedule: e.target.value }))}
+                  disabled={editLoading}
+                  rows="4"
+                  placeholder="np.&#10;14:00 - Rozgrzewka&#10;14:30 - Próba pierwszej części&#10;15:30 - Przerwa&#10;16:00 - Próba drugiej części"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="edit-program">Program koncertu</label>
+                <textarea
+                  id="edit-program"
+                  value={editData.program}
+                  onChange={(e) => setEditData(prev => ({ ...prev, program: e.target.value }))}
+                  disabled={editLoading}
+                  rows="4"
+                  placeholder="np.&#10;1. Mozart - Symfonia nr 40&#10;2. Beethoven - Koncert fortepianowy nr 5&#10;3. Chopin - Nokturny"
+                />
+              </div>
+              
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  onClick={() => setShowEditModal(false)}
+                  disabled={editLoading}
+                  className="btn-secondary"
+                >
+                  Anuluj
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={editLoading}
+                  className="btn-primary"
+                >
+                  {editLoading ? 'Zapisywanie...' : 'Zapisz Zmiany'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       
       <div className="event-details-content">
         <div className="event-info-section">
@@ -190,6 +379,7 @@ const EventDetails = () => {
                   if (!musician) return null;
                   
                   const status = getParticipationStatus(musician._id);
+                  const participation = participations.find(p => p.userId._id === musician._id);
                   let statusClass = 'status-pending';
                   
                   if (status === 'Zaakceptowano') {
@@ -206,6 +396,26 @@ const EventDetails = () => {
                       </div>
                       <div className={`invitation-status ${statusClass}`}>
                         {status}
+                      </div>
+                      <div className="musician-actions">
+                        {status === 'Oczekująca' && (
+                          <button
+                            onClick={() => cancelInvitation(invitation._id, musician.name)}
+                            className="btn-cancel-invitation"
+                            title="Odwołaj zaproszenie"
+                          >
+                            Odwołaj
+                          </button>
+                        )}
+                        {status === 'Zaakceptowano' && participation && (
+                          <button
+                            onClick={() => removeParticipant(participation._id, musician.name)}
+                            className="btn-remove-participant"
+                            title="Usuń z uczestników"
+                          >
+                            Usuń
+                          </button>
+                        )}
                       </div>
                     </div>
                   );

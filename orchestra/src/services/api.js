@@ -215,6 +215,24 @@ export const eventsAPI = {
     });
     return handleResponse(response);
   },
+
+  // Odwołaj zaproszenie (tylko dyrygent-właściciel)
+cancelInvitation: async (eventId, invitationId) => {
+  const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/invitations/${invitationId}`, {
+    method: 'DELETE',
+    headers: getHeaders(true),
+  });
+  return handleResponse(response);
+},
+
+// Usuń uczestnika z wydarzenia (tylko dyrygent-właściciel)
+removeParticipant: async (eventId, participantId) => {
+  const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/participants/${participantId}`, {
+    method: 'DELETE',
+    headers: getHeaders(true),
+  });
+  return handleResponse(response);
+},
 };
 
 // Funkcje pomocnicze dla localStorage
