@@ -352,4 +352,87 @@ router.post('/:id/invite', requireConductor, async (req, res) => {
   }
 });
 
+// POST /api/events/:id/respond - odpowiedz na zaproszenie (tylko muzyk)
+router.post('/:id/respond', requireUser, async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    if (!status || !['confirmed', 'declined'].includes(status)) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Status musi być "confirmed" lub "declined"'
+      });
+    }
+    
+    // Sprawdź czy wydarzenie istnieje
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Wydarzenie nie zostało znalezione'
+      });
+    }
+    
+    // Sprawdź czy użytkownik ma zaproszenie
+    const invitation = await Invitation.findOne({
+      eventId: req.params.id,
+      userId: req.user._id,
+      status: 'pending'
+    });
+    
+    if (!invitation) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Nie znaleziono oczekującego zaproszenia'
+      });
+    }
+    
+    // Sprawdź czy użytkownik już nie odpowiedział
+    const existingParticipation = await Participation.findOne({
+      eventId: req.params.id,
+      userId: req.user._id
+    });
+    
+    if (existingParticipation) {
+      return res.status(400).json({
+        error: 'Already responded',
+        message: 'Już odpowiedziałeś na to zaproszenie'
+      });
+    }
+    
+    // Utwórz uczestnictwo
+    const participation = new Participation({
+      eventId: req.params.id,
+      userId: req.user._id,
+      status: status
+    });
+    
+    await participation.save();
+    
+    // Aktualizuj status zaproszenia
+    invitation.status = status;
+    await invitation.save();
+    
+    // Aktualizuj liczniki w wydarzeniu
+    if (status === 'confirmed') {
+      event.confirmedCount = (event.confirmedCount || 0) + 1;
+    }
+    await event.save();
+    
+    res.json({
+      message: status === 'confirmed' ? 'Potwierdziłeś udział w wydarzeniu' : 'Odrzuciłeś zaproszenie',
+      participation: {
+        eventId: req.params.id,
+        status: status
+      }
+    });
+  } catch (error) {
+    console.error('Respond to invitation error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas odpowiedzi na zaproszenie'
+    });
+  }
+});
+
 export default router;
