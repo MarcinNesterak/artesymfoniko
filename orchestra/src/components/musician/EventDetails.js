@@ -8,6 +8,7 @@ const EventDetails = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [participants, setParticipants] = useState([]);
+  const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -21,6 +22,7 @@ const EventDetails = () => {
         const response = await eventsAPI.getEvent(id);
         
         setEvent(response.event);
+        setInvitations(response.invitations || []);
         
         // Wyciągnij uczestników z participations (tylko zaakceptowani)
         const confirmedParticipants = response.participations?.filter(
@@ -55,6 +57,16 @@ const EventDetails = () => {
     };
     return new Date(dateString).toLocaleDateString('pl-PL', options);
   };
+
+  // Sprawdź czy muzyk ma oczekujące zaproszenie
+  const userInvitation = invitations.find(
+    inv => inv.userId._id === user.id && inv.status === 'pending'
+  );
+
+  // Sprawdź czy muzyk już potwierdził udział
+  const userParticipation = participants.find(
+    part => part.userId._id === user.id
+  );
   
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
@@ -118,6 +130,30 @@ const EventDetails = () => {
               </div>
             )}
           </div>
+
+          {/* Sekcja zaproszenia */}
+          {userInvitation && (
+            <div className="event-info-card invitation-card">
+              <h2>Zaproszenie</h2>
+              <p>Zostałeś zaproszony do tego wydarzenia.</p>
+              <div className="invitation-actions">
+                <button 
+                  onClick={() => navigate(`/musician/events/${id}/participate/${userInvitation._id}`)}
+                  className="btn-respond"
+                >
+                  Odpowiedz na zaproszenie
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Status uczestnictwa */}
+          {userParticipation && (
+            <div className="event-info-card participation-card">
+              <h2>Status uczestnictwa</h2>
+              <p className="participation-confirmed">✅ Potwierdziłeś udział w tym wydarzeniu</p>
+            </div>
+          )}
         </div>
         
         <div className="event-musicians-section">
