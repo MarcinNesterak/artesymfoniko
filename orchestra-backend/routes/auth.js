@@ -10,16 +10,6 @@ const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
-// Funkcja generująca hasło tymczasowe
-const generateTempPassword = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
-
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
@@ -198,7 +188,7 @@ router.post('/create-musician', authenticate, async (req, res) => {
     }
     
     // Wygeneruj hasło tymczasowe
-    const tempPassword = generateTempPassword();
+    const tempPassword = 'haslo123';
     
     // Utwórz nowego muzyka
     const newMusician = new User({

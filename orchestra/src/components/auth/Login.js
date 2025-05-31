@@ -82,13 +82,6 @@ const Login = () => {
           </button>
         </form>
         
-        <div className="auth-info">
-          <p>Testowe konta:</p>
-          <small>
-            Dyrygent: dyrygent@test.pl / haslo123<br/>
-            Muzyk: skrzypce@test.pl / LXXF9YJI
-          </small>
-        </div>
       </div>
     </div>
   );

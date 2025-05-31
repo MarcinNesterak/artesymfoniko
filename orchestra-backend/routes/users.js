@@ -4,16 +4,6 @@ import { authenticate, requireConductor } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Funkcja generująca hasło tymczasowe
-const generateTempPassword = () => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
-
 // GET /api/users - pobierz wszystkich muzyków (tylko dyrygent)
 router.get('/', requireConductor, async (req, res) => {
   try {
@@ -157,7 +147,7 @@ router.patch('/:id/reset-password', requireConductor, async (req, res) => {
     }
     
     // Wygeneruj nowe hasło tymczasowe
-    const newTempPassword = generateTempPassword();
+    const newTempPassword = 'haslo123';
     
     musician.password = newTempPassword;
     musician.isTemporaryPassword = true;
