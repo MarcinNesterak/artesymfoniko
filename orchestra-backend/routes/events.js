@@ -241,22 +241,35 @@ router.put('/:id', requireConductor, async (req, res) => {
     const { title, date, description, schedule, program } = req.body;
     
     // Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
-    if (date && !event.archived) {
-      const eventDate = new Date(date);
-      if (eventDate <= new Date()) {
-        return res.status(400).json({
-          error: 'Validation error',
-          message: 'Data wydarzenia musi być w przyszłości'
-        });
-      }
-      event.date = eventDate;
-    } else if (date && event.archived) {
-      // Dla zarchiwizowanych wydarzeń można zmienić datę bez walidacji przyszłości
-      event.date = new Date(date);
-    }
-    
-    // Aktualizuj pola
-    if (title) event.title = title;
+// Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
+if (date && !event.archived) {
+  const eventDate = new Date(date);
+  if (eventDate <= new Date()) {
+    return res.status(400).json({
+      error: 'Validation error',
+      message: 'Data wydarzenia musi być w przyszłości'
+    });
+  }
+  event.date = eventDate;
+} else if (date && event.archived) {
+  // Dla zarchiwizowanych wydarzeń można zmienić datę bez walidacji przyszłości
+  event.date = new Date(date);
+}
+
+// Sprawdź czy wydarzenie powinno być przywrócone z archiwum
+if (date && event.archived) {
+  const newEventDate = new Date(date);
+  const now = new Date();
+  
+  // Jeśli nowa data jest w przyszłości, przywróć z archiwum
+  if (newEventDate > now) {
+    event.archived = false;
+    console.log(`📤 Event restored from archive: ${event.title} (new date: ${newEventDate})`);
+  }
+}
+
+// Aktualizuj pola
+if (title) event.title = title;
     if (description !== undefined) event.description = description;
     if (schedule !== undefined) event.schedule = schedule;
     if (program !== undefined) event.program = program;

@@ -60,27 +60,7 @@ const ConductorArchive = () => {
       alert('Wystąpił błąd podczas usywania wydarzenia. Spróbuj ponownie.');
     }
   };
-  
-  const handleUnarchiveEvent = async (eventToUnarchive) => {
-    const confirmMessage = `Czy na pewno chcesz przywrócić wydarzenie "${eventToUnarchive.title}" z archiwum?\n\nWydarzenie zostanie przeniesione z powrotem do aktywnych wydarzeń.`;
     
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-    
-    try {
-      await unarchiveEvent(eventToUnarchive._id);
-      
-      alert('Wydarzenie zostało przywrócone z archiwum.');
-      
-      // Odśwież listę wydarzeń
-      fetchArchivedEvents();
-    } catch (error) {
-      console.error('Error unarchiving event:', error);
-      alert('Wystąpił błąd podczas przywracania wydarzenia. Spróbuj ponownie.');
-    }
-  };
-  
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -105,15 +85,6 @@ const ConductorArchive = () => {
                   showDeleteButton={true}
                   onDelete={handleDeleteEvent}
                 />
-                <div className="archived-event-actions">
-                  <button 
-                    onClick={() => handleUnarchiveEvent(event)}
-                    className="btn-unarchive"
-                    title="Przywróć z archiwum"
-                  >
-                    ↩️ Przywróć
-                  </button>
-                </div>
               </div>
             ))}
           </div>
