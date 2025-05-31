@@ -23,17 +23,10 @@ const MusicianArchive = () => {
         const response = await eventsAPI.getEvents(true); // true = archived
         const events = response.events || [];
         
-        // Dodatkowe filtrowanie - tylko wydarzenia w których muzyk brał udział
-        // (backend powinien to robić automatycznie, ale dla pewności)
-        const participatedEvents = events.filter(event => {
-          // Sprawdź czy muzyk ma potwierdzone uczestnictwo w tym wydarzeniu
-          return event.userParticipation?.status === 'confirmed';
-        });
-        
         // Sortuj od najnowszych
         participatedEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
         
-        setArchivedEvents(participatedEvents);
+        setArchivedEvents(events);
       } catch (error) {
         console.error('Error fetching archived events:', error);
         setError('Nie udało się pobrać archiwum wydarzeń. Spróbuj odświeżyć stronę.');
