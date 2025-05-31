@@ -24,7 +24,7 @@ const MusicianArchive = () => {
         const events = response.events || [];
         
         // Sortuj od najnowszych
-        participatedEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+        events.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         setArchivedEvents(events);
       } catch (error) {
