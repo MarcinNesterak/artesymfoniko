@@ -132,7 +132,7 @@ const EventDetails = () => {
           </div>
 
           {/* Sekcja zaproszenia */}
-          {userInvitation && (
+          {userInvitation && !userParticipation && (
             <div className="event-info-card invitation-card">
               <h2>Zaproszenie</h2>
               <p>Zostałeś zaproszony do tego wydarzenia.</p>
