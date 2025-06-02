@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import Invitation from '../models/Invitation.js';
 import Participation from '../models/Participation.js';
 import { authenticate, requireConductor, requireUser } from '../middleware/auth.js';
+import Message from '../models/Message.js';
 
 const router = express.Router();
 
@@ -624,4 +625,109 @@ router.delete('/:id/participants/:participantId', requireConductor, async (req, 
   }
 });
 
+// GET /api/events/:id/messages - pobierz wiadomości czatu
+router.get('/:id/messages', requireUser, async (req, res) => {
+  try {
+    await autoArchiveEvents(); // Auto-archive before fetching messages
+    
+    // Sprawdź czy użytkownik ma dostęp do wydarzenia (jest uczestnikiem)
+    const participation = await Participation.findOne({
+      eventId: req.params.id,
+      userId: req.user._id,
+      status: 'confirmed'
+    });
+    
+    if (!participation && req.user.role !== 'conductor') {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Tylko uczestnicy wydarzenia mogą czytać wiadomości'
+      });
+    }
+    
+    // Pobierz wiadomości z ostatnich 7 dni
+    const messages = await Message.find({
+      eventId: req.params.id,
+    })
+    .populate('userId', 'name instrument')
+    .sort({ createdAt: -1 }) // Chronologicznie - najstarsze pierwsze
+    .limit(100); // Max 100 wiadomości
+    
+    res.json({
+      message: 'Wiadomości czatu',
+      count: messages.length,
+      messages
+    });
+  } catch (error) {
+    console.error('Get messages error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas pobierania wiadomości'
+    });
+  }
+});
+
+// POST /api/events/:id/messages - wyślij wiadomość do czatu
+router.post('/:id/messages', requireUser, async (req, res) => {
+  try {
+    await autoArchiveEvents(); // Auto-archive before sending message
+    
+    const { content } = req.body;
+    
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Treść wiadomości jest wymagana'
+      });
+    }
+    
+    if (content.length > 500) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Wiadomość nie może być dłuższa niż 500 znaków'
+      });
+    }
+    
+    // Sprawdź czy użytkownik ma dostęp do wydarzenia (jest uczestnikiem lub dyrygentem)
+    const participation = await Participation.findOne({
+      eventId: req.params.id,
+      userId: req.user._id,
+      status: 'confirmed'
+    });
+    
+    // Sprawdź czy to dyrygent właściciel wydarzenia
+    const event = await Event.findById(req.params.id);
+    const isConductor = req.user.role === 'conductor' && event?.conductorId.equals(req.user._id);
+    
+    if (!participation && !isConductor) {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Tylko uczestnicy wydarzenia i dyrygent mogą pisać wiadomości'
+      });
+    }
+    
+    // Utwórz nową wiadomość
+    const newMessage = new Message({
+      eventId: req.params.id,
+      userId: req.user._id,
+      content: content.trim()
+    });
+    
+    await newMessage.save();
+    
+    // Pobierz wiadomość z populowanymi danymi
+    const populatedMessage = await Message.findById(newMessage._id)
+      .populate('userId', 'name instrument');
+    
+    res.status(201).json({
+      message: 'Wiadomość została wysłana',
+      newMessage: populatedMessage
+    });
+  } catch (error) {
+    console.error('Send message error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas wysyłania wiadomości'
+    });
+  }
+});
 export default router;
