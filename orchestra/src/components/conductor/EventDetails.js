@@ -6,6 +6,7 @@ import "../../styles/eventDetails.css";
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
   const [event, setEvent] = useState(null);
   const [invitations, setInvitations] = useState([]);
   const [participations, setParticipations] = useState([]);
