@@ -1,10 +1,15 @@
-import express from 'express';
-import Event from '../models/Event.js';
-import User from '../models/User.js';
-import Invitation from '../models/Invitation.js';
-import Participation from '../models/Participation.js';
-import { authenticate, requireConductor, requireUser } from '../middleware/auth.js';
-import Message from '../models/Message.js';
+import express from "express";
+import Event from "../models/Event.js";
+import User from "../models/User.js";
+import Invitation from "../models/Invitation.js";
+import Participation from "../models/Participation.js";
+import {
+  authenticate,
+  requireConductor,
+  requireUser,
+} from "../middleware/auth.js";
+import Message from "../models/Message.js";
+import MessageRead from "../models/MessageRead.js";
 
 const router = express.Router();
 
@@ -12,171 +17,185 @@ const router = express.Router();
 const autoArchiveEvents = async () => {
   try {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000); // 30 minut temu
-    
+
     const result = await Event.updateMany(
       {
         date: { $lt: thirtyMinutesAgo }, // Wydarzenia starsze niż 30 min od rozpoczęcia
-        archived: false // Tylko nieaktywne
+        archived: false, // Tylko nieaktywne
       },
       {
-        archived: true
+        archived: true,
       }
     );
-    
+
     // Log tylko jeśli coś zostało zarchiwizowane
     if (result.modifiedCount > 0) {
-      console.log(`🗂️ Auto-archived ${result.modifiedCount} events (30+ minutes after start time)`);
+      console.log(
+        `🗂️ Auto-archived ${result.modifiedCount} events (30+ minutes after start time)`
+      );
     }
   } catch (error) {
-    console.error('❌ Auto-archive error:', error);
+    console.error("❌ Auto-archive error:", error);
   }
 };
 
 // GET /api/events - pobierz wydarzenia
-router.get('/', requireUser, async (req, res) => {
+router.get("/", requireUser, async (req, res) => {
   try {
     // Automatyczne archiwizowanie przed pobraniem listy
     await autoArchiveEvents();
-    
+
     let query = {};
-    
-    if (req.user.role === 'conductor') {
+
+    if (req.user.role === "conductor") {
       // Dyrygent widzi swoje wydarzenia
       query.conductorId = req.user._id;
     } else {
-  // Różna logika dla archiwum i aktywnych wydarzeń
-  if (req.query.archived === 'true') {
-    // ARCHIWUM: wszystkie wydarzenia gdzie muzyk kiedykolwiek uczestniczył
-    const allParticipations = await Participation.find({ 
-      userId: req.user._id
-    }).distinct('eventId');
-    
-    query._id = { $in: allParticipations };
-  } else {
-    // AKTYWNE: tylko potwierdzone uczestnictwa i oczekujące zaproszenia
-    const confirmedParticipations = await Participation.find({ 
-      userId: req.user._id,
-      status: 'confirmed'
-    }).distinct('eventId');
-    
-    const pendingInvitations = await Invitation.find({ 
-      userId: req.user._id,
-      status: 'pending'
-    }).distinct('eventId');
-    
-    const eventIds = [...new Set([...confirmedParticipations, ...pendingInvitations])];
-    query._id = { $in: eventIds };
-  }
-}
-    
+      // Różna logika dla archiwum i aktywnych wydarzeń
+      if (req.query.archived === "true") {
+        // ARCHIWUM: wszystkie wydarzenia gdzie muzyk kiedykolwiek uczestniczył
+        const allParticipations = await Participation.find({
+          userId: req.user._id,
+        }).distinct("eventId");
+
+        query._id = { $in: allParticipations };
+      } else {
+        // AKTYWNE: tylko potwierdzone uczestnictwa i oczekujące zaproszenia
+        const confirmedParticipations = await Participation.find({
+          userId: req.user._id,
+          status: "confirmed",
+        }).distinct("eventId");
+
+        const pendingInvitations = await Invitation.find({
+          userId: req.user._id,
+          status: "pending",
+        }).distinct("eventId");
+
+        const eventIds = [
+          ...new Set([...confirmedParticipations, ...pendingInvitations]),
+        ];
+        query._id = { $in: eventIds };
+      }
+    }
+
     // Filtruj według archived jeśli podano
     if (req.query.archived !== undefined) {
-      query.archived = req.query.archived === 'true';
+      query.archived = req.query.archived === "true";
     }
-    
+
     const events = await Event.find(query)
-      .populate('conductorId', 'name email')
+      .populate("conductorId", "name email")
       .sort({ date: 1 }); // Chronologicznie - najbliższe pierwsze
-    
+
     res.json({
-      message: 'Lista wydarzeń',
+      message: "Lista wydarzeń",
       count: events.length,
-      events
+      events,
     });
   } catch (error) {
-    console.error('Get events error:', error);
+    console.error("Get events error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas pobierania wydarzeń'
+      error: "Server error",
+      message: "Wystąpił błąd podczas pobierania wydarzeń",
     });
   }
 });
 
 // GET /api/events/:id - pobierz konkretne wydarzenie
-router.get('/:id', requireUser, async (req, res) => {
+router.get("/:id", requireUser, async (req, res) => {
   try {
     // Automatyczne archiwizowanie przed pobraniem szczegółów
     await autoArchiveEvents();
-    
-    const event = await Event.findById(req.params.id)
-      .populate('conductorId', 'name email');
-    
+
+    const event = await Event.findById(req.params.id).populate(
+      "conductorId",
+      "name email"
+    );
+
     if (!event) {
       return res.status(404).json({
-        error: 'Not found',
-        message: 'Wydarzenie nie zostało znalezione'
+        error: "Not found",
+        message: "Wydarzenie nie zostało znalezione",
       });
     }
-    
+
     // Sprawdź czy użytkownik ma dostęp do tego wydarzenia
-    if (req.user.role === 'musician') {
-      const hasAccess = await Invitation.exists({ 
-        eventId: req.params.id, 
-        userId: req.user._id 
-      }) || await Participation.exists({ 
-        eventId: req.params.id, 
-        userId: req.user._id 
-      });
-      
+    if (req.user.role === "musician") {
+      const hasAccess =
+        (await Invitation.exists({
+          eventId: req.params.id,
+          userId: req.user._id,
+        })) ||
+        (await Participation.exists({
+          eventId: req.params.id,
+          userId: req.user._id,
+        }));
+
       if (!hasAccess) {
         return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Brak dostępu do tego wydarzenia'
+          error: "Forbidden",
+          message: "Brak dostępu do tego wydarzenia",
         });
       }
-    } else if (req.user.role === 'conductor' && !event.conductorId.equals(req.user._id)) {
+    } else if (
+      req.user.role === "conductor" &&
+      !event.conductorId.equals(req.user._id)
+    ) {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Możesz przeglądać tylko swoje wydarzenia'
+        error: "Forbidden",
+        message: "Możesz przeglądać tylko swoje wydarzenia",
       });
     }
-    
+
     // Pobierz dodatkowe informacje
-    const invitations = await Invitation.find({ eventId: req.params.id })
-      .populate('userId', 'name email instrument');
-    
-    const participations = await Participation.find({ eventId: req.params.id })
-      .populate('userId', 'name email instrument');
-    
+    const invitations = await Invitation.find({
+      eventId: req.params.id,
+    }).populate("userId", "name email instrument");
+
+    const participations = await Participation.find({
+      eventId: req.params.id,
+    }).populate("userId", "name email instrument");
+
     res.json({
-      message: 'Szczegóły wydarzenia',
+      message: "Szczegóły wydarzenia",
       event,
       invitations,
-      participations
+      participations,
     });
   } catch (error) {
-    console.error('Get event error:', error);
+    console.error("Get event error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas pobierania wydarzenia'
+      error: "Server error",
+      message: "Wystąpił błąd podczas pobierania wydarzenia",
     });
   }
 });
 
 // POST /api/events - utwórz nowe wydarzenie (tylko dyrygent)
-router.post('/', requireConductor, async (req, res) => {
+router.post("/", requireConductor, async (req, res) => {
   try {
     // Automatyczne archiwizowanie przed utworzeniem nowego
     await autoArchiveEvents();
-    
-    const { title, date, description, schedule, program, inviteUserIds } = req.body;
-    
+
+    const { title, date, description, schedule, program, inviteUserIds } =
+      req.body;
+
     if (!title || !date) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Tytuł i data wydarzenia są wymagane'
+        error: "Validation error",
+        message: "Tytuł i data wydarzenia są wymagane",
       });
     }
-    
+
     // Sprawdź czy data jest w przyszłości
     const eventDate = new Date(date);
     if (eventDate <= new Date()) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Data wydarzenia musi być w przyszłości'
+        error: "Validation error",
+        message: "Data wydarzenia musi być w przyszłości",
       });
     }
-    
+
     // Utwórz wydarzenie
     const newEvent = new Event({
       title,
@@ -184,116 +203,122 @@ router.post('/', requireConductor, async (req, res) => {
       description,
       schedule,
       program,
-      conductorId: req.user._id
+      conductorId: req.user._id,
     });
-    
+
     await newEvent.save();
-    
+
     // Utwórz zaproszenia jeśli podano muzyków
     if (inviteUserIds && inviteUserIds.length > 0) {
-      const invitations = inviteUserIds.map(userId => ({
+      const invitations = inviteUserIds.map((userId) => ({
         eventId: newEvent._id,
         userId: userId,
-        status: 'pending'
+        status: "pending",
       }));
-      
+
       await Invitation.insertMany(invitations);
-      
+
       // Aktualizuj licznik zaproszeń
       newEvent.invitedCount = inviteUserIds.length;
       await newEvent.save();
     }
-    
+
     // Pobierz wydarzenie z populowanymi danymi
-    const populatedEvent = await Event.findById(newEvent._id)
-      .populate('conductorId', 'name email');
-    
+    const populatedEvent = await Event.findById(newEvent._id).populate(
+      "conductorId",
+      "name email"
+    );
+
     res.status(201).json({
-      message: 'Wydarzenie zostało utworzone',
-      event: populatedEvent
+      message: "Wydarzenie zostało utworzone",
+      event: populatedEvent,
     });
   } catch (error) {
-    console.error('Create event error:', error);
+    console.error("Create event error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas tworzenia wydarzenia'
+      error: "Server error",
+      message: "Wystąpił błąd podczas tworzenia wydarzenia",
     });
   }
 });
 
 // PUT /api/events/:id - aktualizuj wydarzenie (tylko dyrygent-właściciel)
-router.put('/:id', requireConductor, async (req, res) => {
+router.put("/:id", requireConductor, async (req, res) => {
   try {
     // Automatyczne archiwizowanie przed edycją
     await autoArchiveEvents();
-    
+
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       return res.status(404).json({
-        error: 'Not found',
-        message: 'Wydarzenie nie zostało znalezione'
+        error: "Not found",
+        message: "Wydarzenie nie zostało znalezione",
       });
     }
-    
+
     // Sprawdź czy dyrygent jest właścicielem wydarzenia
     if (!event.conductorId.equals(req.user._id)) {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Możesz edytować tylko swoje wydarzenia'
+        error: "Forbidden",
+        message: "Możesz edytować tylko swoje wydarzenia",
       });
     }
-    
+
     const { title, date, description, schedule, program } = req.body;
-    
+
     // Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
-// Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
-if (date && !event.archived) {
-  const eventDate = new Date(date);
-  if (eventDate <= new Date()) {
-    return res.status(400).json({
-      error: 'Validation error',
-      message: 'Data wydarzenia musi być w przyszłości'
-    });
-  }
-  event.date = eventDate;
-} else if (date && event.archived) {
-  // Dla zarchiwizowanych wydarzeń można zmienić datę bez walidacji przyszłości
-  event.date = new Date(date);
-}
+    // Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
+    if (date && !event.archived) {
+      const eventDate = new Date(date);
+      if (eventDate <= new Date()) {
+        return res.status(400).json({
+          error: "Validation error",
+          message: "Data wydarzenia musi być w przyszłości",
+        });
+      }
+      event.date = eventDate;
+    } else if (date && event.archived) {
+      // Dla zarchiwizowanych wydarzeń można zmienić datę bez walidacji przyszłości
+      event.date = new Date(date);
+    }
 
-// Sprawdź czy wydarzenie powinno być przywrócone z archiwum
-if (date && event.archived) {
-  const newEventDate = new Date(date);
-  const now = new Date();
-  
-  // Jeśli nowa data jest w przyszłości, przywróć z archiwum
-  if (newEventDate > now) {
-    event.archived = false;
-    console.log(`📤 Event restored from archive: ${event.title} (new date: ${newEventDate})`);
-  }
-}
+    // Sprawdź czy wydarzenie powinno być przywrócone z archiwum
+    if (date && event.archived) {
+      const newEventDate = new Date(date);
+      const now = new Date();
 
-// Aktualizuj pola
-if (title) event.title = title;
+      // Jeśli nowa data jest w przyszłości, przywróć z archiwum
+      if (newEventDate > now) {
+        event.archived = false;
+        console.log(
+          `📤 Event restored from archive: ${event.title} (new date: ${newEventDate})`
+        );
+      }
+    }
+
+    // Aktualizuj pola
+    if (title) event.title = title;
     if (description !== undefined) event.description = description;
     if (schedule !== undefined) event.schedule = schedule;
     if (program !== undefined) event.program = program;
-    
+
     await event.save();
-    
-    const populatedEvent = await Event.findById(event._id)
-      .populate('conductorId', 'name email');
-    
+
+    const populatedEvent = await Event.findById(event._id).populate(
+      "conductorId",
+      "name email"
+    );
+
     res.json({
-      message: 'Wydarzenie zostało zaktualizowane',
-      event: populatedEvent
+      message: "Wydarzenie zostało zaktualizowane",
+      event: populatedEvent,
     });
   } catch (error) {
-    console.error('Update event error:', error);
+    console.error("Update event error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas aktualizacji wydarzenia'
+      error: "Server error",
+      message: "Wystąpił błąd podczas aktualizacji wydarzenia",
     });
   }
 });
@@ -302,431 +327,532 @@ if (title) event.title = title;
 // (DELETE, POST invite, POST respond, DELETE invitations, DELETE participants)
 
 // DELETE /api/events/:id - usuń wydarzenie (tylko dyrygent-właściciel)
-router.delete('/:id', requireConductor, async (req, res) => {
+router.delete("/:id", requireConductor, async (req, res) => {
   try {
     await autoArchiveEvents(); // Auto-archive before deletion
-    
+
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       return res.status(404).json({
-        error: 'Not found',
-        message: 'Wydarzenie nie zostało znalezione'
+        error: "Not found",
+        message: "Wydarzenie nie zostało znalezione",
       });
     }
-    
+
     // Sprawdź czy dyrygent jest właścicielem wydarzenia
     if (!event.conductorId.equals(req.user._id)) {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Możesz usuwać tylko swoje wydarzenia'
+        error: "Forbidden",
+        message: "Możesz usuwać tylko swoje wydarzenia",
       });
     }
-    
+
     // Usuń powiązane zaproszenia i uczestnictwa
     await Invitation.deleteMany({ eventId: req.params.id });
     await Participation.deleteMany({ eventId: req.params.id });
-    
+
     // Usuń wydarzenie
     await Event.findByIdAndDelete(req.params.id);
-    
+
     res.json({
-      message: 'Wydarzenie zostało usunięte',
+      message: "Wydarzenie zostało usunięte",
       deletedEvent: {
         id: event._id,
         title: event.title,
-        date: event.date
-      }
+        date: event.date,
+      },
     });
   } catch (error) {
-    console.error('Delete event error:', error);
+    console.error("Delete event error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas usuwania wydarzenia'
+      error: "Server error",
+      message: "Wystąpił błąd podczas usuwania wydarzenia",
     });
   }
 });
 
 // POST /api/events/:id/invite - zaproś muzyków do wydarzenia
-router.post('/:id/invite', requireConductor, async (req, res) => {
+router.post("/:id/invite", requireConductor, async (req, res) => {
   try {
     await autoArchiveEvents(); // Auto-archive before inviting
-    
+
     const { userIds } = req.body;
-    
+
     if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Lista ID użytkowników jest wymagana'
+        error: "Validation error",
+        message: "Lista ID użytkowników jest wymagana",
       });
     }
-    
+
     const event = await Event.findById(req.params.id);
-    
+
     if (!event) {
       return res.status(404).json({
-        error: 'Not found',
-        message: 'Wydarzenie nie zostało znalezione'
+        error: "Not found",
+        message: "Wydarzenie nie zostało znalezione",
       });
     }
-    
+
     // Sprawdź czy dyrygent jest właścicielem wydarzenia
     if (!event.conductorId.equals(req.user._id)) {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Możesz zapraszać tylko do swoich wydarzeń'
+        error: "Forbidden",
+        message: "Możesz zapraszać tylko do swoich wydarzeń",
       });
     }
-    
+
     // Sprawdź które zaproszenia już istnieją
     const existingInvitations = await Invitation.find({
       eventId: req.params.id,
-      userId: { $in: userIds }
-    }).distinct('userId');
-    
+      userId: { $in: userIds },
+    }).distinct("userId");
+
     // Filtruj nowych użytkowników
-    const newUserIds = userIds.filter(userId => 
-      !existingInvitations.some(existingId => existingId.toString() === userId)
+    const newUserIds = userIds.filter(
+      (userId) =>
+        !existingInvitations.some(
+          (existingId) => existingId.toString() === userId
+        )
     );
-    
+
     if (newUserIds.length === 0) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Wszyscy podani użytkownicy zostali już zaproszeni'
+        error: "Validation error",
+        message: "Wszyscy podani użytkownicy zostali już zaproszeni",
       });
     }
-    
+
     // Utwórz nowe zaproszenia
-    const invitations = newUserIds.map(userId => ({
+    const invitations = newUserIds.map((userId) => ({
       eventId: req.params.id,
       userId: userId,
-      status: 'pending'
+      status: "pending",
     }));
-    
+
     await Invitation.insertMany(invitations);
-    
+
     // Aktualizuj licznik zaproszeń
-    const totalInvitations = await Invitation.countDocuments({ eventId: req.params.id });
+    const totalInvitations = await Invitation.countDocuments({
+      eventId: req.params.id,
+    });
     event.invitedCount = totalInvitations;
     await event.save();
-    
+
     res.json({
       message: `Wysłano ${newUserIds.length} nowych zaproszeń`,
       invitedCount: newUserIds.length,
-      totalInvitations: totalInvitations
+      totalInvitations: totalInvitations,
     });
   } catch (error) {
-    console.error('Invite users error:', error);
+    console.error("Invite users error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas wysyłania zaproszeń'
+      error: "Server error",
+      message: "Wystąpił błąd podczas wysyłania zaproszeń",
     });
   }
 });
 
 // POST /api/events/:id/respond - odpowiedz na zaproszenie (tylko muzyk)
-router.post('/:id/respond', requireUser, async (req, res) => {
+router.post("/:id/respond", requireUser, async (req, res) => {
   try {
     await autoArchiveEvents(); // Auto-archive before responding
-    
+
     const { status } = req.body;
-    
-    if (!status || !['confirmed', 'declined'].includes(status)) {
+
+    if (!status || !["confirmed", "declined"].includes(status)) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Status musi być "confirmed" lub "declined"'
+        error: "Validation error",
+        message: 'Status musi być "confirmed" lub "declined"',
       });
     }
-    
+
     // Sprawdź czy wydarzenie istnieje
     const event = await Event.findById(req.params.id);
     if (!event) {
       return res.status(404).json({
-        error: 'Not found',
-        message: 'Wydarzenie nie zostało znalezione'
+        error: "Not found",
+        message: "Wydarzenie nie zostało znalezione",
       });
     }
-    
+
     // Sprawdź czy użytkownik ma zaproszenie
     const invitation = await Invitation.findOne({
       eventId: req.params.id,
       userId: req.user._id,
-      status: 'pending'
+      status: "pending",
     });
-    
+
     if (!invitation) {
       return res.status(404).json({
-        error: 'Not found',
-        message: 'Nie znaleziono oczekującego zaproszenia'
+        error: "Not found",
+        message: "Nie znaleziono oczekującego zaproszenia",
       });
     }
-    
+
     // Sprawdź czy użytkownik już nie odpowiedział
     const existingParticipation = await Participation.findOne({
       eventId: req.params.id,
-      userId: req.user._id
+      userId: req.user._id,
     });
-    
+
     if (existingParticipation) {
       return res.status(400).json({
-        error: 'Already responded',
-        message: 'Już odpowiedziałeś na to zaproszenie'
+        error: "Already responded",
+        message: "Już odpowiedziałeś na to zaproszenie",
       });
     }
-    
+
     // Mapuj status na response
-    const response = status === 'confirmed' ? 'accepted' : 'declined';
-    
+    const response = status === "confirmed" ? "accepted" : "declined";
+
     // Utwórz uczestnictwo
     const participation = new Participation({
       eventId: req.params.id,
       userId: req.user._id,
-      status: status
+      status: status,
     });
-    
+
     await participation.save();
-    
+
     // Aktualizuj status zaproszenia - poprawiona wersja
-    invitation.status = 'responded';
+    invitation.status = "responded";
     invitation.response = response;
     invitation.responseDate = new Date();
     await invitation.save();
-    
+
     // Aktualizuj liczniki w wydarzeniu
-    if (status === 'confirmed') {
+    if (status === "confirmed") {
       event.confirmedCount = (event.confirmedCount || 0) + 1;
     }
     await event.save();
-    
+
     res.json({
-      message: status === 'confirmed' ? 'Potwierdziłeś udział w wydarzeniu' : 'Odrzuciłeś zaproszenie',
+      message:
+        status === "confirmed"
+          ? "Potwierdziłeś udział w wydarzeniu"
+          : "Odrzuciłeś zaproszenie",
       participation: {
         eventId: req.params.id,
-        status: status
-      }
+        status: status,
+      },
     });
   } catch (error) {
-    console.error('Respond to invitation error:', error);
+    console.error("Respond to invitation error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas odpowiedzi na zaproszenie'
+      error: "Server error",
+      message: "Wystąpił błąd podczas odpowiedzi na zaproszenie",
     });
   }
 });
 
 // DELETE /api/events/:id/invitations/:invitationId - odwołaj zaproszenie
-router.delete('/:id/invitations/:invitationId', requireConductor, async (req, res) => {
-  try {
-    await autoArchiveEvents(); // Auto-archive before canceling invitation
-    
-    const { id: eventId, invitationId } = req.params;
-    
-    // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({
-        error: 'Not found',
-        message: 'Wydarzenie nie zostało znalezione'
-      });
-    }
-    
-    if (!event.conductorId.equals(req.user._id)) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Możesz odwoływać zaproszenia tylko do swoich wydarzeń'
-      });
-    }
-    
-    // Usuń zaproszenie
-    const deletedInvitation = await Invitation.findByIdAndDelete(invitationId);
-    
-    if (!deletedInvitation) {
-      return res.status(404).json({
-        error: 'Not found',
-        message: 'Zaproszenie nie zostało znalezione'
-      });
-    }
-    
-    // Aktualizuj licznik zaproszeń
-    const totalInvitations = await Invitation.countDocuments({ eventId });
-    event.invitedCount = totalInvitations;
-    await event.save();
-    
-    res.json({
-      message: 'Zaproszenie zostało odwołane',
-      deletedInvitation: {
-        id: deletedInvitation._id,
-        userId: deletedInvitation.userId
+router.delete(
+  "/:id/invitations/:invitationId",
+  requireConductor,
+  async (req, res) => {
+    try {
+      await autoArchiveEvents(); // Auto-archive before canceling invitation
+
+      const { id: eventId, invitationId } = req.params;
+
+      // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({
+          error: "Not found",
+          message: "Wydarzenie nie zostało znalezione",
+        });
       }
-    });
-  } catch (error) {
-    console.error('Cancel invitation error:', error);
-    res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas odwoływania zaproszenia'
-    });
+
+      if (!event.conductorId.equals(req.user._id)) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Możesz odwoływać zaproszenia tylko do swoich wydarzeń",
+        });
+      }
+
+      // Usuń zaproszenie
+      const deletedInvitation = await Invitation.findByIdAndDelete(
+        invitationId
+      );
+
+      if (!deletedInvitation) {
+        return res.status(404).json({
+          error: "Not found",
+          message: "Zaproszenie nie zostało znalezione",
+        });
+      }
+
+      // Aktualizuj licznik zaproszeń
+      const totalInvitations = await Invitation.countDocuments({ eventId });
+      event.invitedCount = totalInvitations;
+      await event.save();
+
+      res.json({
+        message: "Zaproszenie zostało odwołane",
+        deletedInvitation: {
+          id: deletedInvitation._id,
+          userId: deletedInvitation.userId,
+        },
+      });
+    } catch (error) {
+      console.error("Cancel invitation error:", error);
+      res.status(500).json({
+        error: "Server error",
+        message: "Wystąpił błąd podczas odwoływania zaproszenia",
+      });
+    }
   }
-});
+);
 
 // DELETE /api/events/:id/participants/:participantId - usuń uczestnika
-router.delete('/:id/participants/:participantId', requireConductor, async (req, res) => {
-  try {
-    await autoArchiveEvents(); // Auto-archive before removing participant
-    
-    const { id: eventId, participantId } = req.params;
-    
-    // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({
-        error: 'Not found',
-        message: 'Wydarzenie nie zostało znalezione'
-      });
-    }
-    
-    if (!event.conductorId.equals(req.user._id)) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Możesz usuwać uczestników tylko ze swoich wydarzeń'
-      });
-    }
-    
-    // Usuń uczestnictwo
-    const deletedParticipation = await Participation.findByIdAndDelete(participantId);
-    
-    if (!deletedParticipation) {
-      return res.status(404).json({
-        error: 'Not found',
-        message: 'Uczestnictwo nie zostało znalezione'
-      });
-    }
-    
-    // Aktualizuj licznik potwierdzonych uczestników
-    const confirmedCount = await Participation.countDocuments({ 
-      eventId, 
-      status: 'confirmed' 
-    });
-    event.confirmedCount = confirmedCount;
-    await event.save();
-    
-    res.json({
-      message: 'Uczestnik został usunięty z wydarzenia',
-      deletedParticipation: {
-        id: deletedParticipation._id,
-        userId: deletedParticipation.userId
+router.delete(
+  "/:id/participants/:participantId",
+  requireConductor,
+  async (req, res) => {
+    try {
+      await autoArchiveEvents(); // Auto-archive before removing participant
+
+      const { id: eventId, participantId } = req.params;
+
+      // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
+      const event = await Event.findById(eventId);
+      if (!event) {
+        return res.status(404).json({
+          error: "Not found",
+          message: "Wydarzenie nie zostało znalezione",
+        });
       }
-    });
-  } catch (error) {
-    console.error('Remove participant error:', error);
-    res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas usuwania uczestnika'
-    });
+
+      if (!event.conductorId.equals(req.user._id)) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Możesz usuwać uczestników tylko ze swoich wydarzeń",
+        });
+      }
+
+      // Usuń uczestnictwo
+      const deletedParticipation = await Participation.findByIdAndDelete(
+        participantId
+      );
+
+      if (!deletedParticipation) {
+        return res.status(404).json({
+          error: "Not found",
+          message: "Uczestnictwo nie zostało znalezione",
+        });
+      }
+
+      // Aktualizuj licznik potwierdzonych uczestników
+      const confirmedCount = await Participation.countDocuments({
+        eventId,
+        status: "confirmed",
+      });
+      event.confirmedCount = confirmedCount;
+      await event.save();
+
+      res.json({
+        message: "Uczestnik został usunięty z wydarzenia",
+        deletedParticipation: {
+          id: deletedParticipation._id,
+          userId: deletedParticipation.userId,
+        },
+      });
+    } catch (error) {
+      console.error("Remove participant error:", error);
+      res.status(500).json({
+        error: "Server error",
+        message: "Wystąpił błąd podczas usuwania uczestnika",
+      });
+    }
   }
-});
+);
 
 // GET /api/events/:id/messages - pobierz wiadomości czatu
-router.get('/:id/messages', requireUser, async (req, res) => {
+router.get("/:id/messages", requireUser, async (req, res) => {
   try {
     await autoArchiveEvents(); // Auto-archive before fetching messages
-    
+
     // Sprawdź czy użytkownik ma dostęp do wydarzenia (jest uczestnikiem)
     const participation = await Participation.findOne({
       eventId: req.params.id,
       userId: req.user._id,
-      status: 'confirmed'
+      status: "confirmed",
     });
-    
-    if (!participation && req.user.role !== 'conductor') {
+
+    if (!participation && req.user.role !== "conductor") {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Tylko uczestnicy wydarzenia mogą czytać wiadomości'
+        error: "Forbidden",
+        message: "Tylko uczestnicy wydarzenia mogą czytać wiadomości",
       });
     }
-    
-    // Pobierz wiadomości z ostatnich 7 dni
+
+    // Pobierz wszystkie wiadomości od utworzenia wydarzenia
     const messages = await Message.find({
       eventId: req.params.id,
     })
-    .populate('userId', 'name instrument')
-    .sort({ createdAt: -1 }) // Chronologicznie - najstarsze pierwsze
-    .limit(100); // Max 100 wiadomości
-    
-    res.json({
-      message: 'Wiadomości czatu',
-      count: messages.length,
-      messages
-    });
+      .populate("userId", "name instrument")
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    // Jeśli to dyrygent, dodaj informacje o przeczytaniach
+    if (
+      req.user.role === "conductor" &&
+      event?.conductorId.equals(req.user._id)
+    ) {
+      // ... cały kod dla dyrygenta ...
+
+      res.json({
+        message: "Wiadomości czatu",
+        count: messagesWithReadStatus.length,
+        messages: messagesWithReadStatus,
+      });
+    } else {
+      // Dla muzyków - zwróć normalne wiadomości
+      res.json({
+        message: "Wiadomości czatu",
+        count: messages.length,
+        messages,
+      });
+    }
   } catch (error) {
-    console.error('Get messages error:', error);
+    console.error("Get messages error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas pobierania wiadomości'
+      error: "Server error",
+      message: "Wystąpił błąd podczas pobierania wiadomości",
     });
   }
 });
 
 // POST /api/events/:id/messages - wyślij wiadomość do czatu
-router.post('/:id/messages', requireUser, async (req, res) => {
+router.post("/:id/messages", requireUser, async (req, res) => {
   try {
     await autoArchiveEvents(); // Auto-archive before sending message
-    
+
     const { content } = req.body;
-    
+
     if (!content || content.trim().length === 0) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Treść wiadomości jest wymagana'
+        error: "Validation error",
+        message: "Treść wiadomości jest wymagana",
       });
     }
-    
+
     if (content.length > 500) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Wiadomość nie może być dłuższa niż 500 znaków'
+        error: "Validation error",
+        message: "Wiadomość nie może być dłuższa niż 500 znaków",
       });
     }
-    
+
     // Sprawdź czy użytkownik ma dostęp do wydarzenia (jest uczestnikiem lub dyrygentem)
     const participation = await Participation.findOne({
       eventId: req.params.id,
       userId: req.user._id,
-      status: 'confirmed'
+      status: "confirmed",
     });
-    
+
     // Sprawdź czy to dyrygent właściciel wydarzenia
     const event = await Event.findById(req.params.id);
-    const isConductor = req.user.role === 'conductor' && event?.conductorId.equals(req.user._id);
-    
+    const isConductor =
+      req.user.role === "conductor" && event?.conductorId.equals(req.user._id);
+
     if (!participation && !isConductor) {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Tylko uczestnicy wydarzenia i dyrygent mogą pisać wiadomości'
+        error: "Forbidden",
+        message: "Tylko uczestnicy wydarzenia i dyrygent mogą pisać wiadomości",
       });
     }
-    
+
     // Utwórz nową wiadomość
     const newMessage = new Message({
       eventId: req.params.id,
       userId: req.user._id,
-      content: content.trim()
+      content: content.trim(),
     });
-    
+
     await newMessage.save();
-    
+
     // Pobierz wiadomość z populowanymi danymi
-    const populatedMessage = await Message.findById(newMessage._id)
-      .populate('userId', 'name instrument');
-    
+    const populatedMessage = await Message.findById(newMessage._id).populate(
+      "userId",
+      "name instrument"
+    );
+
     res.status(201).json({
-      message: 'Wiadomość została wysłana',
-      newMessage: populatedMessage
+      message: "Wiadomość została wysłana",
+      newMessage: populatedMessage,
     });
   } catch (error) {
-    console.error('Send message error:', error);
+    console.error("Send message error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas wysyłania wiadomości'
+      error: "Server error",
+      message: "Wystąpił błąd podczas wysyłania wiadomości",
+    });
+  }
+});
+
+// POST /api/events/:id/messages/mark-read - oznacz wiadomości jako przeczytane
+router.post("/:id/messages/mark-read", requireUser, async (req, res) => {
+  try {
+    await autoArchiveEvents();
+
+    const { messageIds } = req.body;
+
+    if (!messageIds || !Array.isArray(messageIds)) {
+      return res.status(400).json({
+        error: "Validation error",
+        message: "messageIds musi być tablicą",
+      });
+    }
+
+    // Sprawdź czy użytkownik ma dostęp do wydarzenia
+    const participation = await Participation.findOne({
+      eventId: req.params.id,
+      userId: req.user._id,
+      status: "confirmed",
+    });
+
+    const event = await Event.findById(req.params.id);
+    const isConductor =
+      req.user.role === "conductor" && event?.conductorId.equals(req.user._id);
+
+    if (!participation && !isConductor) {
+      return res.status(403).json({
+        error: "Forbidden",
+        message:
+          "Tylko uczestnicy wydarzenia mogą oznaczać wiadomości jako przeczytane",
+      });
+    }
+
+    // Oznacz wiadomości jako przeczytane (ignoruj duplikaty)
+    const markPromises = messageIds.map(async (messageId) => {
+      try {
+        await MessageRead.create({
+          messageId,
+          userId: req.user._id,
+        });
+      } catch (error) {
+        // Ignoruj błędy duplikatów (już przeczytane)
+        if (error.code !== 11000) {
+          console.error("Error marking message as read:", error);
+        }
+      }
+    });
+
+    await Promise.all(markPromises);
+
+    res.json({
+      message: "Wiadomości zostały oznaczone jako przeczytane",
+      markedCount: messageIds.length,
+    });
+  } catch (error) {
+    console.error("Mark messages as read error:", error);
+    res.status(500).json({
+      error: "Server error",
+      message: "Wystąpił błąd podczas oznaczania wiadomości",
     });
   }
 });
