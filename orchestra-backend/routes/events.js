@@ -725,6 +725,10 @@ router.get("/:id/messages", requireUser, async (req, res) => {
             })),
             readCount: reads.length,
             participantCount: participants.length,
+            allParticipants: participants.map((p) => ({
+              userId: p.userId._id,
+              name: p.userId.name,
+            })),
           };
         })
       );

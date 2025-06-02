@@ -518,18 +518,34 @@ const EventDetails = () => {
                     {/* Status przeczytania - tylko dla dyrygenta */}
                     {message.readBy && (
                       <div className="message-read-status">
-                        <small className="read-info">
-                          👁️ Przeczytało: {message.readCount}/
-                          {message.participantCount}
-                          {message.readBy.length > 0 && (
-                            <span className="read-by-list">
-                              {" - " +
-                                message.readBy
-                                  .map((read) => read.name)
-                                  .join(", ")}
-                            </span>
-                          )}
-                        </small>
+                        {(() => {
+                          // Znajdź kto NIE przeczytał
+                          const allParticipants = message.allParticipants || [];
+                          const readByNames = message.readBy.map(
+                            (read) => read.name
+                          );
+                          const notReadBy = allParticipants
+                            .map((p) => p.name)
+                            .filter((name) => !readByNames.includes(name));
+
+                          return (
+                            <small className="read-info">
+                              {notReadBy.length > 0 ? (
+                                <>
+                                  ⚠️ Nie przeczytali:{" "}
+                                  <span className="not-read-list">
+                                    {notReadBy.join(", ")}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  ✅ Wszyscy przeczytali ({message.readCount}/
+                                  {message.participantCount})
+                                </>
+                              )}
+                            </small>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
