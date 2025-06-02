@@ -278,6 +278,19 @@ export const eventsAPI = {
     );
     return handleResponse(response);
   },
+
+   // Oznacz wiadomości jako przeczytane
+  markMessagesAsRead: async (eventId, messageIds) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/messages/mark-read`,
+      {
+        method: "POST",
+        headers: getHeaders(true),
+        body: JSON.stringify({ messageIds }),
+      }
+    );
+    return handleResponse(response);
+  },
 };
 
 // Funkcje pomocnicze dla localStorage
@@ -308,17 +321,5 @@ export const storage = {
   getUserRole: () => {
     const user = storage.getUser();
     return user ? user.role : null;
-  },
-  // Oznacz wiadomości jako przeczytane
-  markMessagesAsRead: async (eventId, messageIds) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/messages/mark-read`,
-      {
-        method: "POST",
-        headers: getHeaders(true),
-        body: JSON.stringify({ messageIds }),
-      }
-    );
-    return handleResponse(response);
   },
 };
