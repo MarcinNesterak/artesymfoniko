@@ -698,12 +698,36 @@ router.get("/:id/messages", requireUser, async (req, res) => {
       .limit(100);
 
     // Jeśli to dyrygent, dodaj informacje o przeczytaniach
+    const event = await Event.findById(req.params.id);
     if (
       req.user.role === "conductor" &&
       event?.conductorId.equals(req.user._id)
     ) {
-      // ... cały kod dla dyrygenta ...
+      // Pobierz wszystkich uczestników wydarzenia
+      const participants = await Participation.find({
+        eventId: req.params.id,
+        status: "confirmed",
+      }).populate("userId", "name");
 
+      // Dla każdej wiadomości pobierz kto ją przeczytał
+      const messagesWithReadStatus = await Promise.all(
+        messages.map(async (message) => {
+          const reads = await MessageRead.find({ messageId: message._id })
+            .populate("userId", "name")
+            .select("userId readAt");
+
+          return {
+            ...message.toObject(),
+            readBy: reads.map((read) => ({
+              userId: read.userId._id,
+              name: read.userId.name,
+              readAt: read.readAt,
+            })),
+            readCount: reads.length,
+            participantCount: participants.length,
+          };
+        })
+      );
       res.json({
         message: "Wiadomości czatu",
         count: messagesWithReadStatus.length,
