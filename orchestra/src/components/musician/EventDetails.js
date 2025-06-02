@@ -18,6 +18,33 @@ const EventDetails = () => {
   const userJson = localStorage.getItem("user");
   const user = userJson ? JSON.parse(userJson) : null;
 
+  // Funkcje czatu
+  const fetchMessages = async () => {
+    try {
+      const response = await eventsAPI.getEventMessages(id);
+      setMessages(response.messages || []);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || sendingMessage) return;
+
+    setSendingMessage(true);
+    try {
+      await eventsAPI.sendEventMessage(id, newMessage.trim());
+      setNewMessage("");
+      fetchMessages(); // Odśwież wiadomości po wysłaniu
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Błąd podczas wysyłania wiadomości");
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
   useEffect(() => {
     const fetchEventData = async () => {
       try {
@@ -60,33 +87,6 @@ const EventDetails = () => {
       minute: "2-digit",
     };
     return new Date(dateString).toLocaleDateString("pl-PL", options);
-  };
-
-  // Funkcje czatu
-  const fetchMessages = async () => {
-    try {
-      const response = await eventsAPI.getEventMessages(id);
-      setMessages(response.messages || []);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
-  };
-
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || sendingMessage) return;
-
-    setSendingMessage(true);
-    try {
-      await eventsAPI.sendEventMessage(id, newMessage.trim());
-      setNewMessage("");
-      fetchMessages(); // Odśwież wiadomości po wysłaniu
-    } catch (error) {
-      console.error("Error sending message:", error);
-      alert("Błąd podczas wysyłania wiadomości");
-    } finally {
-      setSendingMessage(false);
-    }
   };
 
   // Automatyczne odświeżanie wiadomości co 5 sekund
