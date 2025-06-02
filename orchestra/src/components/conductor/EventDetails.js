@@ -16,10 +16,9 @@ const EventDetails = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
-
-  // Modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  const [selectedMusicians, setSelectedMusicians] = useState([]);
   const [editData, setEditData] = useState({
     title: "",
     date: "",
@@ -188,6 +187,51 @@ const EventDetails = () => {
     } catch (error) {
       console.error("Error sending invitation:", error);
       alert("Wystąpił błąd podczas wysyłania zaproszenia.");
+    }
+  };
+
+  const sendMultipleInvitations = async () => {
+    if (selectedMusicians.length === 0) return;
+
+    try {
+      // Sprawdź czy któryś z muzyków już został zaproszony
+      const alreadyInvited = selectedMusicians.filter((musicianId) =>
+        invitations.some((inv) => inv.userId._id === musicianId)
+      );
+
+      if (alreadyInvited.length > 0) {
+        alert(
+          "Niektórzy wybrani muzycy już zostali zaproszeni. Zaproszenia zostaną wysłane tylko do nowych muzyków."
+        );
+      }
+
+      // Wyślij zaproszenia tylko do tych, którzy jeszcze nie zostali zaproszeni
+      const newInvitations = selectedMusicians.filter(
+        (musicianId) =>
+          !invitations.some((inv) => inv.userId._id === musicianId)
+      );
+
+      if (newInvitations.length === 0) {
+        alert("Wszyscy wybrani muzycy już zostali zaproszeni.");
+        setSelectedMusicians([]);
+        return;
+      }
+
+      await eventsAPI.inviteMusicians(id, newInvitations);
+
+      const count = newInvitations.length;
+      alert(
+        `Zaproszenia zostały wysłane do ${count} ${
+          count === 1 ? "muzyka" : count < 5 ? "muzyków" : "muzyków"
+        }.`
+      );
+
+      // Wyczyść wybór i odśwież dane
+      setSelectedMusicians([]);
+      fetchEventData();
+    } catch (error) {
+      console.error("Error sending multiple invitations:", error);
+      alert("Wystąpił błąd podczas wysyłania zaproszeń.");
     }
   };
 
@@ -572,25 +616,49 @@ const EventDetails = () => {
             {availableMusicians.length > 0 && (
               <div className="add-musicians-section">
                 <h3>Zaproś więcej muzyków</h3>
-                <select
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      sendInvitation(e.target.value);
-                      e.target.value = ""; // Reset select
-                    }
-                  }}
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    Wybierz muzyka
-                  </option>
+                <div className="musicians-selection">
                   {availableMusicians.map((musician) => (
-                    <option key={musician._id} value={musician._id}>
-                      {musician.name} (
-                      {musician.instrument || "Instrument nieznany"})
-                    </option>
+                    <label key={musician._id} className="musician-checkbox">
+                      <input
+                        type="checkbox"
+                        value={musician._id}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedMusicians((prev) => [
+                              ...prev,
+                              musician._id,
+                            ]);
+                          } else {
+                            setSelectedMusicians((prev) =>
+                              prev.filter((id) => id !== musician._id)
+                            );
+                          }
+                        }}
+                        checked={selectedMusicians.includes(musician._id)}
+                      />
+                      <span className="musician-label">
+                        {musician.name} (
+                        {musician.instrument || "Instrument nieznany"})
+                      </span>
+                    </label>
                   ))}
-                </select>
+                </div>
+                {selectedMusicians.length > 0 && (
+                  <div className="invitation-actions">
+                    <button
+                      onClick={sendMultipleInvitations}
+                      className="btn-invite-selected"
+                    >
+                      Zaproś wybranych ({selectedMusicians.length})
+                    </button>
+                    <button
+                      onClick={() => setSelectedMusicians([])}
+                      className="btn-clear-selection"
+                    >
+                      Wyczyść wybór
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
