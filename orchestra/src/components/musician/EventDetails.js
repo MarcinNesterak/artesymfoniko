@@ -45,6 +45,16 @@ const EventDetails = () => {
     }
   };
 
+  // Sprawdź czy muzyk ma oczekujące zaproszenie
+  const userInvitation = invitations.find(
+    (inv) => inv.userId._id === user.id && inv.status === "pending"
+  );
+
+  // Sprawdź czy muzyk już potwierdził udział
+  const userParticipation = participants.find(
+    (part) => part.userId._id === user.id
+  );
+
   useEffect(() => {
     const fetchEventData = async () => {
       try {
@@ -99,16 +109,6 @@ const EventDetails = () => {
       return () => clearInterval(interval);
     }
   }, [id, userParticipation]);
-
-  // Sprawdź czy muzyk ma oczekujące zaproszenie
-  const userInvitation = invitations.find(
-    (inv) => inv.userId._id === user.id && inv.status === "pending"
-  );
-
-  // Sprawdź czy muzyk już potwierdził udział
-  const userParticipation = participants.find(
-    (part) => part.userId._id === user.id
-  );
 
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
@@ -215,16 +215,7 @@ const EventDetails = () => {
               </p>
             </div>
           )}
-          {/* Status uczestnictwa */}
-          {userParticipation && (
-            <div className="event-info-card participation-card">
-              <h2>Status uczestnictwa</h2>
-              <p className="participation-confirmed">
-                ✅ Potwierdziłeś udział w tym wydarzeniu
-              </p>
-            </div>
-          )}
-
+          
           {/* DODAJ TUTAJ - Czat wydarzenia */}
           {userParticipation && (
             <div className="event-info-card chat-card">
