@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { eventsAPI } from '../../services/api';
-import '../../styles/eventDetails.css';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { eventsAPI } from "../../services/api";
+import "../../styles/eventDetails.css";
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -10,119 +10,174 @@ const EventDetails = () => {
   const [participants, setParticipants] = useState([]);
   const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
-  const userJson = localStorage.getItem('user');
+  const [error, setError] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [sendingMessage, setSendingMessage] = useState(false);
+
+  const userJson = localStorage.getItem("user");
   const user = userJson ? JSON.parse(userJson) : null;
-  
+
   useEffect(() => {
     const fetchEventData = async () => {
       try {
         // Pobierz szczegóły wydarzenia (backend sprawdzi czy muzyk ma dostęp)
         const response = await eventsAPI.getEvent(id);
-        
+
         setEvent(response.event);
         setInvitations(response.invitations || []);
-        
+
         // Wyciągnij uczestników z participations (tylko zaakceptowani)
-        const confirmedParticipants = response.participations?.filter(
-          participation => participation.status === 'confirmed'
-        ) || [];
-        
+        const confirmedParticipants =
+          response.participations?.filter(
+            (participation) => participation.status === "confirmed"
+          ) || [];
+
         setParticipants(confirmedParticipants);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching event data:', error);
-        
+        console.error("Error fetching event data:", error);
+
         // Jeśli błąd 403/401, prawdopodobnie brak dostępu
-        if (error.message?.includes('403') || error.message?.includes('401')) {
-          setError('Nie masz dostępu do tego wydarzenia');
+        if (error.message?.includes("403") || error.message?.includes("401")) {
+          setError("Nie masz dostępu do tego wydarzenia");
         } else {
-          setError(error.message || 'Wystąpił błąd podczas pobierania danych');
+          setError(error.message || "Wystąpił błąd podczas pobierania danych");
         }
         setLoading(false);
       }
     };
-    
+
     fetchEventData();
   }, [id]);
-  
+
   const formatDate = (dateString) => {
-    const options = { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     };
-    return new Date(dateString).toLocaleDateString('pl-PL', options);
+    return new Date(dateString).toLocaleDateString("pl-PL", options);
   };
+
+  // Funkcje czatu
+  const fetchMessages = async () => {
+    try {
+      const response = await eventsAPI.getEventMessages(id);
+      setMessages(response.messages || []);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || sendingMessage) return;
+
+    setSendingMessage(true);
+    try {
+      await eventsAPI.sendEventMessage(id, newMessage.trim());
+      setNewMessage("");
+      fetchMessages(); // Odśwież wiadomości po wysłaniu
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Błąd podczas wysyłania wiadomości");
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  // Automatyczne odświeżanie wiadomości co 5 sekund
+  useEffect(() => {
+    if (userParticipation) {
+      // Tylko dla uczestników
+      fetchMessages(); // Początkowe załadowanie
+
+      const interval = setInterval(fetchMessages, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [id, userParticipation]);
 
   // Sprawdź czy muzyk ma oczekujące zaproszenie
   const userInvitation = invitations.find(
-    inv => inv.userId._id === user.id && inv.status === 'pending'
+    (inv) => inv.userId._id === user.id && inv.status === "pending"
   );
 
   // Sprawdź czy muzyk już potwierdził udział
   const userParticipation = participants.find(
-    part => part.userId._id === user.id
+    (part) => part.userId._id === user.id
   );
-  
+
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
   }
-  
+
   if (error) {
-    return <div className="error-container">
-      <div className="error-message">{error}</div>
-      <button onClick={() => navigate('/musician/dashboard')} className="btn-back">
-        Powrót do strony głównej
-      </button>
-    </div>;
+    return (
+      <div className="error-container">
+        <div className="error-message">{error}</div>
+        <button
+          onClick={() => navigate("/musician/dashboard")}
+          className="btn-back"
+        >
+          Powrót do strony głównej
+        </button>
+      </div>
+    );
   }
-  
+
   if (!event) {
-    return <div className="error-container">
-      <div className="error-message">Nie znaleziono wydarzenia.</div>
-      <button onClick={() => navigate('/musician/dashboard')} className="btn-back">
-        Powrót do strony głównej
-      </button>
-    </div>;
+    return (
+      <div className="error-container">
+        <div className="error-message">Nie znaleziono wydarzenia.</div>
+        <button
+          onClick={() => navigate("/musician/dashboard")}
+          className="btn-back"
+        >
+          Powrót do strony głównej
+        </button>
+      </div>
+    );
   }
-  
+
   return (
     <div className="event-details">
       <div className="event-details-header">
         <h1>{event.title}</h1>
-        <button onClick={() => navigate('/musician/dashboard')} className="btn-back">
+        <button
+          onClick={() => navigate("/musician/dashboard")}
+          className="btn-back"
+        >
           Powrót do listy
         </button>
       </div>
-      
+
       <div className="event-details-content">
         <div className="event-info-section">
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
-            
+
             <div className="info-item">
               <strong>Data i godzina:</strong>
               <span>{formatDate(event.date)}</span>
             </div>
-            
+
             {event.description && (
               <div className="info-item">
                 <strong>Opis:</strong>
                 <p>{event.description}</p>
               </div>
             )}
-            
+
             {event.schedule && (
               <div className="info-item">
                 <strong>Harmonogram:</strong>
                 <pre>{event.schedule}</pre>
               </div>
             )}
-            
+
             {event.program && (
               <div className="info-item">
                 <strong>Program:</strong>
@@ -137,8 +192,12 @@ const EventDetails = () => {
               <h2>Zaproszenie</h2>
               <p>Zostałeś zaproszony do tego wydarzenia.</p>
               <div className="invitation-actions">
-                <button 
-                  onClick={() => navigate(`/musician/events/${id}/participate/${userInvitation._id}`)}
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/musician/events/${id}/participate/${userInvitation._id}`
+                    )
+                  }
                   className="btn-respond"
                 >
                   Odpowiedz na zaproszenie
@@ -151,30 +210,98 @@ const EventDetails = () => {
           {userParticipation && (
             <div className="event-info-card participation-card">
               <h2>Status uczestnictwa</h2>
-              <p className="participation-confirmed">✅ Potwierdziłeś udział w tym wydarzeniu</p>
+              <p className="participation-confirmed">
+                ✅ Potwierdziłeś udział w tym wydarzeniu
+              </p>
+            </div>
+          )}
+          {/* Status uczestnictwa */}
+          {userParticipation && (
+            <div className="event-info-card participation-card">
+              <h2>Status uczestnictwa</h2>
+              <p className="participation-confirmed">
+                ✅ Potwierdziłeś udział w tym wydarzeniu
+              </p>
+            </div>
+          )}
+
+          {/* DODAJ TUTAJ - Czat wydarzenia */}
+          {userParticipation && (
+            <div className="event-info-card chat-card">
+              <h2>💬 Czat Wydarzenia</h2>
+
+              <div className="chat-messages">
+                {messages.length > 0 ? (
+                  messages.map((message) => (
+                    <div key={message._id} className="chat-message">
+                      <div className="message-header">
+                        <span className="message-author">
+                          {message.userId.name}
+                          {message.userId._id === user.id && " (Ty)"}
+                        </span>
+                        <span className="message-time">
+                          {new Date(message.createdAt).toLocaleString("pl-PL", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <div className="message-content">{message.content}</div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-messages">
+                    Brak wiadomości. Napisz pierwszą!
+                  </p>
+                )}
+              </div>
+
+              <form onSubmit={sendMessage} className="chat-form">
+                <div className="chat-input-group">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Napisz wiadomość..."
+                    disabled={sendingMessage}
+                    maxLength={500}
+                    className="chat-input"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!newMessage.trim() || sendingMessage}
+                    className="chat-send-btn"
+                  >
+                    {sendingMessage ? "📤" : "➤"}
+                  </button>
+                </div>
+                <div className="chat-counter">{newMessage.length}/500</div>
+              </form>
             </div>
           )}
         </div>
-        
+
         <div className="event-musicians-section">
           <div className="musicians-card">
             <h2>Uczestnicy</h2>
-            
+
             {participants.length > 0 ? (
               <div className="musicians-list">
-                {participants.map(participant => {
+                {participants.map((participant) => {
                   const musician = participant.userId;
                   if (!musician) return null;
-                  
+
                   return (
                     <div key={participant._id} className="musician-item">
                       <div className="musician-info">
                         <div className="musician-name">
                           {musician.name}
-                          {musician._id === user.id && ' (Ty)'}
+                          {musician._id === user.id && " (Ty)"}
                         </div>
                         <div className="musician-instrument">
-                          {musician.instrument || 'Instrument nieznany'}
+                          {musician.instrument || "Instrument nieznany"}
                         </div>
                       </div>
                     </div>
