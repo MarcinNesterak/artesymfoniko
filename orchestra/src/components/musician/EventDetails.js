@@ -22,7 +22,19 @@ const EventDetails = () => {
   const fetchMessages = async () => {
     try {
       const response = await eventsAPI.getEventMessages(id);
-      setMessages(response.messages || []);
+      const newMessages = response.messages || [];
+      setMessages(newMessages);
+
+      // Automatycznie oznacz wszystkie wiadomości jako przeczytane
+      if (newMessages.length > 0) {
+        const messageIds = newMessages.map((msg) => msg._id);
+        try {
+          await eventsAPI.markMessagesAsRead(id, messageIds);
+        } catch (error) {
+          console.error("Error marking messages as read:", error);
+          // Nie pokazujemy błędu użytkownikowi - to funkcja w tle
+        }
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -215,7 +227,7 @@ const EventDetails = () => {
               </p>
             </div>
           )}
-          
+
           {/* DODAJ TUTAJ - Czat wydarzenia */}
           {userParticipation && (
             <div className="event-info-card chat-card">

@@ -514,6 +514,24 @@ const EventDetails = () => {
                       </span>
                     </div>
                     <div className="message-content">{message.content}</div>
+
+                    {/* Status przeczytania - tylko dla dyrygenta */}
+                    {message.readBy && (
+                      <div className="message-read-status">
+                        <small className="read-info">
+                          👁️ Przeczytało: {message.readCount}/
+                          {message.participantCount}
+                          {message.readBy.length > 0 && (
+                            <span className="read-by-list">
+                              {" - " +
+                                message.readBy
+                                  .map((read) => read.name)
+                                  .join(", ")}
+                            </span>
+                          )}
+                        </small>
+                      </div>
+                    )}
                   </div>
                 ))
               ) : (
