@@ -122,6 +122,21 @@ const EventDetails = () => {
     }
   }, [id, userParticipation]);
 
+  // Aktualizuj ostatnią wizytę wydarzenia
+  useEffect(() => {
+    const updateLastView = async () => {
+      try {
+        await eventsAPI.updateLastView(id);
+      } catch (error) {
+        console.error("Błąd przy aktualizacji ostatniej wizyty:", error);
+      }
+    };
+
+    if (id && event) {
+      updateLastView();
+    }
+  }, [id, event]);
+
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
   }

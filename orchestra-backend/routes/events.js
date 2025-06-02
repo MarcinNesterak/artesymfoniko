@@ -83,9 +83,41 @@ router.get("/", requireUser, async (req, res) => {
       query.archived = req.query.archived === "true";
     }
 
-    const events = await Event.find(query)
+    let events = await Event.find(query)
       .populate("conductorId", "name email")
       .sort({ date: 1 }); // Chronologicznie - najbliższe pierwsze
+
+    // Dla muzyków - dodaj informacje o nowych wiadomościach i zmianach
+    if (req.user.role === "musician") {
+      const eventsWithNotifications = await Promise.all(
+        events.map(async (event) => {
+          // Znajdź ostatnią wizytę użytkownika dla tego wydarzenia
+          const user = await User.findById(req.user._id);
+          const lastView = user.lastEventViews?.find(
+            (view) => view.eventId.toString() === event._id.toString()
+          );
+          const lastViewedAt = lastView?.lastViewedAt || new Date(0); // Jeśli nigdy nie oglądał = 1970
+
+          // Sprawdź czy są nowe wiadomości
+          const newMessagesCount = await Message.countDocuments({
+            eventId: event._id,
+            createdAt: { $gt: lastViewedAt },
+          });
+
+          // Sprawdź czy wydarzenie było modyfikowane od ostatniej wizyty
+          const wasModified = event.lastModified > lastViewedAt;
+
+          return {
+            ...event.toObject(),
+            notifications: {
+              newMessages: newMessagesCount,
+              wasModified: wasModified,
+            },
+          };
+        })
+      );
+      events = eventsWithNotifications;
+    }
 
     res.json({
       message: "Lista wydarzeń",
@@ -882,6 +914,42 @@ router.post("/:id/messages/mark-read", requireUser, async (req, res) => {
       error: "Server error",
       message: "Wystąpił błąd podczas oznaczania wiadomości",
     });
+  }
+});
+
+// Aktualizuj ostatnią wizytę wydarzenia
+router.put("/:id/update-last-view", requireUser, async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const userId = req.user._id;
+
+    // Znajdź użytkownika i zaktualizuj ostatnią wizytę
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Użytkownik nie znaleziony" });
+    }
+
+    // Znajdź istniejący wpis lub utwórz nowy
+    const existingViewIndex = user.lastEventViews.findIndex(
+      (view) => view.eventId.toString() === eventId
+    );
+
+    if (existingViewIndex !== -1) {
+      // Aktualizuj istniejący wpis
+      user.lastEventViews[existingViewIndex].lastViewedAt = new Date();
+    } else {
+      // Dodaj nowy wpis
+      user.lastEventViews.push({
+        eventId: eventId,
+        lastViewedAt: new Date(),
+      });
+    }
+
+    await user.save();
+    res.json({ message: "Ostatnia wizyta zaktualizowana" });
+  } catch (error) {
+    console.error("Błąd przy aktualizacji ostatniej wizyty:", error);
+    res.status(500).json({ error: "Błąd serwera" });
   }
 });
 export default router;

@@ -279,7 +279,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-   // Oznacz wiadomości jako przeczytane
+  // Oznacz wiadomości jako przeczytane
   markMessagesAsRead: async (eventId, messageIds) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/messages/mark-read`,
@@ -287,6 +287,18 @@ export const eventsAPI = {
         method: "POST",
         headers: getHeaders(true),
         body: JSON.stringify({ messageIds }),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Aktualizuj ostatnią wizytę wydarzenia
+  updateLastView: async (eventId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/update-last-view`,
+      {
+        method: "PUT",
+        headers: getHeaders(true),
       }
     );
     return handleResponse(response);
