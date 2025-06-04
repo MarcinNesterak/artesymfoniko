@@ -952,4 +952,97 @@ router.put("/:id/update-last-view", requireUser, async (req, res) => {
     res.status(500).json({ error: "Błąd serwera" });
   }
 });
+
+// GET /api/events/admin/backup - pobierz backup danych
+router.get("/admin/backup", requireUser, async (req, res) => {
+  try {
+    // Tylko dyrygent może robić backup
+    if (req.user.role !== "conductor") {
+      return res.status(403).json({ error: "Brak uprawnień" });
+    }
+
+    const User = require("../models/User");
+    const Event = require("../models/Event");
+    const Message = require("../models/Message");
+    const Participation = require("../models/Participation");
+
+    // Pobierz wszystkie dane
+    const users = await User.find({}).select('-password'); // Bez haseł!
+    const events = await Event.find({});
+    const messages = await Message.find({});
+    const participations = await Participation.find({});
+
+    const backupData = {
+      createdAt: new Date().toISOString(),
+      users,
+      events,
+      messages,
+      participations,
+      counts: {
+        users: users.length,
+        events: events.length,
+        messages: messages.length,
+        participations: participations.length
+      }
+    };
+
+    res.json(backupData);
+  } catch (error) {
+    console.error("Backup error:", error);
+    res.status(500).json({ error: "Błąd podczas tworzenia kopii zapasowej" });
+  }
+});
+
+// POST /api/events/admin/restore - przywróć dane z backupu
+router.post("/admin/restore", requireUser, async (req, res) => {
+  try {
+    // Tylko dyrygent może przywracać backup
+    if (req.user.role !== "conductor") {
+      return res.status(403).json({ error: "Brak uprawnień" });
+    }
+
+    const { users, events, messages, participations } = req.body;
+
+    // Sprawdź czy dane są prawidłowe
+    if (!users || !events || !messages || !participations) {
+      return res.status(400).json({ 
+        error: "Nieprawidłowy format danych backup" 
+      });
+    }
+
+    const User = require("../models/User");
+    const Event = require("../models/Event");
+    const Message = require("../models/Message");
+    const Participation = require("../models/Participation");
+
+    // USUŃ wszystkie istniejące dane
+    await User.deleteMany({});
+    await Event.deleteMany({});
+    await Message.deleteMany({});
+    await Participation.deleteMany({});
+
+    // WSTAW dane z backup
+    if (users.length > 0) await User.insertMany(users);
+    if (events.length > 0) await Event.insertMany(events);
+    if (messages.length > 0) await Message.insertMany(messages);
+    if (participations.length > 0) await Participation.insertMany(participations);
+
+    res.json({
+      message: "Backup został przywrócony pomyślnie",
+      restored: {
+        users: users.length,
+        events: events.length,
+        messages: messages.length,
+        participations: participations.length
+      }
+    });
+
+  } catch (error) {
+    console.error("Restore error:", error);
+    res.status(500).json({ 
+      error: "Błąd podczas przywracania danych",
+      details: error.message 
+    });
+  }
+});
 export default router;

@@ -303,6 +303,23 @@ export const eventsAPI = {
     );
     return handleResponse(response);
   },
+  // Backup i restore
+  getBackup: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/events/admin/backup`, {
+      method: "GET",
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
+
+  restoreBackup: async (backupData) => {
+    const response = await fetch(`${API_BASE_URL}/api/events/admin/restore`, {
+      method: "POST",
+      headers: getHeaders(true),
+      body: JSON.stringify(backupData),
+    });
+    return handleResponse(response);
+  },
 };
 
 // Funkcje pomocnicze dla localStorage
