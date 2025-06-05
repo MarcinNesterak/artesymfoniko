@@ -967,7 +967,7 @@ router.get("/admin/backup", requireUser, async (req, res) => {
     const Participation = require("../models/Participation");
 
     // Pobierz wszystkie dane
-    const users = await User.find({}).select('-password'); // Bez haseł!
+    const users = await User.find({}).select("+password");
     const events = await Event.find({});
     const messages = await Message.find({});
     const participations = await Participation.find({});
@@ -982,8 +982,8 @@ router.get("/admin/backup", requireUser, async (req, res) => {
         users: users.length,
         events: events.length,
         messages: messages.length,
-        participations: participations.length
-      }
+        participations: participations.length,
+      },
     };
 
     res.json(backupData);
@@ -1005,15 +1005,10 @@ router.post("/admin/restore", requireUser, async (req, res) => {
 
     // Sprawdź czy dane są prawidłowe
     if (!users || !events || !messages || !participations) {
-      return res.status(400).json({ 
-        error: "Nieprawidłowy format danych backup" 
+      return res.status(400).json({
+        error: "Nieprawidłowy format danych backup",
       });
     }
-
-    const User = require("../models/User");
-    const Event = require("../models/Event");
-    const Message = require("../models/Message");
-    const Participation = require("../models/Participation");
 
     // USUŃ wszystkie istniejące dane
     await User.deleteMany({});
@@ -1022,10 +1017,17 @@ router.post("/admin/restore", requireUser, async (req, res) => {
     await Participation.deleteMany({});
 
     // WSTAW dane z backup
-    if (users.length > 0) await User.insertMany(users);
+    if (users.length > 0) {
+      const usersWithFlag = users.map((user) => ({
+        ...user,
+        isImporting: true,
+      }));
+      await User.insertMany(usersWithFlag);
+    }
     if (events.length > 0) await Event.insertMany(events);
     if (messages.length > 0) await Message.insertMany(messages);
-    if (participations.length > 0) await Participation.insertMany(participations);
+    if (participations.length > 0)
+      await Participation.insertMany(participations);
 
     res.json({
       message: "Backup został przywrócony pomyślnie",
@@ -1033,15 +1035,14 @@ router.post("/admin/restore", requireUser, async (req, res) => {
         users: users.length,
         events: events.length,
         messages: messages.length,
-        participations: participations.length
-      }
+        participations: participations.length,
+      },
     });
-
   } catch (error) {
     console.error("Restore error:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Błąd podczas przywracania danych",
-      details: error.message 
+      details: error.message,
     });
   }
 });
