@@ -961,11 +961,6 @@ router.get("/admin/backup", requireUser, async (req, res) => {
       return res.status(403).json({ error: "Brak uprawnień" });
     }
 
-    const User = require("../models/User");
-    const Event = require("../models/Event");
-    const Message = require("../models/Message");
-    const Participation = require("../models/Participation");
-
     // Pobierz wszystkie dane
     const users = await User.find({}).select("+password");
     const events = await Event.find({});
