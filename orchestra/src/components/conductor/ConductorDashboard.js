@@ -110,7 +110,7 @@ const ConductorDashboard = () => {
         throw new Error("Nieprawidłowy format pliku backup");
       }
 
-      const confirmed = confirm(
+      const confirmed = window.confirm(
         `⚠️ UWAGA!\n\nPrzywrócenie kopii zapasowej:\n- USUNIE wszystkie obecne dane\n- Przywróci dane z: ${
           backupData.createdAt
         }\n- Liczba użytkowników: ${
