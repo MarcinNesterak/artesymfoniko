@@ -155,7 +155,7 @@ const createTestAccounts = async () => {
     const User = (await import('./models/User.js')).default;
     
     // Sprawdź czy testowe konta już istnieją
-    const conductor = await User.findOne({ email: 'dyrygent@test.pl' });
+    let conductor = await User.findOne({ email: 'dyrygent@test.pl' });
     const musician = await User.findOne({ email: 'skrzypce@test.pl' });
     
     if (!conductor) {
@@ -170,7 +170,7 @@ const createTestAccounts = async () => {
           lastName: 'Testowy'
         }
       });
-      await testConductor.save();
+      conductor = await testConductor.save(); // Zapisz do zmiennej conductor
       console.log('✅ Utworzono testowe konto dyrygenta');
     }
     
@@ -178,11 +178,11 @@ const createTestAccounts = async () => {
       const testMusician = new User({
         email: 'skrzypce@test.pl',
         name: 'Skrzypce Testowe',
-        password: 'LXXF9YJI',
+        password: 'haslo123', // Zmieniono na standardowe hasło
         role: 'musician',
         instrument: 'skrzypce',
         active: true,
-          createdBy: conductor._id,
+        createdBy: conductor._id, // Teraz conductor na pewno istnieje
         personalData: {
           firstName: 'Skrzypce',
           lastName: 'Testowe'
