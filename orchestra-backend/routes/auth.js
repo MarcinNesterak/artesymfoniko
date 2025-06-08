@@ -2,6 +2,8 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
+import { loginLimiter, registerLimiter } from '../middleware/rateLimiter.js';
+import { sendEmail } from '../utils/email.js';
 
 const router = express.Router();
 
@@ -307,6 +309,136 @@ router.get('/me', authenticate, (req, res) => {
       lastLogin: req.user.lastLogin
     }
   });
+});
+
+// POST /api/auth/verify-email/:token
+router.get('/verify-email/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      emailVerificationToken: req.params.token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: 'Invalid token',
+        message: 'Token weryfikacji email jest nieprawidłowy lub wygasł'
+      });
+    }
+
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    res.json({
+      message: 'Email został zweryfikowany pomyślnie'
+    });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas weryfikacji email'
+    });
+  }
+});
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Email jest wymagany'
+      });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      // Dla bezpieczeństwa zwracamy sukces nawet jeśli użytkownik nie istnieje
+      return res.json({
+        message: 'Jeśli podany email istnieje w systemie, otrzymasz instrukcje resetowania hasła'
+      });
+    }
+
+    const resetToken = user.generatePasswordResetToken();
+    await user.save();
+
+    // Wyślij email z linkiem do resetowania hasła
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    await sendEmail({
+      to: user.email,
+      subject: 'Reset hasła',
+      text: `Aby zresetować hasło, kliknij w link: ${resetUrl}`,
+      html: `
+        <h1>Reset hasła</h1>
+        <p>Aby zresetować hasło, kliknij w poniższy link:</p>
+        <a href="${resetUrl}">Resetuj hasło</a>
+        <p>Link wygaśnie za godzinę.</p>
+      `
+    });
+
+    res.json({
+      message: 'Jeśli podany email istnieje w systemie, otrzymasz instrukcje resetowania hasła'
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas przetwarzania żądania resetowania hasła'
+    });
+  }
+});
+
+// POST /api/auth/reset-password/:token
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Nowe hasło jest wymagane'
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Hasło musi mieć co najmniej 6 znaków'
+      });
+    }
+
+    const user = await User.findOne({
+      passwordResetToken: req.params.token,
+      passwordResetExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: 'Invalid token',
+        message: 'Token resetowania hasła jest nieprawidłowy lub wygasł'
+      });
+    }
+
+    user.password = password;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    user.isTemporaryPassword = false;
+    await user.save();
+
+    res.json({
+      message: 'Hasło zostało zmienione pomyślnie'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas resetowania hasła'
+    });
+  }
 });
 
 export default router;

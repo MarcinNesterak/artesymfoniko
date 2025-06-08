@@ -2,9 +2,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
 import usersRoutes from './routes/users.js';
 import authRoutes from './routes/auth.js';
 import eventsRoutes from './routes/events.js';
+import { apiLimiter } from './middleware/rateLimiter.js';
 
 
 // Import models
@@ -19,7 +21,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Middleware
+// Security middleware
+app.use(helmet()); // Dodaje nagłówki bezpieczeństwa
 app.use(cors({
   origin: [
     'http://localhost:3000', 
@@ -30,6 +33,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Rate limiting dla wszystkich endpointów API
+app.use('/api/', apiLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
