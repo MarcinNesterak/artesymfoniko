@@ -3,12 +3,15 @@ import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
 
 // Konfiguracja Redis
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redis = new Redis(process.env.REDIS_URL, {
+  enableOfflineQueue: false,
+  maxRetriesPerRequest: 1
+});
 
 // Rate limiter dla logowania
 export const loginLimiter = rateLimit({
   store: new RedisStore({
-    client: redis,
+    sendCommand: (...args) => redis.call(...args),
     prefix: 'login-limit:'
   }),
   windowMs: 15 * 60 * 1000, // 15 minut
@@ -22,7 +25,7 @@ export const loginLimiter = rateLimit({
 // Rate limiter dla API
 export const apiLimiter = rateLimit({
   store: new RedisStore({
-    client: redis,
+    sendCommand: (...args) => redis.call(...args),
     prefix: 'api-limit:'
   }),
   windowMs: 60 * 1000, // 1 minuta
@@ -36,7 +39,7 @@ export const apiLimiter = rateLimit({
 // Rate limiter dla rejestracji
 export const registerLimiter = rateLimit({
   store: new RedisStore({
-    client: redis,
+    sendCommand: (...args) => redis.call(...args),
     prefix: 'register-limit:'
   }),
   windowMs: 60 * 60 * 1000, // 1 godzina
