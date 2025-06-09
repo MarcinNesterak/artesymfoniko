@@ -114,6 +114,15 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
+// Tymczasowy endpoint do sprawdzenia zmiennych środowiskowych
+app.get('/api/debug/env', (req, res) => {
+  res.json({
+    REDIS_URL: process.env.REDIS_URL ? 'Set' : 'Not set',
+    NODE_ENV: process.env.NODE_ENV,
+    MONGODB_URI: process.env.MONGODB_URI ? 'Set' : 'Not set'
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.stack);

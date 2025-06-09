@@ -3,20 +3,38 @@ import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
 
 // Konfiguracja Redis
-const redis = new Redis(process.env.REDIS_URL, {
+const redisUrl = process.env.REDIS_URL;
+if (!redisUrl) {
+  console.error('REDIS_URL is not defined in environment variables');
+  process.exit(1);
+}
+
+console.log('Connecting to Redis at:', redisUrl);
+
+const redis = new Redis(redisUrl, {
   enableOfflineQueue: true,
   maxRetriesPerRequest: 3,
   retryStrategy: (times) => {
     const delay = Math.min(times * 50, 2000);
+    console.log(`Redis connection attempt ${times}, retrying in ${delay}ms`);
     return delay;
   },
   reconnectOnError: (err) => {
+    console.error('Redis connection error:', err.message);
     const targetError = 'READONLY';
     if (err.message.includes(targetError)) {
       return true;
     }
     return false;
   }
+});
+
+redis.on('connect', () => {
+  console.log('✅ Redis connected successfully');
+});
+
+redis.on('error', (err) => {
+  console.error('❌ Redis connection error:', err.message);
 });
 
 // Rate limiter dla logowania
