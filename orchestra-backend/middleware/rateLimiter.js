@@ -2,47 +2,49 @@ import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
 
-// Konfiguracja Redis
+let store;
 const redisUrl = process.env.REDIS_URL;
-if (!redisUrl) {
-  console.error('REDIS_URL is not defined in environment variables');
-  process.exit(1);
-}
 
-console.log('Connecting to Redis at:', redisUrl);
-
-const redis = new Redis(redisUrl, {
-  enableOfflineQueue: true,
-  maxRetriesPerRequest: 3,
-  retryStrategy: (times) => {
-    const delay = Math.min(times * 50, 2000);
-    console.log(`Redis connection attempt ${times}, retrying in ${delay}ms`);
-    return delay;
-  },
-  reconnectOnError: (err) => {
-    console.error('Redis connection error:', err.message);
-    const targetError = 'READONLY';
-    if (err.message.includes(targetError)) {
-      return true;
+if (redisUrl) {
+  console.log('Connecting to Redis at:', redisUrl);
+  const redis = new Redis(redisUrl, {
+    enableOfflineQueue: true,
+    maxRetriesPerRequest: 3,
+    retryStrategy: (times) => {
+      const delay = Math.min(times * 50, 2000);
+      console.log(`Redis connection attempt ${times}, retrying in ${delay}ms`);
+      return delay;
+    },
+    reconnectOnError: (err) => {
+      console.error('Redis connection error:', err.message);
+      const targetError = 'READONLY';
+      if (err.message.includes(targetError)) {
+        return true;
+      }
+      return false;
     }
-    return false;
-  }
-});
+  });
 
-redis.on('connect', () => {
-  console.log('✅ Redis connected successfully');
-});
+  redis.on('connect', () => {
+    console.log('✅ Redis connected successfully');
+  });
 
-redis.on('error', (err) => {
-  console.error('❌ Redis connection error:', err.message);
-});
+  redis.on('error', (err) => {
+    console.error('❌ Redis connection error:', err.message);
+  });
+
+  store = new RedisStore({
+    sendCommand: (...args) => redis.call(...args),
+    prefix: 'rate-limit:'
+  });
+} else {
+  console.log('⚠️ Redis URL not found, using memory store for rate limiting');
+  store = new Map();
+}
 
 // Rate limiter dla logowania
 export const loginLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args) => redis.call(...args),
-    prefix: 'login-limit:'
-  }),
+  store,
   windowMs: 15 * 60 * 1000, // 15 minut
   max: 5, // 5 prób
   message: {
@@ -53,10 +55,7 @@ export const loginLimiter = rateLimit({
 
 // Rate limiter dla API
 export const apiLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args) => redis.call(...args),
-    prefix: 'api-limit:'
-  }),
+  store,
   windowMs: 60 * 1000, // 1 minuta
   max: 100, // 100 requestów na minutę
   message: {
@@ -67,10 +66,7 @@ export const apiLimiter = rateLimit({
 
 // Rate limiter dla rejestracji
 export const registerLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args) => redis.call(...args),
-    prefix: 'register-limit:'
-  }),
+  store,
   windowMs: 60 * 60 * 1000, // 1 godzina
   max: 3, // 3 próby na godzinę
   message: {
