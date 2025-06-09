@@ -4,8 +4,19 @@ import Redis from 'ioredis';
 
 // Konfiguracja Redis
 const redis = new Redis(process.env.REDIS_URL, {
-  enableOfflineQueue: false,
-  maxRetriesPerRequest: 1
+  enableOfflineQueue: true,
+  maxRetriesPerRequest: 3,
+  retryStrategy: (times) => {
+    const delay = Math.min(times * 50, 2000);
+    return delay;
+  },
+  reconnectOnError: (err) => {
+    const targetError = 'READONLY';
+    if (err.message.includes(targetError)) {
+      return true;
+    }
+    return false;
+  }
 });
 
 // Rate limiter dla logowania
