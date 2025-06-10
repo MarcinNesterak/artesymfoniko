@@ -7,6 +7,8 @@ import usersRoutes from './routes/users.js';
 import authRoutes from './routes/auth.js';
 import eventsRoutes from './routes/events.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
+import Redis from 'ioredis';
+import RedisStore from 'ioredis-store';
 
 
 // Import models
@@ -35,7 +37,7 @@ app.use(cors({
 }));
 
 // Rate limiting dla wszystkich endpointów API
-app.use('/api/', apiLimiter);
+// app.use('/api/', apiLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -122,6 +124,15 @@ app.get('/api/debug/env', (req, res) => {
     MONGODB_URI: process.env.MONGODB_URI ? 'Set' : 'Not set'
   });
 });
+
+// Debugowanie zmiennych środowiskowych
+console.log('Environment variables check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+console.log('REDIS_URL:', process.env.REDIS_URL ? 'Set' : 'Not set');
+if (process.env.REDIS_URL) {
+  console.log('Redis URL format:', process.env.REDIS_URL.substring(0, 20) + '...');
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -210,3 +221,11 @@ const createTestAccounts = async () => {
     console.error('❌ Błąd tworzenia testowych kont:', error);
   }
 };
+
+const redisUrl = process.env.REDIS_URL;
+const redis = redisUrl ? new Redis(redisUrl) : null;
+
+const store = redis ? new RedisStore({
+  sendCommand: (...args) => redis.call(...args),
+  prefix: 'login-limit:'
+}) : undefined;
