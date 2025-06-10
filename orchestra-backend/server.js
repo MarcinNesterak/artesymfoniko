@@ -8,7 +8,7 @@ import authRoutes from './routes/auth.js';
 import eventsRoutes from './routes/events.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import Redis from 'ioredis';
-import RedisStore from 'rate-limit-
+import RedisStore from 'rate-limit-redis';
 
 
 // Import models
