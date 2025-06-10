@@ -8,7 +8,7 @@ import authRoutes from './routes/auth.js';
 import eventsRoutes from './routes/events.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import Redis from 'ioredis';
-import RedisStore from 'ioredis-store';
+import RedisStore from 'rate-limit-
 
 
 // Import models
@@ -224,7 +224,6 @@ const createTestAccounts = async () => {
 
 const redisUrl = process.env.REDIS_URL;
 const redis = redisUrl ? new Redis(redisUrl) : null;
-
 const store = redis ? new RedisStore({
   sendCommand: (...args) => redis.call(...args),
   prefix: 'login-limit:'
