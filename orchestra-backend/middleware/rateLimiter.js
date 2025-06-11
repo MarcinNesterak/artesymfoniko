@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import Redis from 'ioredis';
 
-const redisUrl = process.env.REDIS_URL;
+const redisUrl = process.env.REDIS_URL ? process.env.REDIS_URL + '?family=0' : null;
 const redis = redisUrl ? new Redis(redisUrl) : null;
 
 if (redis) {
