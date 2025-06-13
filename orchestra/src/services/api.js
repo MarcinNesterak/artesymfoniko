@@ -1,6 +1,6 @@
 // Konfiguracja API
 const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "https://artesymfoniko-production.up.railway.app/api";
+  process.env.REACT_APP_API_URL || "https://artesymfoniko-production.up.railway.app";
 
 // Funkcja pomocnicza do pobierania tokena
 const getAuthToken = () => {
