@@ -67,7 +67,6 @@ const connectDB = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ MongoDB connected successfully');
     console.log(`📊 Database: ${mongoose.connection.name}`);
-    createTestAccounts();
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
     process.exit(1);
@@ -194,50 +193,3 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
-
-// Funkcja tworząca testowe konta
-const createTestAccounts = async () => {
-  try {
-    const User = (await import('./models/User.js')).default;
-    
-    // Sprawdź czy testowe konta już istnieją
-    let conductor = await User.findOne({ email: 'dyrygent@test.pl' });
-    const musician = await User.findOne({ email: 'skrzypce@test.pl' });
-    
-    if (!conductor) {
-      const testConductor = new User({
-        email: 'dyrygent@test.pl',
-        name: 'Dyrygent Testowy',
-        password: 'haslo123',
-        role: 'conductor',
-        active: true,
-        personalData: {
-          firstName: 'Dyrygent',
-          lastName: 'Testowy'
-        }
-      });
-      conductor = await testConductor.save(); // Zapisz do zmiennej conductor
-      console.log('✅ Utworzono testowe konto dyrygenta');
-    }
-    
-    if (!musician) {
-      const testMusician = new User({
-        email: 'skrzypce@test.pl',
-        name: 'Skrzypce Testowe',
-        password: 'haslo123', // Zmieniono na standardowe hasło
-        role: 'musician',
-        instrument: 'skrzypce',
-        active: true,
-        createdBy: conductor._id, // Teraz conductor na pewno istnieje
-        personalData: {
-          firstName: 'Skrzypce',
-          lastName: 'Testowe'
-        }
-      });
-      await testMusician.save();
-      console.log('✅ Utworzono testowe konto muzyka');
-    }
-  } catch (error) {
-    console.error('❌ Błąd tworzenia testowych kont:', error);
-  }
-};
