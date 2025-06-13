@@ -484,12 +484,13 @@
 }
 
 .dresscode-view img {
-  width: 44px;
-  height: 44px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   border-radius: 6px;
   background: var(--bg-tertiary, #f0f0f0);
   box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  margin-right: 8px;
 }
 
 .dresscode-view span {
@@ -499,8 +500,8 @@
 
 @media (max-width: 600px) {
   .dresscode-view img {
-    width: 28px;
-    height: 28px;
+    width: 38px;
+    height: 38px;
   }
 
   .dresscode-view span {

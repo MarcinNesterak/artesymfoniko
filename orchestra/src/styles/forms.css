@@ -212,10 +212,10 @@ input[type="date"], input[type="time"] {
   background: var(--bg-tertiary, #f0f0f0);
 }
 .dresscode-option img {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .dresscode-option span {
   font-size: 0.95em;
@@ -230,8 +230,8 @@ input[type="date"], input[type="time"] {
     padding: 4px 2px;
   }
   .dresscode-option img {
-    width: 38px;
-    height: 38px;
+    width: 50px;
+    height: 50px;
   }
   .dresscode-option span {
     font-size: 0.8em;
