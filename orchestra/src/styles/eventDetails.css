@@ -478,33 +478,53 @@
 
 .dresscode-view {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-top: 4px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .dresscode-view img {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--bg-tertiary, #f0f0f0);
   box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-  margin-right: 8px;
 }
 
 .dresscode-view span {
-  font-size: 1em;
+  font-size: 0.95em;
   color: var(--text-primary);
+  line-height: 1.3;
+  margin-top: 4px;
 }
 
-@media (max-width: 600px) {
-  .dresscode-view img {
-    width: 38px;
-    height: 38px;
+@media (max-width: 768px) {
+  .dresscode-view {
+    gap: 10px;
   }
-
+  
+  .dresscode-view img {
+    width: 60px;
+    height: 60px;
+  }
+  
   .dresscode-view span {
     font-size: 0.9em;
+  }
+}
+
+@media (max-width: 480px) {
+  .dresscode-view {
+    gap: 8px;
+  }
+  
+  .dresscode-view img {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .dresscode-view span {
+    font-size: 0.85em;
   }
 }

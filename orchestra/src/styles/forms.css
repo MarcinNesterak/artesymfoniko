@@ -193,8 +193,11 @@ input[type="date"], input[type="time"] {
 }
 .dresscode-options {
   display: flex;
-  gap: 18px;
+  justify-content: space-between;
+  gap: 10px;
   flex-wrap: wrap;
+  width: 100%;
+  margin: 10px 0;
 }
 .dresscode-option {
   display: flex;
@@ -202,38 +205,56 @@ input[type="date"], input[type="time"] {
   align-items: center;
   cursor: pointer;
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 8px;
   border: 2px solid transparent;
   transition: border 0.2s, background 0.2s;
-  width: 90px;
+  flex: 1;
+  min-width: 100px;
+  max-width: 150px;
 }
 .dresscode-option.selected {
   border: 2px solid var(--accent-primary, #1976d2);
   background: var(--bg-tertiary, #f0f0f0);
 }
 .dresscode-option img {
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
   object-fit: contain;
   margin-bottom: 8px;
 }
 .dresscode-option span {
-  font-size: 0.95em;
+  font-size: 0.9em;
   text-align: center;
+  line-height: 1.2;
 }
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .dresscode-options {
     gap: 8px;
   }
+  
   .dresscode-option {
-    width: 60px;
-    padding: 4px 2px;
+    min-width: 80px;
+    max-width: 120px;
+    padding: 6px;
   }
-  .dresscode-option img {
-    width: 50px;
-    height: 50px;
-  }
+  
   .dresscode-option span {
     font-size: 0.8em;
+  }
+}
+@media (max-width: 480px) {
+  .dresscode-options {
+    gap: 6px;
+  }
+  
+  .dresscode-option {
+    min-width: 70px;
+    max-width: 100px;
+    padding: 4px;
+  }
+  
+  .dresscode-option span {
+    font-size: 0.75em;
   }
 }
