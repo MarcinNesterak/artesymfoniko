@@ -465,3 +465,39 @@
   padding: 2px 6px;
   border-radius: 3px;
 }
+
+.dresscode-info {
+  margin-top: 10px;
+}
+
+.dresscode-view {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.dresscode-view img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: var(--bg-tertiary, #f0f0f0);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.dresscode-view span {
+  font-size: 1em;
+  color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+  .dresscode-view img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .dresscode-view span {
+    font-size: 0.9em;
+  }
+}

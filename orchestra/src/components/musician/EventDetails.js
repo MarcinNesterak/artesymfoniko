@@ -216,6 +216,27 @@ const EventDetails = () => {
                 <pre>{event.program}</pre>
               </div>
             )}
+
+            {event.dresscode && (
+              <div className="info-item dresscode-info">
+                <strong>Dresscode:</strong>
+                <div className="dresscode-view">
+                  {event.dresscode === 'frak' && (
+                    <><img src="/img/frak.jpg" alt="frak" /><span>frak, biała koszula, biała mucha</span></>
+                  )}
+                  {event.dresscode === 'black' && (
+                    <><img src="/img/black.jpg" alt="black" /><span>czarna koszula i czarna marynarka</span></>
+                  )}
+                  {event.dresscode === 'casual' && (
+                    <><img src="/img/casual.jpg" alt="casual" /><span>biała koszula i czarna marynarka</span></>
+                  )}
+                  {event.dresscode === 'other' && (
+                    <><img src="/img/other.jpg" alt="other" /><span>inne</span></>
+                  )}
+                  <img src="/img/principessa.jpg" alt="principessa" /><span>principessa</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sekcja zaproszenia */}
