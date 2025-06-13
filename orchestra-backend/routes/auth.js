@@ -13,7 +13,7 @@ const generateToken = (userId) => {
 };
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     
@@ -87,7 +87,7 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/auth/register (tylko dla pierwszego dyrygenta)
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   try {
     const { email, password, name } = req.body;
     

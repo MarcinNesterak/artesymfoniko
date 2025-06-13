@@ -7,9 +7,8 @@ import usersRoutes from './routes/users.js';
 import authRoutes from './routes/auth.js';
 import eventsRoutes from './routes/events.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
-import Redis from 'ioredis';
-import RedisStore from 'rate-limit-redis';
-
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 
 // Import models
 import User from './models/User.js';
@@ -24,12 +23,12 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 
 // Security middleware
-app.use(helmet()); // Dodaje nagłówki bezpieczeństwa
+app.use(helmet());
 app.use(cors({
   origin: [
     'http://localhost:3000', 
     'http://localhost:3001',
-    'https://artesymfoniko.vercel.app'  // Dodaj swoją domenę Vercel
+    'https://artesymfoniko.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -37,10 +36,28 @@ app.use(cors({
 }));
 
 // Rate limiting dla wszystkich endpointów API
-// app.use('/api/', apiLimiter);
+app.use('/api/', apiLimiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Konfiguracja sesji z MongoDB
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60, // 14 dni
+    autoRemove: 'native' // używa natywnego TTL MongoDB
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // true w produkcji
+    httpOnly: true,
+    maxAge: 14 * 24 * 60 * 60 * 1000 // 14 dni
+  }
+}));
 
 const connectDB = async () => {
   try {
@@ -221,10 +238,3 @@ const createTestAccounts = async () => {
     console.error('❌ Błąd tworzenia testowych kont:', error);
   }
 };
-
-const redisUrl = process.env.REDIS_URL;
-const redis = redisUrl ? new Redis(redisUrl) : null;
-const store = redis ? new RedisStore({
-  sendCommand: (...args) => redis.call(...args),
-  prefix: 'login-limit:'
-}) : undefined;

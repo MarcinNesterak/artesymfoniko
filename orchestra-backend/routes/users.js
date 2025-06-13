@@ -1,11 +1,12 @@
 import express from 'express';
 import User from '../models/User.js';
 import { authenticate, requireConductor } from '../middleware/auth.js';
+import { apiLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
 // GET /api/users - pobierz wszystkich muzyków (tylko dyrygent)
-router.get('/', requireConductor, async (req, res) => {
+router.get('/', apiLimiter, requireConductor, async (req, res) => {
   try {
     const musicians = await User.find({ role: 'musician' })
       .select('-password')
@@ -27,7 +28,7 @@ router.get('/', requireConductor, async (req, res) => {
 });
 
 // GET /api/users/:id - pobierz konkretnego muzyka (tylko dyrygent)
-router.get('/:id', requireConductor, async (req, res) => {
+router.get('/:id', apiLimiter, requireConductor, async (req, res) => {
   try {
     const musician = await User.findOne({ 
       _id: req.params.id, 
@@ -57,7 +58,7 @@ router.get('/:id', requireConductor, async (req, res) => {
 });
 
 // PUT /api/users/:id - aktualizuj dane muzyka (tylko dyrygent)
-router.put('/:id', requireConductor, async (req, res) => {
+router.put('/:id', apiLimiter, requireConductor, async (req, res) => {
   try {
     const { email, firstName, lastName, instrument, phone, address } = req.body;
     
@@ -132,7 +133,7 @@ router.put('/:id', requireConductor, async (req, res) => {
 });
 
 // PATCH /api/users/:id/reset-password - resetuj hasło muzyka (tylko dyrygent)
-router.patch('/:id/reset-password', requireConductor, async (req, res) => {
+router.patch('/:id/reset-password', apiLimiter, requireConductor, async (req, res) => {
   try {
     const musician = await User.findOne({ 
       _id: req.params.id, 
@@ -172,7 +173,7 @@ router.patch('/:id/reset-password', requireConductor, async (req, res) => {
 });
 
 // PATCH /api/users/:id/toggle-status - aktywuj/dezaktywuj muzyka (tylko dyrygent)
-router.patch('/:id/toggle-status', requireConductor, async (req, res) => {
+router.patch('/:id/toggle-status', apiLimiter, requireConductor, async (req, res) => {
   try {
     const musician = await User.findOne({ 
       _id: req.params.id, 

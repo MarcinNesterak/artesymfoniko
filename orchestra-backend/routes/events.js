@@ -10,6 +10,7 @@ import {
 } from "../middleware/auth.js";
 import Message from "../models/Message.js";
 import MessageRead from "../models/MessageRead.js";
+import { apiLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ const autoArchiveEvents = async () => {
 };
 
 // GET /api/events - pobierz wydarzenia
-router.get("/", requireUser, async (req, res) => {
+router.get("/", apiLimiter, requireUser, async (req, res) => {
   try {
     // Automatyczne archiwizowanie przed pobraniem listy
     await autoArchiveEvents();
@@ -134,7 +135,7 @@ router.get("/", requireUser, async (req, res) => {
 });
 
 // GET /api/events/:id - pobierz konkretne wydarzenie
-router.get("/:id", requireUser, async (req, res) => {
+router.get("/:id", apiLimiter, requireUser, async (req, res) => {
   try {
     // Automatyczne archiwizowanie przed pobraniem szczegółów
     await autoArchiveEvents();
