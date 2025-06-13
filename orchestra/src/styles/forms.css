@@ -64,35 +64,39 @@
   border-bottom: none;
 }
 
-.musician-label {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  width: 100%;
+.musician-item .musician-label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
   padding: 4px 0 !important;
+  margin: 0 !important;
+  background: none !important;
 }
 
-.musician-label input[type="checkbox"] {
-  margin: 0;
-  width: 16px;
-  height: 16px;
+.musician-item .musician-label input[type="checkbox"] {
+  margin: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
 }
 
-.musician-name {
-  font-weight: 500;
-  font-size: 0.97em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.musician-item .musician-name {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-weight: 500 !important;
+  font-size: 0.97em !important;
 }
 
-.musician-instrument {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  white-space: nowrap;
-  padding-left: 8px;
+.musician-item .musician-instrument {
+  margin-left: 8px !important;
+  white-space: nowrap !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.85rem !important;
 }
 
 @media (max-width: 768px) {
@@ -104,16 +108,16 @@
     padding: 3px 4px !important;
     font-size: 0.93em !important;
   }
-  .musician-label {
-    gap: 6px;
+  .musician-item .musician-label {
+    gap: 6px !important;
     padding: 3px 0 !important;
   }
-  .musician-name {
-    font-size: 0.93em;
+  .musician-item .musician-name {
+    font-size: 0.93em !important;
   }
-  .musician-instrument {
-    font-size: 0.8rem;
-    padding-left: 6px;
+  .musician-item .musician-instrument {
+    font-size: 0.8rem !important;
+    padding-left: 6px !important;
   }
 }
 
@@ -144,7 +148,7 @@
     font-size: 0.9rem;
   }
   
-  .musician-label {
+  .musician-item .musician-label {
     padding: 6px 8px;
   }
 }
@@ -162,18 +166,18 @@
   .musician-item {
     padding: 2px 3px !important;
   }
-  .musician-label {
-    gap: 4px;
+  .musician-item .musician-label {
+    gap: 4px !important;
     padding: 2px 0 !important;
   }
-  .musician-name {
-    font-size: 0.85em;
+  .musician-item .musician-name {
+    font-size: 0.85em !important;
   }
-  .musician-instrument {
-    font-size: 0.75rem;
-    padding-left: 4px;
-    min-width: 60px;
-    text-align: right;
+  .musician-item .musician-instrument {
+    font-size: 0.75rem !important;
+    padding-left: 4px !important;
+    min-width: 60px !important;
+    text-align: right !important;
   }
 }
 
@@ -198,15 +202,15 @@ input[type="date"], input[type="time"] {
     font-size: 1.1em;
     padding: 10px;
   }
-  .musician-label {
+  .musician-item .musician-label {
     gap: 4px;
   }
-  .musician-name, .musician-instrument {
+  .musician-item .musician-name, .musician-item .musician-instrument {
     font-size: 0.93em;
     margin-left: 4px;
     white-space: normal;
   }
-  .musician-instrument {
+  .musician-item .musician-instrument {
     display: block;
     margin-left: 0;
     margin-top: 2px;
