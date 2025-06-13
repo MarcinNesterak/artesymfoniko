@@ -14,6 +14,7 @@ const CreateEvent = () => {
   const [availableMusicians, setAvailableMusicians] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [dresscode, setDresscode] = useState('');
   const navigate = useNavigate();
   
   // Fetch available musicians
@@ -61,7 +62,8 @@ const CreateEvent = () => {
         description,
         schedule,
         program,
-        inviteUserIds: selectedMusicians
+        inviteUserIds: selectedMusicians,
+        dresscode
       };
       
       const response = await eventsAPI.createEvent(eventData);
@@ -156,6 +158,28 @@ const CreateEvent = () => {
             placeholder="Np. 1. Mozart - Uwertura do Wesela Figara&#10;2. Vivaldi - Cztery Pory Roku (Wiosna)"
             disabled={loading}
           ></textarea>
+        </div>
+        
+        <div className="form-group">
+          <label>Dresscode:</label>
+          <div className="dresscode-options">
+            <div className={`dresscode-option ${dresscode === 'frak' ? 'selected' : ''}`} onClick={() => setDresscode('frak')}>
+              <img src="/img/frak.jpg" alt="frak" />
+              <span>frak, biała koszula, biała mucha</span>
+            </div>
+            <div className={`dresscode-option ${dresscode === 'black' ? 'selected' : ''}`} onClick={() => setDresscode('black')}>
+              <img src="/img/black.jpg" alt="black" />
+              <span>czarna koszula i czarna marynarka</span>
+            </div>
+            <div className={`dresscode-option ${dresscode === 'casual' ? 'selected' : ''}`} onClick={() => setDresscode('casual')}>
+              <img src="/img/casual.jpg" alt="casual" />
+              <span>biała koszula i czarna marynarka</span>
+            </div>
+            <div className={`dresscode-option ${dresscode === 'other' ? 'selected' : ''}`} onClick={() => setDresscode('other')}>
+              <img src="/img/other.jpg" alt="other" />
+              <span>inne</span>
+            </div>
+          </div>
         </div>
         
         <div className="form-group">
