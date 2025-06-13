@@ -95,8 +95,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
+  padding: 3px 6px !important;
   border-bottom: 1px solid var(--border-color);
+  font-size: 0.97em !important;
 }
 
 .musician-item:last-child {
@@ -175,6 +176,11 @@
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
+  }
+
+  .musician-item {
+    padding: 2px 4px !important;
+    font-size: 0.93em !important;
   }
 }
 
