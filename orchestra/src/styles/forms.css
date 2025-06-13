@@ -58,7 +58,6 @@
   padding: 4px 6px !important;
   font-size: 0.97em !important;
   border-bottom: 1px solid var(--border-color);
-  display: flex;
 }
 
 .musician-item:last-child {
@@ -66,39 +65,34 @@
 }
 
 .musician-label {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
   cursor: pointer;
   width: 100%;
   padding: 4px 0 !important;
-  white-space: nowrap;
 }
 
 .musician-label input[type="checkbox"] {
   margin: 0;
-  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .musician-name {
   font-weight: 500;
   font-size: 0.97em;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: inline-block;
 }
 
 .musician-instrument {
   color: var(--text-secondary);
   font-size: 0.85rem;
   white-space: nowrap;
-  margin-left: auto;
   padding-left: 8px;
-  flex-shrink: 0;
-  display: inline-block;
 }
 
 @media (max-width: 768px) {
