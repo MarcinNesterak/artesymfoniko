@@ -331,6 +331,13 @@ router.patch('/change-password', authenticate, async (req, res) => {
       });
     }
     
+    if (newPassword === 'haslo123') {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Nie możesz ustawić hasła "haslo123". Wybierz inne, bardziej bezpieczne hasło.'
+      });
+    }
+    
     const user = await User.findById(req.user._id);
     
     // Jeśli nie ma hasła tymczasowego, sprawdź obecne hasło
