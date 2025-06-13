@@ -395,11 +395,6 @@ const MyProfile = () => {
           </div>
           
           <div className="info-item">
-            <strong>Data utworzenia konta:</strong>
-            <span>{new Date(userData.createdAt).toLocaleDateString('pl-PL')}</span>
-          </div>
-          
-          <div className="info-item">
             <strong>Status konta:</strong>
             <span className={`status-badge ${userData.active ? 'active' : 'inactive'}`}>
               {userData.active ? 'Aktywne' : 'Nieaktywne'}
