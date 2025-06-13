@@ -34,12 +34,4 @@ export const registerLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-});
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minut
-  max: 100 // max 100 żądań na IP
-  // nie podajemy store!
-});
-
-app.use(limiter); 
+}); 
