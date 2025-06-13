@@ -186,6 +186,26 @@ const EventDetails = () => {
         </button>
       </div>
 
+      {/* Zaproszenie na górze */}
+      {userInvitation && !userParticipation && (
+        <div className="event-info-card invitation-card" style={{marginBottom: 24}}>
+          <h2>Zaproszenie</h2>
+          <p>Zostałeś zaproszony do tego wydarzenia.</p>
+          <div className="invitation-actions">
+            <button
+              onClick={() =>
+                navigate(
+                  `/musician/events/${id}/participate/${userInvitation._id}`
+                )
+              }
+              className="btn-respond"
+            >
+              Odpowiedz na zaproszenie
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="event-details-content">
         <div className="event-info-section">
           <div className="event-info-card">
@@ -238,26 +258,6 @@ const EventDetails = () => {
               </div>
             )}
           </div>
-
-          {/* Sekcja zaproszenia */}
-          {userInvitation && !userParticipation && (
-            <div className="event-info-card invitation-card">
-              <h2>Zaproszenie</h2>
-              <p>Zostałeś zaproszony do tego wydarzenia.</p>
-              <div className="invitation-actions">
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/musician/events/${id}/participate/${userInvitation._id}`
-                    )
-                  }
-                  className="btn-respond"
-                >
-                  Odpowiedz na zaproszenie
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Status uczestnictwa */}
           {userParticipation && (
