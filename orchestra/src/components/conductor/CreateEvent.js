@@ -186,21 +186,23 @@ const CreateEvent = () => {
           <label>Zaproś muzyków:</label>
           <div className="musicians-list">
             {availableMusicians.length > 0 ? (
-              availableMusicians.map(musician => (
-                <div key={musician._id} className="musician-item">
-                  <label htmlFor={`musician-${musician._id}`} className="musician-label">
-                    <input
-                      type="checkbox"
-                      id={`musician-${musician._id}`}
-                      checked={selectedMusicians.includes(musician._id)}
-                      onChange={() => handleToggleMusician(musician._id)}
-                      disabled={loading}
-                    />
-                    <span className="musician-name">{musician.name}</span>
-                    <span className="musician-instrument">({musician.instrument || 'Instrument nieznany'})</span>
-                  </label>
-                </div>
-              ))
+              [...availableMusicians]
+                .sort((a, b) => a.name.localeCompare(b.name, 'pl'))
+                .map(musician => (
+                  <div key={musician._id} className="musician-item">
+                    <label htmlFor={`musician-${musician._id}`} className="musician-label">
+                      <input
+                        type="checkbox"
+                        id={`musician-${musician._id}`}
+                        checked={selectedMusicians.includes(musician._id)}
+                        onChange={() => handleToggleMusician(musician._id)}
+                        disabled={loading}
+                      />
+                      <span className="musician-name">{musician.name}</span>
+                      <span className="musician-instrument">({musician.instrument || 'Instrument nieznany'})</span>
+                    </label>
+                  </div>
+                ))
             ) : (
               <p>Brak dostępnych muzyków.</p>
             )}

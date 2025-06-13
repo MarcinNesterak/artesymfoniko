@@ -586,63 +586,73 @@ const EventDetails = () => {
 
             {invitations.length > 0 ? (
               <div className="musicians-list">
-                {invitations.map((invitation) => {
-                  const musician = invitation.userId;
-                  if (!musician) return null;
+                {[...invitations]
+                  .sort((a, b) => {
+                    const statusA = getParticipationStatus(a.userId._id);
+                    const statusB = getParticipationStatus(b.userId._id);
+                    // Zaakceptowani na górze
+                    if (statusA === "Zaakceptowano" && statusB !== "Zaakceptowano") return -1;
+                    if (statusA !== "Zaakceptowano" && statusB === "Zaakceptowano") return 1;
+                    // Potem alfabetycznie
+                    return a.userId.name.localeCompare(b.userId.name, 'pl');
+                  })
+                  .map((invitation) => {
+                    const musician = invitation.userId;
+                    if (!musician) return null;
 
-                  const status = getParticipationStatus(musician._id);
-                  const participation = participations.find(
-                    (p) => p.userId._id === musician._id
-                  );
-                  let statusClass = "status-pending";
+                    const status = getParticipationStatus(musician._id);
+                    const participation = participations.find(
+                      (p) => p.userId._id === musician._id
+                    );
+                    let statusClass = "status-pending";
 
-                  if (status === "Zaakceptowano") {
-                    statusClass = "status-confirmed";
-                  } else if (status === "Odrzucono") {
-                    statusClass = "status-declined";
-                  }
+                    if (status === "Zaakceptowano") {
+                      statusClass = "status-confirmed";
+                    } else if (status === "Odrzucono") {
+                      statusClass = "status-declined";
+                    }
 
-                  return (
-                    <div key={invitation._id} className="musician-item">
-                      <div className="musician-info">
-                        <div className="musician-name">{musician.name}</div>
-                        <div className="musician-instrument">
-                          {musician.instrument || "Instrument nieznany"}
+                    return (
+                      <div key={invitation._id} className="musician-item">
+                        <div className="musician-info">
+                          <div className="musician-name">{musician.name}</div>
+                          <div className="musician-instrument">
+                            {musician.instrument || "Instrument nieznany"}
+                          </div>
+                        </div>
+                        <div className={`invitation-status ${statusClass}`}>
+                          {status}
+                        </div>
+                        <div className="musician-actions">
+                          {status === "Oczekująca" && (
+                            <button
+                              onClick={() =>
+                                cancelInvitation(invitation._id, musician.name)
+                              }
+                              className="btn-cancel-invitation"
+                              title="Odwołaj zaproszenie"
+                            >
+                              Odwołaj
+                            </button>
+                          )}
+                          {status === "Zaakceptowano" && participation && (
+                            <button
+                              onClick={() =>
+                                removeParticipant(
+                                  participation._id,
+                                  musician.name
+                                )
+                              }
+                              className="btn-remove-participant"
+                              title="Usuń z uczestników"
+                            >
+                              Usuń
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className={`invitation-status ${statusClass}`}>
-                        {status}
-                      </div>
-                      <div className="musician-actions">
-                        {status === "Oczekująca" && (
-                          <button
-                            onClick={() =>
-                              cancelInvitation(invitation._id, musician.name)
-                            }
-                            className="btn-cancel-invitation"
-                            title="Odwołaj zaproszenie"
-                          >
-                            Odwołaj
-                          </button>
-                        )}
-                        {status === "Zaakceptowano" && participation && (
-                          <button
-                            onClick={() =>
-                              removeParticipant(
-                                participation._id,
-                                musician.name
-                              )
-                            }
-                            className="btn-remove-participant"
-                            title="Usuń z uczestników"
-                          >
-                            Usuń
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             ) : (
               <p>Nie zaproszono jeszcze żadnych muzyków.</p>
