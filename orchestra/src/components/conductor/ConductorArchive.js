@@ -4,11 +4,13 @@ import { eventsAPI } from '../../services/api';
 import { unarchiveEvent } from '../../services/archiveService';
 import EventCard from '../common/EventCard';
 import '../../styles/dashboard.css';
+import SuccessMessage from '../common/SuccessMessage';
 
 const ConductorArchive = () => {
   const [archivedEvents, setArchivedEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
   
   useEffect(() => {
     fetchArchivedEvents();
@@ -41,7 +43,8 @@ const ConductorArchive = () => {
     
     if (userInput !== 'USUŃ') {
       if (userInput !== null) {
-        alert('Usuwanie anulowane. Aby usunąć wydarzenie, musisz wpisać dokładnie: USUŃ');
+        setError('Usuwanie anulowane. Aby usunąć wydarzenie, musisz wpisać dokładnie: USUŃ');
+        setTimeout(() => setError(""), 3500);
       }
       return;
     }
@@ -51,13 +54,15 @@ const ConductorArchive = () => {
       // Backend automatycznie usunie powiązane invitations i participations
       await eventsAPI.deleteEvent(eventToDelete._id);
       
-      alert('Wydarzenie zostało pomyślnie usunięte z archiwum.');
+      setSuccessMessage('Wydarzenie zostało pomyślnie usunięte z archiwum.');
+      setTimeout(() => setSuccessMessage(""), 3500);
       
       // Odśwież listę wydarzeń
       fetchArchivedEvents();
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Wystąpił błąd podczas usywania wydarzenia. Spróbuj ponownie.');
+      setError('Wystąpił błąd podczas usuwania wydarzenia. Spróbuj ponownie.');
+      setTimeout(() => setError(""), 3500);
     }
   };
     
@@ -95,6 +100,7 @@ const ConductorArchive = () => {
           </div>
         )}
       </div>
+      <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
     </div>
   );
 };

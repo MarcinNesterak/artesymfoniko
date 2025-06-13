@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { eventsAPI, usersAPI } from "../../services/api";
 import "../../styles/eventDetails.css";
+import SuccessMessage from '../common/SuccessMessage';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const EventDetails = () => {
     schedule: "",
     program: "",
   });
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetchEventData();
@@ -99,7 +101,7 @@ const EventDetails = () => {
       fetchMessages();
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Błąd podczas wysyłania wiadomości");
+      setError("Błąd podczas wysyłania wiadomości");
     } finally {
       setSendingMessage(false);
     }
@@ -131,10 +133,11 @@ const EventDetails = () => {
       await fetchEventData();
 
       setShowEditModal(false);
-      alert("Wydarzenie zostało zaktualizowane pomyślnie!");
+      setSuccessMessage("Wydarzenie zostało zaktualizowane pomyślnie!");
+      setTimeout(() => setSuccessMessage(""), 3500);
     } catch (error) {
       console.error("Error updating event:", error);
-      alert("Wystąpił błąd podczas aktualizacji wydarzenia.");
+      setError("Wystąpił błąd podczas aktualizacji wydarzenia.");
     } finally {
       setEditLoading(false);
     }
@@ -147,9 +150,7 @@ const EventDetails = () => {
 
     if (userInput !== "USUŃ") {
       if (userInput !== null) {
-        alert(
-          "Usuwanie anulowane. Aby usunąć wydarzenie, musisz wpisać dokładnie: USUŃ"
-        );
+        setError("Usuwanie anulowane. Aby usunąć wydarzenie, musisz wpisać dokładnie: USUŃ");
       }
       return;
     }
@@ -159,11 +160,11 @@ const EventDetails = () => {
 
       await eventsAPI.deleteEvent(id);
 
-      alert("Wydarzenie zostało pomyślnie usunięte.");
+      setSuccessMessage("Wydarzenie zostało pomyślnie usunięte.");
       navigate("/conductor/dashboard");
     } catch (error) {
       console.error("Error deleting event:", error);
-      alert("Wystąpił błąd podczas usuwania wydarzenia. Spróbuj ponownie.");
+      setError("Wystąpił błąd podczas usuwania wydarzenia. Spróbuj ponownie.");
       setLoading(false);
     }
   };
@@ -175,18 +176,18 @@ const EventDetails = () => {
         (inv) => inv.userId._id === musicianId
       );
       if (alreadyInvited) {
-        alert("Ten muzyk już został zaproszony.");
+        setError("Ten muzyk już został zaproszony.");
         return;
       }
 
       await eventsAPI.inviteMusicians(id, [musicianId]);
-      alert("Zaproszenie zostało wysłane.");
+      setSuccessMessage("Zaproszenie zostało wysłane.");
 
       // Odśwież dane wydarzenia
       fetchEventData();
     } catch (error) {
       console.error("Error sending invitation:", error);
-      alert("Wystąpił błąd podczas wysyłania zaproszenia.");
+      setError("Wystąpił błąd podczas wysyłania zaproszenia.");
     }
   };
 
@@ -200,7 +201,7 @@ const EventDetails = () => {
       );
 
       if (alreadyInvited.length > 0) {
-        alert(
+        setError(
           "Niektórzy wybrani muzycy już zostali zaproszeni. Zaproszenia zostaną wysłane tylko do nowych muzyków."
         );
       }
@@ -212,7 +213,7 @@ const EventDetails = () => {
       );
 
       if (newInvitations.length === 0) {
-        alert("Wszyscy wybrani muzycy już zostali zaproszeni.");
+        setError("Wszyscy wybrani muzycy już zostali zaproszeni.");
         setSelectedMusicians([]);
         return;
       }
@@ -220,7 +221,7 @@ const EventDetails = () => {
       await eventsAPI.inviteMusicians(id, newInvitations);
 
       const count = newInvitations.length;
-      alert(
+      setSuccessMessage(
         `Zaproszenia zostały wysłane do ${count} ${
           count === 1 ? "muzyka" : count < 5 ? "muzyków" : "muzyków"
         }.`
@@ -231,7 +232,7 @@ const EventDetails = () => {
       fetchEventData();
     } catch (error) {
       console.error("Error sending multiple invitations:", error);
-      alert("Wystąpił błąd podczas wysyłania zaproszeń.");
+      setError("Wystąpił błąd podczas wysyłania zaproszeń.");
     }
   };
 
@@ -247,13 +248,13 @@ const EventDetails = () => {
     try {
       // Wywołaj endpoint do odwołania zaproszenia
       await eventsAPI.cancelInvitation(id, invitationId);
-      alert("Zaproszenie zostało odwołane.");
+      setSuccessMessage("Zaproszenie zostało odwołane.");
 
       // Odśwież dane wydarzenia
       fetchEventData();
     } catch (error) {
       console.error("Error canceling invitation:", error);
-      alert("Wystąpił błąd podczas odwoływania zaproszenia.");
+      setError("Wystąpił błąd podczas odwoływania zaproszenia.");
     }
   };
 
@@ -269,13 +270,13 @@ const EventDetails = () => {
     try {
       // Wywołaj endpoint do usunięcia uczestnika
       await eventsAPI.removeParticipant(id, participantId);
-      alert("Uczestnik został usunięty z wydarzenia.");
+      setSuccessMessage("Uczestnik został usunięty z wydarzenia.");
 
       // Odśwież dane wydarzenia
       fetchEventData();
     } catch (error) {
       console.error("Error removing participant:", error);
-      alert("Wystąpił błąd podczas usuwania uczestnika.");
+      setError("Wystąpił błąd podczas usuwania uczestnika.");
     }
   };
 
@@ -698,6 +699,7 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
+      <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
     </div>
   );
 };

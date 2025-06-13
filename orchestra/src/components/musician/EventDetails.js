@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { eventsAPI } from "../../services/api";
 import "../../styles/eventDetails.css";
+import SuccessMessage from '../common/SuccessMessage';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -14,6 +15,7 @@ const EventDetails = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const userJson = localStorage.getItem("user");
   const user = userJson ? JSON.parse(userJson) : null;
@@ -49,9 +51,12 @@ const EventDetails = () => {
       await eventsAPI.sendEventMessage(id, newMessage.trim());
       setNewMessage("");
       fetchMessages(); // Odśwież wiadomości po wysłaniu
+      setSuccessMessage("Wiadomość wysłana pomyślnie!");
+      setTimeout(() => setSuccessMessage(""), 3500);
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Błąd podczas wysyłania wiadomości");
+      setError("Błąd podczas wysyłania wiadomości");
+      setTimeout(() => setError(""), 3500);
     } finally {
       setSendingMessage(false);
     }
@@ -332,6 +337,7 @@ const EventDetails = () => {
           </div>
         </div>
       </div>
+      <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
     </div>
   );
 };

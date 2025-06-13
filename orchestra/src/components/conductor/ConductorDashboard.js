@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { eventsAPI } from "../../services/api";
 import EventCard from "../common/EventCard";
 import "../../styles/dashboard.css";
+import SuccessMessage from '../common/SuccessMessage';
 
 const ConductorDashboard = () => {
   const [events, setEvents] = useState([]);
@@ -10,6 +11,7 @@ const ConductorDashboard = () => {
   const [error, setError] = useState("");
   const [backupLoading, setBackupLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetchEvents();
@@ -40,22 +42,23 @@ const ConductorDashboard = () => {
 
     if (userInput !== "USUŃ") {
       if (userInput !== null) {
-        alert(
-          "Usuwanie anulowane. Aby usunąć wydarzenie, musisz wpisać dokładnie: USUŃ"
-        );
+        setError("Usuwanie anulowane. Aby usunąć wydarzenie, musisz wpisać dokładnie: USUŃ");
+        setTimeout(() => setError(""), 3500);
       }
       return;
     }
 
     try {
       await eventsAPI.deleteEvent(eventToDelete._id);
-      alert("Wydarzenie zostało pomyślnie usunięte.");
+      setSuccessMessage("Wydarzenie zostało pomyślnie usunięte.");
+      setTimeout(() => setSuccessMessage(""), 3500);
 
       // Odśwież listę wydarzeń
       fetchEvents();
     } catch (error) {
       console.error("Error deleting event:", error);
-      alert("Wystąpił błąd podczas usuwania wydarzenia. Spróbuj ponownie.");
+      setError("Wystąpił błąd podczas usuwania wydarzenia. Spróbuj ponownie.");
+      setTimeout(() => setError(""), 3500);
     }
   };
 
@@ -82,12 +85,14 @@ const ConductorDashboard = () => {
       // Zwolnij pamięć
       URL.revokeObjectURL(url);
 
-      alert(
+      setSuccessMessage(
         `✅ Kopia zapasowa została pobrana!\n\nLiczba danych:\n- Użytkownicy: ${response.counts.users}\n- Wydarzenia: ${response.counts.events}\n- Wiadomości: ${response.counts.messages}\n- Uczestnictwa: ${response.counts.participations}`
       );
+      setTimeout(() => setSuccessMessage(""), 3500);
     } catch (error) {
       console.error("Backup error:", error);
-      alert("❌ Błąd podczas tworzenia kopii zapasowej");
+      setError("❌ Błąd podczas tworzenia kopii zapasowej");
+      setTimeout(() => setError(""), 3500);
     } finally {
       setBackupLoading(false);
     }
@@ -126,15 +131,17 @@ const ConductorDashboard = () => {
       }
 
       await eventsAPI.restoreBackup(backupData);
-      alert(
+      setSuccessMessage(
         "✅ Kopia zapasowa została przywrócona!\n\nOdśwież stronę, aby zobaczyć zmiany."
       );
+      setTimeout(() => setSuccessMessage(""), 3500);
 
       // Odśwież dane
       fetchEvents();
     } catch (error) {
       console.error("Restore error:", error);
-      alert("❌ Błąd podczas przywracania kopii zapasowej");
+      setError("❌ Błąd podczas przywracania kopii zapasowej");
+      setTimeout(() => setError(""), 3500);
     } finally {
       setRestoreLoading(false);
     }
@@ -206,6 +213,7 @@ const ConductorDashboard = () => {
           />
         </div>
       </div>
+      <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
     </div>
   );
 };

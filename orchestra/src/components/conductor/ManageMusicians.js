@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { authAPI, usersAPI } from '../../services/api';
 import '../../styles/manageMusicians.css';
+import SuccessMessage from '../common/SuccessMessage';
 
 const ManageMusicians = () => {
   const [musicians, setMusicians] = useState([]);
@@ -20,6 +21,7 @@ const ManageMusicians = () => {
   });
   
   const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   
   useEffect(() => {
     fetchMusicians();
@@ -75,8 +77,8 @@ const ManageMusicians = () => {
       
       const response = await authAPI.createMusician(musicianData);
       
-      // Pokaż dane logowania
-      alert(`Konto utworzone pomyślnie!\n\nDane do logowania:\nEmail: ${formData.email}\nHasło tymczasowe: ${response.temporaryPassword}\n\nPrzekaż te dane muzykowi. Przy pierwszym logowaniu będzie musiał zmienić hasło.`);
+      setSuccessMessage(`Konto utworzone pomyślnie! Dane do logowania: Email: ${formData.email} Hasło tymczasowe: ${response.temporaryPassword} Przekaż te dane muzykowi. Przy pierwszym logowaniu będzie musiał zmienić hasło.`);
+      setTimeout(() => setSuccessMessage(""), 3500);
       
       // Odśwież listę muzyków
       fetchMusicians();
@@ -142,13 +144,15 @@ const ManageMusicians = () => {
     try {
       const response = await usersAPI.resetMusicianPassword(musician._id);
       
-      alert(`Hasło zostało zresetowane!\n\nNowe hasło tymczasowe: ${response.temporaryPassword}\n\nPrzekaż je muzykowi.`);
+      setSuccessMessage('Hasło zostało zresetowane! Nowe hasło tymczasowe: ' + response.temporaryPassword + ' Przekaż je muzykowi.');
+      setTimeout(() => setSuccessMessage(""), 3500);
       
       // Odśwież listę muzyków
       fetchMusicians();
     } catch (error) {
       console.error('Error resetting password:', error);
-      alert('Wystąpił błąd podczas resetowania hasła');
+      setSuccessMessage('Wystąpił błąd podczas resetowania hasła');
+      setTimeout(() => setSuccessMessage(""), 3500);
     }
   };
   
@@ -167,7 +171,8 @@ const ManageMusicians = () => {
       fetchMusicians();
     } catch (error) {
       console.error('Error toggling musician status:', error);
-      alert('Wystąpił błąd podczas zmiany statusu konta');
+      setSuccessMessage('Wystąpił błąd podczas zmiany statusu konta');
+      setTimeout(() => setSuccessMessage(""), 3500);
     }
   };
   
@@ -354,6 +359,7 @@ const ManageMusicians = () => {
           <p>Nie masz jeszcze żadnych muzyków. Dodaj pierwszego muzyka!</p>
         )}
       </div>
+      <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
     </div>
   );
 };
