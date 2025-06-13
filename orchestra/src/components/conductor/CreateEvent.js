@@ -164,19 +164,19 @@ const CreateEvent = () => {
           <label>Dresscode:</label>
           <div className="dresscode-options">
             <div className={`dresscode-option ${dresscode === 'frak' ? 'selected' : ''}`} onClick={() => setDresscode('frak')}>
-              <img src="/img/frak.jpg" alt="frak" />
+              <img src="/img/frak.png" alt="frak" />
               <span>frak, biała koszula, biała mucha</span>
             </div>
             <div className={`dresscode-option ${dresscode === 'black' ? 'selected' : ''}`} onClick={() => setDresscode('black')}>
-              <img src="/img/black.jpg" alt="black" />
+              <img src="/img/black.png" alt="black" />
               <span>czarna koszula i czarna marynarka</span>
             </div>
             <div className={`dresscode-option ${dresscode === 'casual' ? 'selected' : ''}`} onClick={() => setDresscode('casual')}>
-              <img src="/img/casual.jpg" alt="casual" />
+              <img src="/img/casual.png" alt="casual" />
               <span>biała koszula i czarna marynarka</span>
             </div>
             <div className={`dresscode-option ${dresscode === 'other' ? 'selected' : ''}`} onClick={() => setDresscode('other')}>
-              <img src="/img/other.jpg" alt="other" />
+              <img src="/img/other.png" alt="other" />
               <span>inne</span>
             </div>
           </div>

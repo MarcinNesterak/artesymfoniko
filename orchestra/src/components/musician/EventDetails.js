@@ -222,18 +222,18 @@ const EventDetails = () => {
                 <strong>Dresscode:</strong>
                 <div className="dresscode-view">
                   {event.dresscode === 'frak' && (
-                    <><img src="/img/frak.jpg" alt="frak" /><span>frak, biała koszula, biała mucha</span></>
+                    <><img src="/img/frak.png" alt="frak" /><span>frak, biała koszula, biała mucha</span></>
                   )}
                   {event.dresscode === 'black' && (
-                    <><img src="/img/black.jpg" alt="black" /><span>czarna koszula i czarna marynarka</span></>
+                    <><img src="/img/black.png" alt="black" /><span>czarna koszula i czarna marynarka</span></>
                   )}
                   {event.dresscode === 'casual' && (
-                    <><img src="/img/casual.jpg" alt="casual" /><span>biała koszula i czarna marynarka</span></>
+                    <><img src="/img/casual.png" alt="casual" /><span>biała koszula i czarna marynarka</span></>
                   )}
                   {event.dresscode === 'other' && (
-                    <><img src="/img/other.jpg" alt="other" /><span>inne</span></>
+                    <><img src="/img/other.png" alt="other" /><span>inne</span></>
                   )}
-                  <img src="/img/principessa.jpg" alt="principessa" /><span>principessa</span>
+                  <img src="/img/principessa.png" alt="principessa" /><span>principessa</span>
                 </div>
               </div>
             )}
