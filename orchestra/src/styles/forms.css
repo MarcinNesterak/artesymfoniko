@@ -130,3 +130,26 @@
     font-size: 16px; /* Zapobiega zoom na iOS */
   }
 }
+
+/* Jasna ikona kalendarza dla input[type="date"] */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+}
+
+/* Jasna ikona zegara dla input[type="time"] */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+}
+
+/* Dla Firefox */
+input[type="date"], input[type="time"] {
+  color-scheme: light;
+}
+
+/* Lepszy wygląd na mobile */
+@media (max-width: 600px) {
+  input[type="date"], input[type="time"] {
+    font-size: 1.1em;
+    padding: 10px;
+  }
+}
