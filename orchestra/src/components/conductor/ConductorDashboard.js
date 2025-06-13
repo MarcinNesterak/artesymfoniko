@@ -9,8 +9,6 @@ const ConductorDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [backupLoading, setBackupLoading] = useState(false);
-  const [restoreLoading, setRestoreLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
@@ -62,91 +60,6 @@ const ConductorDashboard = () => {
     }
   };
 
-  const handleBackup = async () => {
-    setBackupLoading(true);
-    try {
-      const response = await eventsAPI.getBackup();
-
-      // Utwórz plik JSON do pobrania
-      const dataStr = JSON.stringify(response, null, 2);
-      const blob = new Blob([dataStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-
-      // Pobierz plik
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `backup-orkiestra-${
-        new Date().toISOString().split("T")[0]
-      }.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Zwolnij pamięć
-      URL.revokeObjectURL(url);
-
-      setSuccessMessage(
-        `✅ Kopia zapasowa została pobrana!\n\nLiczba danych:\n- Użytkownicy: ${response.counts.users}\n- Wydarzenia: ${response.counts.events}\n- Wiadomości: ${response.counts.messages}\n- Uczestnictwa: ${response.counts.participations}`
-      );
-      setTimeout(() => setSuccessMessage(""), 3500);
-    } catch (error) {
-      console.error("Backup error:", error);
-      setError("❌ Błąd podczas tworzenia kopii zapasowej");
-      setTimeout(() => setError(""), 3500);
-    } finally {
-      setBackupLoading(false);
-    }
-  };
-
-  const handleRestore = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Reset input
-    event.target.value = "";
-
-    setRestoreLoading(true);
-    try {
-      const text = await file.text();
-      const backupData = JSON.parse(text);
-
-      // Sprawdź czy to prawidłowy backup
-      if (!backupData.users || !backupData.events) {
-        throw new Error("Nieprawidłowy format pliku backup");
-      }
-
-      const confirmed = window.confirm(
-        `⚠️ UWAGA!\n\nPrzywrócenie kopii zapasowej:\n- USUNIE wszystkie obecne dane\n- Przywróci dane z: ${
-          backupData.createdAt
-        }\n- Liczba użytkowników: ${
-          backupData.counts?.users || 0
-        }\n- Liczba wydarzeń: ${
-          backupData.counts?.events || 0
-        }\n\nCzy na pewno chcesz kontynuować?`
-      );
-
-      if (!confirmed) {
-        setRestoreLoading(false);
-        return;
-      }
-
-      await eventsAPI.restoreBackup(backupData);
-      setSuccessMessage(
-        "✅ Kopia zapasowa została przywrócona!\n\nOdśwież stronę, aby zobaczyć zmiany."
-      );
-      setTimeout(() => setSuccessMessage(""), 3500);
-
-      // Odśwież dane
-      fetchEvents();
-    } catch (error) {
-      console.error("Restore error:", error);
-      setError("❌ Błąd podczas przywracania kopii zapasowej");
-      setTimeout(() => setError(""), 3500);
-    } finally {
-      setRestoreLoading(false);
-    }
-  };
-
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -183,35 +96,6 @@ const ConductorDashboard = () => {
         ) : (
           <p>Nie masz aktualnych wydarzeń. Utwórz swoje pierwsze wydarzenie!</p>
         )}
-      </div>
-      {/* Admin Footer - tylko desktop */}
-      <div className="admin-footer">
-        <h3>🔧 Narzędzia administratora</h3>
-        <div className="admin-buttons">
-          <button
-            onClick={handleBackup}
-            className="btn-backup"
-            disabled={backupLoading}
-          >
-            {backupLoading ? "⏳ Tworzenie..." : "💾 Pobierz kopię zapasową"}
-          </button>
-          <button
-            onClick={() => document.getElementById("restore-file").click()}
-            className="btn-restore"
-            disabled={restoreLoading}
-          >
-            {restoreLoading
-              ? "⏳ Przywracanie..."
-              : "📥 Przywróć kopię zapasową"}
-          </button>
-          <input
-            id="restore-file"
-            type="file"
-            accept=".json"
-            onChange={handleRestore}
-            style={{ display: "none" }}
-          />
-        </div>
       </div>
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
     </div>
