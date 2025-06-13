@@ -22,6 +22,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// Trust proxy - potrzebne dla rate limiting na Railway
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(cors({

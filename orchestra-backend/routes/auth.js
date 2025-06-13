@@ -26,6 +26,8 @@ router.post('/login', loginLimiter, async (req, res) => {
     
     // Znajdź użytkownika po email
     const user = await User.findOne({ email: email.toLowerCase() });
+    console.log("DEBUG: user found:", user);
+    
     if (!user) {
       return res.status(401).json({
         error: 'Authentication failed',
@@ -43,6 +45,8 @@ router.post('/login', loginLimiter, async (req, res) => {
     
     // Sprawdź hasło
     const isMatch = await user.comparePassword(password);
+    console.log("DEBUG: password match:", isMatch);
+    
     if (!isMatch) {
       return res.status(401).json({
         error: 'Authentication failed',
@@ -233,6 +237,77 @@ router.post('/create-musician', authenticate, async (req, res) => {
     res.status(500).json({
       error: 'Server error',
       message: 'Wystąpił błąd podczas tworzenia konta muzyka'
+    });
+  }
+});
+
+// POST /api/auth/create-conductor (tylko dla istniejącego dyrygenta)
+router.post('/create-conductor', authenticate, async (req, res) => {
+  try {
+    // Sprawdź czy użytkownik to dyrygent
+    if (req.user.role !== 'conductor') {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Tylko dyrygent może tworzyć konta innych dyrygentów'
+      });
+    }
+    
+    const { email, firstName, lastName, phone } = req.body;
+    
+    if (!email || !firstName || !lastName) {
+      return res.status(400).json({
+        error: 'Validation error',
+        message: 'Email, imię i nazwisko są wymagane'
+      });
+    }
+    
+    // Sprawdź czy użytkownik już istnieje
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({
+        error: 'User exists',
+        message: 'Użytkownik o podanym emailu już istnieje'
+      });
+    }
+    
+    // Wygeneruj hasło tymczasowe
+    const tempPassword = 'haslo123';
+    
+    // Utwórz nowego dyrygenta
+    const newConductor = new User({
+      email: email.toLowerCase(),
+      name: `${firstName} ${lastName}`,
+      password: tempPassword,
+      role: 'conductor',
+      active: true,
+      isTemporaryPassword: true,
+      createdBy: req.user._id,
+      personalData: {
+        firstName,
+        lastName,
+        phone: phone || ''
+      }
+    });
+    
+    await newConductor.save();
+    
+    res.status(201).json({
+      message: 'Konto dyrygenta utworzone pomyślnie',
+      conductor: {
+        id: newConductor._id,
+        email: newConductor.email,
+        name: newConductor.name,
+        role: newConductor.role,
+        active: newConductor.active,
+        temporaryPassword: tempPassword
+      }
+    });
+    
+  } catch (error) {
+    console.error('Create conductor error:', error);
+    res.status(500).json({
+      error: 'Server error',
+      message: 'Wystąpił błąd podczas tworzenia konta dyrygenta'
     });
   }
 });
