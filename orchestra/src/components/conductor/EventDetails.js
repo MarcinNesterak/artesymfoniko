@@ -490,10 +490,12 @@ const EventDetails = () => {
                   <div className="dresscode-grid">
                     <div className="dresscode-column">
                       <div className="dresscode-image-container">
-                        {event.dresscode === 'frak' && <img src="/img/frak.png" alt="frak" />}
-                        {event.dresscode === 'black' && <img src="/img/black.png" alt="black" />}
-                        {event.dresscode === 'casual' && <img src="/img/casual.png" alt="casual" />}
-                        {event.dresscode === 'other' && <img src="/img/other.png" alt="other" />}
+                        {(event.dresscode === 'frak' || event.dresscode === 'black' || event.dresscode === 'casual' || event.dresscode === 'other')
+                          ? (
+                            <img src={`/img/${event.dresscode || 'frak'}.png`} alt={event.dresscode || 'frak'} />
+                          ) : (
+                            <img src="/img/frak.png" alt="frak" />
+                          )}
                       </div>
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
