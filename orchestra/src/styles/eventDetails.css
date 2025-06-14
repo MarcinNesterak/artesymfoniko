@@ -540,11 +540,11 @@
     gap: 32px;
   }
   .event-info-section {
-    width: 70%;
+    width: 50%;
     min-width: 0;
   }
   .event-side-section {
-    width: 30%;
+    width: 50%;
     min-width: 260px;
     display: flex;
     flex-direction: column;
