@@ -491,93 +491,6 @@ const EventDetails = () => {
               </div>
             )}
           </div>
-
-          {/* Czat Wydarzenia - dla dyrygenta */}
-          <div className="event-info-card chat-card">
-            <h2>💬 Czat Wydarzenia</h2>
-
-            <div className="chat-messages">
-              {messages.length > 0 ? (
-                messages.map((message) => (
-                  <div key={message._id} className="chat-message">
-                    <div className="message-header">
-                      <span className="message-author">
-                        {message.userId.name}
-                        {message.userId._id === user.id && " (Ty)"}
-                      </span>
-                      <span className="message-time">
-                        {new Date(message.createdAt).toLocaleString("pl-PL", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                    <div className="message-content">{message.content}</div>
-
-                    {/* Status przeczytania - tylko dla dyrygenta */}
-                    {message.readBy && (
-                      <div className="message-read-status">
-                        {(() => {
-                          // Znajdź kto NIE przeczytał
-                          const allParticipants = message.allParticipants || [];
-                          const readByNames = message.readBy.map(
-                            (read) => read.name
-                          );
-                          const notReadBy = allParticipants
-                            .map((p) => p.name)
-                            .filter((name) => !readByNames.includes(name));
-
-                          return (
-                            <small className="read-info">
-                              {notReadBy.length > 0 ? (
-                                <>
-                                  ⚠️ Nie przeczytali:{" "}
-                                  <span className="not-read-list">
-                                    {notReadBy.join(", ")}
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  ✅ Wszyscy przeczytali ({message.readCount}/
-                                  {message.participantCount})
-                                </>
-                              )}
-                            </small>
-                          );
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="no-messages">Brak wiadomości. Napisz pierwszą!</p>
-              )}
-            </div>
-
-            <form onSubmit={sendMessage} className="chat-form">
-              <div className="chat-input-group">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Napisz wiadomość..."
-                  disabled={sendingMessage}
-                  maxLength={500}
-                  className="chat-input"
-                />
-                <button
-                  type="submit"
-                  disabled={!newMessage.trim() || sendingMessage}
-                  className="chat-send-btn"
-                >
-                  {sendingMessage ? "📤" : "➤"}
-                </button>
-              </div>
-              <div className="chat-counter">{newMessage.length}/500</div>
-            </form>
-          </div>
         </div>
 
         <div className="event-musicians-section">
@@ -707,6 +620,91 @@ const EventDetails = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Czat Wydarzenia - dla dyrygenta, przeniesiony pod muzyków */}
+        <div className="event-info-card chat-card chat-desktop-order">
+          <h2>💬 Czat Wydarzenia</h2>
+          <div className="chat-messages">
+            {messages.length > 0 ? (
+              messages.map((message) => (
+                <div key={message._id} className="chat-message">
+                  <div className="message-header">
+                    <span className="message-author">
+                      {message.userId.name}
+                      {message.userId._id === user.id && " (Ty)"}
+                    </span>
+                    <span className="message-time">
+                      {new Date(message.createdAt).toLocaleString("pl-PL", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                  <div className="message-content">{message.content}</div>
+
+                  {/* Status przeczytania - tylko dla dyrygenta */}
+                  {message.readBy && (
+                    <div className="message-read-status">
+                      {(() => {
+                        // Znajdź kto NIE przeczytał
+                        const allParticipants = message.allParticipants || [];
+                        const readByNames = message.readBy.map(
+                          (read) => read.name
+                        );
+                        const notReadBy = allParticipants
+                          .map((p) => p.name)
+                          .filter((name) => !readByNames.includes(name));
+
+                        return (
+                          <small className="read-info">
+                            {notReadBy.length > 0 ? (
+                              <>
+                                ⚠️ Nie przeczytali:{" "}
+                                <span className="not-read-list">
+                                  {notReadBy.join(", ")}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                ✅ Wszyscy przeczytali ({message.readCount}/
+                                {message.participantCount})
+                              </>
+                            )}
+                          </small>
+                        );
+                      })()}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="no-messages">Brak wiadomości. Napisz pierwszą!</p>
+            )}
+          </div>
+          <form onSubmit={sendMessage} className="chat-form">
+            <div className="chat-input-group">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Napisz wiadomość..."
+                disabled={sendingMessage}
+                maxLength={500}
+                className="chat-input"
+              />
+              <button
+                type="submit"
+                disabled={!newMessage.trim() || sendingMessage}
+                className="chat-send-btn"
+              >
+                {sendingMessage ? "📤" : "➤"}
+              </button>
+            </div>
+            <div className="chat-counter">{newMessage.length}/500</div>
+          </form>
         </div>
       </div>
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
