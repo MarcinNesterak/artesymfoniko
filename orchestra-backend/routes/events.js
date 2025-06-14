@@ -210,8 +210,7 @@ router.post("/", requireConductor, async (req, res) => {
     // Automatyczne archiwizowanie przed utworzeniem nowego
     await autoArchiveEvents();
 
-    const { title, date, description, schedule, program, inviteUserIds } =
-      req.body;
+    const { title, date, description, schedule, program, inviteUserIds, location } = req.body;
 
     if (!title || !date) {
       return res.status(400).json({
@@ -237,6 +236,7 @@ router.post("/", requireConductor, async (req, res) => {
       schedule,
       program,
       conductorId: req.user._id,
+      location,
     });
 
     await newEvent.save();
@@ -298,9 +298,8 @@ router.put("/:id", requireConductor, async (req, res) => {
       });
     }
 
-    const { title, date, description, schedule, program } = req.body;
+    const { title, date, description, schedule, program, location } = req.body;
 
-    // Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
     // Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
     if (date && !event.archived) {
       const eventDate = new Date(date);
@@ -335,6 +334,7 @@ router.put("/:id", requireConductor, async (req, res) => {
     if (description !== undefined) event.description = description;
     if (schedule !== undefined) event.schedule = schedule;
     if (program !== undefined) event.program = program;
+    if (location !== undefined) event.location = location;
 
     await event.save();
 
