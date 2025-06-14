@@ -516,10 +516,21 @@ const EventDetails = () => {
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
                         <p className="dresscode-description">
-                          {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
-                          {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
-                          {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
-                          {event.dresscode === 'other' && 'inny'}
+                          {(() => {
+                            console.log('Dresscode value:', event.dresscode);
+                            switch(event.dresscode) {
+                              case 'frak':
+                                return 'biała koszula, biała muszka, frak';
+                              case 'black':
+                                return 'czarna koszula, czarna marynarka';
+                              case 'casual':
+                                return 'czarna koszula, biała marynarka';
+                              case 'other':
+                                return 'inny';
+                              default:
+                                return 'brak informacji';
+                            }
+                          })()}
                         </p>
                       </div>
                     </div>
@@ -734,7 +745,7 @@ const EventDetails = () => {
                 <h3>Zaproś więcej muzyków</h3>
                 <div className="musicians-selection">
                   {availableMusicians.map((musician) => (
-                    <label key={musician._id} className="musician-checkbox">
+                    <label key={musician._id} className="musician-checkbox">a
                       <input
                         type="checkbox"
                         value={musician._id}
