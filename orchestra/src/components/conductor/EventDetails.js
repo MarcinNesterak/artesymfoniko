@@ -489,6 +489,7 @@ const EventDetails = () => {
                 <div className="dresscode-info">
                   <span className="info-value">{event.dresscode}</span>
                   <div className="dresscode-image">
+                    <img src={`/img/${event.dresscode}.png`} alt={event.dresscode} />
                     <img src="/img/principessa.png" alt="Principessa" />
                     <span className="dresscode-description">Strój męski: frak, biała koszula, czarna muszka, lakierki</span>
                   </div>
@@ -497,7 +498,9 @@ const EventDetails = () => {
               <div className="info-item">
                 <span className="info-label">Status:</span>
                 <span className={`info-value status-${event.status}`}>
-                  {event.status === 'active' ? 'Aktywne' : 'Zakończone'}
+                  {event.status === 'upcoming' ? 'Nadchodzące' : 
+                   event.status === 'completed' ? 'Zakończone' : 
+                   event.status === 'cancelled' ? 'Anulowane' : 'Nieznany'}
                 </span>
               </div>
             </div>

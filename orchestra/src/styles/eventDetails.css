@@ -489,11 +489,14 @@
   width: 48px;
   height: 48px;
   object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dresscode-description {
   font-size: 0.9em;
   color: #666;
+  flex: 1;
 }
 
 .dresscode-view {
