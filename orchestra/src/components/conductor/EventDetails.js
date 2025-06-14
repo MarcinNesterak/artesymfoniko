@@ -656,6 +656,9 @@ const EventDetails = () => {
                     // Zaakceptowani na górze
                     if (statusA === "Zaakceptowano" && statusB !== "Zaakceptowano") return -1;
                     if (statusA !== "Zaakceptowano" && statusB === "Zaakceptowano") return 1;
+                    // Oczekujący przed odrzuconymi
+                    if (statusA === "Oczekująca" && statusB === "Odrzucono") return -1;
+                    if (statusA === "Odrzucono" && statusB === "Oczekująca") return 1;
                     // Potem alfabetycznie
                     return a.userId.name.localeCompare(b.userId.name, 'pl');
                   })

@@ -633,3 +633,19 @@
     margin-bottom: 24px;
   }
 }
+
+.event-extra-info {
+  margin-top: 12px;
+  padding: 8px 0 0 0;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.event-extra-info pre {
+  background: none;
+  color: inherit;
+  font-size: 1em;
+  padding: 0;
+  margin: 0;
+  white-space: pre-wrap;
+}
