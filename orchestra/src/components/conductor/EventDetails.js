@@ -487,11 +487,29 @@ const EventDetails = () => {
               <div className="info-item">
                 <span className="info-label">Dresscode:</span>
                 <div className="dresscode-info">
-                  <span className="info-value">{event.dresscode}</span>
-                  <div className="dresscode-image">
-                    <img src={`/img/${event.dresscode}.png`} alt={event.dresscode} />
-                    <img src="/img/principessa.png" alt="Principessa" />
-                    <span className="dresscode-description">Strój męski: frak, biała koszula, czarna muszka, lakierki</span>
+                  <div className="dresscode-grid">
+                    <div className="dresscode-column">
+                      <div className="dresscode-image-container">
+                        {event.dresscode === 'frak' && <img src="/img/frak.png" alt="frak" />}
+                        {event.dresscode === 'black' && <img src="/img/black.png" alt="black" />}
+                        {event.dresscode === 'casual' && <img src="/img/casual.png" alt="casual" />}
+                        {event.dresscode === 'other' && <img src="/img/other.png" alt="other" />}
+                      </div>
+                      <div className="dresscode-details">
+                        <span className="dresscode-label">Panowie</span>
+                        <span className="dresscode-value">{event.dresscode}</span>
+                        <p className="dresscode-description">frak, biała koszula, czarna muszka, lakierki</p>
+                      </div>
+                    </div>
+                    <div className="dresscode-column">
+                      <div className="dresscode-image-container">
+                        <img src="/img/principessa.png" alt="Principessa" />
+                      </div>
+                      <div className="dresscode-details">
+                        <span className="dresscode-label">Panie</span>
+                        <span className="dresscode-value">principessa</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

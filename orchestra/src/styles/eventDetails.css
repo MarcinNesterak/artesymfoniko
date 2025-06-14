@@ -475,28 +475,63 @@
 .dresscode-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
 
-.dresscode-image {
+.dresscode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  width: 100%;
+}
+
+.dresscode-column {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
-  margin-top: 4px;
 }
 
-.dresscode-image img {
-  width: 48px;
-  height: 48px;
+.dresscode-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.dresscode-image-container img {
+  width: 96px;
+  height: 96px;
   object-fit: contain;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.dresscode-description {
+.dresscode-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.dresscode-label {
   font-size: 0.9em;
   color: #666;
-  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dresscode-value {
+  font-size: 1.1em;
+  color: #333;
+  font-weight: 500;
+}
+
+.dresscode-description {
+  font-size: 0.85em;
+  color: #666;
+  margin-top: 4px;
 }
 
 .dresscode-view {
@@ -523,32 +558,14 @@
 }
 
 @media (max-width: 768px) {
-  .dresscode-view {
-    gap: 10px;
+  .dresscode-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
   
-  .dresscode-view img {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .dresscode-view span {
-    font-size: 0.9em;
-  }
-}
-
-@media (max-width: 480px) {
-  .dresscode-view {
-    gap: 8px;
-  }
-  
-  .dresscode-view img {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .dresscode-view span {
-    font-size: 0.85em;
+  .dresscode-image-container img {
+    width: 80px;
+    height: 80px;
   }
 }
 
