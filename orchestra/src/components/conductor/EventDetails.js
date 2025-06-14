@@ -510,6 +510,7 @@ const EventDetails = () => {
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panie</span>
                         <span className="dresscode-value">principessa</span>
+                        <p className="dresscode-description">principessa</p>
                       </div>
                     </div>
                   </div>
