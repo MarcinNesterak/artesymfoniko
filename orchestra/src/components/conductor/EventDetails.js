@@ -481,10 +481,10 @@ const EventDetails = () => {
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
             <div className="event-info-grid">
-              <div className="info-item">
+              {/* <div className="info-item">
                 <span className="info-label">Nazwa:</span>
                 <span className="info-value">{event.name}</span>
-              </div>
+              </div> */}
               <div className="info-item">
                 <span className="info-label">Data:</span>
                 <span className="info-value">{new Date(event.date).toLocaleDateString('pl-PL', {
@@ -530,14 +530,14 @@ const EventDetails = () => {
                   </div>
                 </div>
               </div>
-              <div className="info-item">
+              {/* <div className="info-item">
                 <span className="info-label">Status:</span>
                 <span className={`info-value status-${event.status}`}>
                   {event.status === 'upcoming' ? 'Nadchodzące' : 
-                   event.status === 'completed' ? 'Zakończone' : 
-                   event.status === 'cancelled' ? 'Anulowane' : 'Nieznany'}
+                    event.status === 'completed' ? 'Zakończone' : 
+                    event.status === 'cancelled' ? 'Anulowane' : 'Nieznany'}
                 </span>
-              </div>
+              </div> */}
             </div>
             {event.description && (
               <div className="event-extra-info">
