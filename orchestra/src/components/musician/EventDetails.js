@@ -206,7 +206,7 @@ const EventDetails = () => {
         </div>
       )}
 
-      <div className="event-details-content">
+      <div className="event-details-content event-details-desktop-layout">
         <div className="event-info-section">
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
@@ -280,10 +280,38 @@ const EventDetails = () => {
               </p>
             </div>
           )}
+        </div>
+        <div className="event-side-section">
+          <div className="musicians-card">
+            <h2>Uczestnicy</h2>
 
-          {/* DODAJ TUTAJ - Czat wydarzenia */}
+            {participants.length > 0 ? (
+              <div className="musicians-list">
+                {participants.map((participant) => {
+                  const musician = participant.userId;
+                  if (!musician) return null;
+
+                  return (
+                    <div key={participant._id} className="musician-item">
+                      <div className="musician-info">
+                        <div className="musician-name">
+                          {musician.name}
+                          {musician._id === user.id && " (Ty)"}
+                        </div>
+                        <div className="musician-instrument">
+                          {musician.instrument || "Instrument nieznany"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p>Brak potwierdzonych uczestników.</p>
+            )}
+          </div>
           {userParticipation && (
-            <div className="event-info-card chat-card">
+            <div className="event-info-card chat-card chat-responsive-order">
               <h2>💬 Czat Wydarzenia</h2>
 
               <div className="chat-messages">
@@ -337,37 +365,6 @@ const EventDetails = () => {
               </form>
             </div>
           )}
-        </div>
-
-        <div className="event-musicians-section">
-          <div className="musicians-card">
-            <h2>Uczestnicy</h2>
-
-            {participants.length > 0 ? (
-              <div className="musicians-list">
-                {participants.map((participant) => {
-                  const musician = participant.userId;
-                  if (!musician) return null;
-
-                  return (
-                    <div key={participant._id} className="musician-item">
-                      <div className="musician-info">
-                        <div className="musician-name">
-                          {musician.name}
-                          {musician._id === user.id && " (Ty)"}
-                        </div>
-                        <div className="musician-instrument">
-                          {musician.instrument || "Instrument nieznany"}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p>Brak potwierdzonych uczestników.</p>
-            )}
-          </div>
         </div>
       </div>
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
