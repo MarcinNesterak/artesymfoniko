@@ -516,15 +516,10 @@ const EventDetails = () => {
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
                         <p className="dresscode-description">
-                          {(() => {
-                            const dc = (event.dresscode || '').trim().toLowerCase();
-                            if (dc === 'frak') return 'biała koszula, biała muszka, frak';
-                            if (dc === 'black') return 'czarna koszula, czarna marynarka';
-                            if (dc === 'casual') return 'czarna koszula, biała marynarka';
-                            if (dc === 'other') return 'inny';
-                            if (!dc) return 'brak informacji';
-                            return dc;
-                          })()}
+                          {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
+                          {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
+                          {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
+                          {event.dresscode === 'other' && 'inny'}
                         </p>
                       </div>
                     </div>
