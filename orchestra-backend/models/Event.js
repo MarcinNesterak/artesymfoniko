@@ -63,6 +63,12 @@ const eventSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
+    location: {
+      type: String,
+      trim: true,
+      maxlength: [300, "Miejsce nie może być dłuższe niż 300 znaków"],
+    },
   },
   {
     timestamps: true,
