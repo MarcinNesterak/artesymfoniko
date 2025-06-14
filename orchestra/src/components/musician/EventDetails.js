@@ -236,31 +236,15 @@ const EventDetails = () => {
                   <div className="dresscode-grid">
                     <div className="dresscode-column">
                       <div className="dresscode-image-container">
-                        {(event.dresscode === 'frak' || event.dresscode === 'black' || event.dresscode === 'casual' || event.dresscode === 'other')
-                          ? (
-                            <img src={`/img/${event.dresscode || 'frak'}.png`} alt={event.dresscode || 'frak'} />
-                          ) : (
-                            <img src="/img/frak.png" alt="frak" />
-                          )}
+                        <img src={`/img/${event.dresscode}.png`} alt={event.dresscode} />
                       </div>
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
                         <p className="dresscode-description">
-                          {(() => {
-                            console.log('Dresscode value:', event.dresscode);
-                            switch(event.dresscode) {
-                              case 'frak':
-                                return 'biała koszula, biała muszka, frak';
-                              case 'black':
-                                return 'czarna koszula, czarna marynarka';
-                              case 'casual':
-                                return 'czarna koszula, biała marynarka';
-                              case 'other':
-                                return 'inny';
-                              default:
-                                return 'brak informacji';
-                            }
-                          })()}
+                          {event.dresscode === 'frak' && 'frak, biała koszula i biała muszka'}
+                          {event.dresscode === 'black' && 'czarna koszula i czarna marynarka'}
+                          {event.dresscode === 'casual' && 'czarna koszula i biała marynarka'}
+                          {event.dresscode === 'other' && 'inny'}
                         </p>
                       </div>
                     </div>
