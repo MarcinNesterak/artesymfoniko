@@ -269,6 +269,24 @@ const EventDetails = () => {
                 </span>
               </div>
             </div>
+            {event.description && (
+              <div className="event-extra-info">
+                <strong>Opis:</strong>
+                <p>{event.description}</p>
+              </div>
+            )}
+            {event.schedule && (
+              <div className="event-extra-info">
+                <strong>Harmonogram:</strong>
+                <pre>{event.schedule}</pre>
+              </div>
+            )}
+            {event.program && (
+              <div className="event-extra-info">
+                <strong>Program koncertu:</strong>
+                <pre>{event.program}</pre>
+              </div>
+            )}
           </div>
 
           {/* Status uczestnictwa */}

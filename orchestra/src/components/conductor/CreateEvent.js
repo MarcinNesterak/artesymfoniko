@@ -15,6 +15,7 @@ const CreateEvent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dresscode, setDresscode] = useState('');
+  const [location, setLocation] = useState('');
   const navigate = useNavigate();
   
   // Fetch available musicians
@@ -63,7 +64,8 @@ const CreateEvent = () => {
         schedule,
         program,
         inviteUserIds: selectedMusicians,
-        dresscode
+        dresscode,
+        location
       };
       
       const response = await eventsAPI.createEvent(eventData);
@@ -180,6 +182,19 @@ const CreateEvent = () => {
               <span>inne</span>
             </div>
           </div>
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="location">Miejsce*</label>
+          <input
+            type="text"
+            id="location"
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+            required
+            disabled={loading}
+            placeholder="Np. Filharmonia Krakowska, ul. Zwierzyniecka 1"
+          />
         </div>
         
         <div className="form-group">

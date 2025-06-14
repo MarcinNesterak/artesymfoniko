@@ -26,6 +26,7 @@ const EventDetails = () => {
     description: "",
     schedule: "",
     program: "",
+    location: "",
   });
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -54,6 +55,7 @@ const EventDetails = () => {
         description: eventData.description || "",
         schedule: eventData.schedule || "",
         program: eventData.program || "",
+        location: eventData.location || "",
       });
 
       // Pobierz wszystkich muzyków dla selecta
@@ -125,6 +127,7 @@ const EventDetails = () => {
         description: editData.description,
         schedule: editData.schedule,
         program: editData.program,
+        location: editData.location,
       };
 
       await eventsAPI.updateEvent(id, updateData);
@@ -438,6 +441,19 @@ const EventDetails = () => {
                 />
               </div>
 
+              <div className="form-group">
+                <label htmlFor="edit-location">Miejsce*</label>
+                <input
+                  type="text"
+                  id="edit-location"
+                  value={editData.location}
+                  onChange={e => setEditData(prev => ({ ...prev, location: e.target.value }))}
+                  required
+                  disabled={editLoading}
+                  placeholder="Np. Filharmonia Krakowska, ul. Zwierzyniecka 1"
+                />
+              </div>
+
               <div className="form-actions">
                 <button
                   type="button"
@@ -523,6 +539,24 @@ const EventDetails = () => {
                 </span>
               </div>
             </div>
+            {event.description && (
+              <div className="event-extra-info">
+                <strong>Opis:</strong>
+                <p>{event.description}</p>
+              </div>
+            )}
+            {event.schedule && (
+              <div className="event-extra-info">
+                <strong>Harmonogram:</strong>
+                <pre>{event.schedule}</pre>
+              </div>
+            )}
+            {event.program && (
+              <div className="event-extra-info">
+                <strong>Program koncertu:</strong>
+                <pre>{event.program}</pre>
+              </div>
+            )}
           </div>
         </div>
         <div className="event-side-section">
