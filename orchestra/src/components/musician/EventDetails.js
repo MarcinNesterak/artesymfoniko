@@ -245,7 +245,6 @@ const EventDetails = () => {
                       </div>
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
-                        <span className="dresscode-value">{event.dresscode}</span>
                         <p className="dresscode-description">frak, biała koszula, czarna muszka, lakierki</p>
                       </div>
                     </div>
@@ -255,7 +254,6 @@ const EventDetails = () => {
                       </div>
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panie</span>
-                        <span className="dresscode-value">principessa</span>
                         <p className="dresscode-description">principessa</p>
                       </div>
                     </div>
