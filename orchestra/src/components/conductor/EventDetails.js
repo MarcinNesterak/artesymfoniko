@@ -515,7 +515,12 @@ const EventDetails = () => {
                       </div>
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
-                        <p className="dresscode-description">frak, biała koszula, czarna muszka, lakierki</p>
+                        <p className="dresscode-description">
+                          {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
+                          {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
+                          {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
+                          {event.dresscode === 'other' && 'inny'}
+                        </p>
                       </div>
                     </div>
                     <div className="dresscode-column">
