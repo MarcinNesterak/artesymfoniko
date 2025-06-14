@@ -210,53 +210,43 @@ const EventDetails = () => {
         <div className="event-info-section">
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
-
-            <div className="info-item">
-              <strong>Data i godzina:</strong>
-              <span>{formatDate(event.date)}</span>
-            </div>
-
-            {event.description && (
+            <div className="event-info-grid">
               <div className="info-item">
-                <strong>Opis:</strong>
-                <p>{event.description}</p>
+                <span className="info-label">Nazwa:</span>
+                <span className="info-value">{event.name}</span>
               </div>
-            )}
-
-            {event.schedule && (
               <div className="info-item">
-                <strong>Harmonogram:</strong>
-                <pre>{event.schedule}</pre>
+                <span className="info-label">Data:</span>
+                <span className="info-value">{new Date(event.date).toLocaleDateString('pl-PL', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</span>
               </div>
-            )}
-
-            {event.program && (
               <div className="info-item">
-                <strong>Program:</strong>
-                <pre>{event.program}</pre>
+                <span className="info-label">Miejsce:</span>
+                <span className="info-value">{event.location}</span>
               </div>
-            )}
-
-            {event.dresscode && (
-              <div className="info-item dresscode-info">
-                <strong>Dresscode:</strong>
-                <div className="dresscode-view">
-                  {event.dresscode === 'frak' && (
-                    <><img src="/img/frak.png" alt="frak" /><span>frak, biała koszula, biała mucha</span></>
-                  )}
-                  {event.dresscode === 'black' && (
-                    <><img src="/img/black.png" alt="black" /><span>czarna koszula i czarna marynarka</span></>
-                  )}
-                  {event.dresscode === 'casual' && (
-                    <><img src="/img/casual.png" alt="casual" /><span>biała koszula i czarna marynarka</span></>
-                  )}
-                  {event.dresscode === 'other' && (
-                    <><img src="/img/other.png" alt="other" /><span>inne</span></>
-                  )}
-                  <img src="/img/principessa.png" alt="principessa" /><span>principessa</span>
+              <div className="info-item">
+                <span className="info-label">Dresscode:</span>
+                <div className="dresscode-info">
+                  <span className="info-value">{event.dresscode}</span>
+                  <div className="dresscode-image">
+                    <img src="/img/principessa.png" alt="Principessa" />
+                    <span className="dresscode-description">Strój męski: frak, biała koszula, czarna muszka, lakierki</span>
+                  </div>
                 </div>
               </div>
-            )}
+              <div className="info-item">
+                <span className="info-label">Status:</span>
+                <span className={`info-value status-${event.status}`}>
+                  {event.status === 'active' ? 'Aktywne' : 'Zakończone'}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Status uczestnictwa */}

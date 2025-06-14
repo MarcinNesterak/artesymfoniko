@@ -473,7 +473,27 @@
 }
 
 .dresscode-info {
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dresscode-image {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.dresscode-image img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.dresscode-description {
+  font-size: 0.9em;
+  color: #666;
 }
 
 .dresscode-view {

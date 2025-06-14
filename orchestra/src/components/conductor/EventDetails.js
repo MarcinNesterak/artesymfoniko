@@ -464,32 +464,43 @@ const EventDetails = () => {
         <div className="event-info-section">
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
-
-            <div className="info-item">
-              <strong>Data i godzina:</strong>
-              <span>{formatDate(event.date)}</span>
+            <div className="event-info-grid">
+              <div className="info-item">
+                <span className="info-label">Nazwa:</span>
+                <span className="info-value">{event.name}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Data:</span>
+                <span className="info-value">{new Date(event.date).toLocaleDateString('pl-PL', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Miejsce:</span>
+                <span className="info-value">{event.location}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Dresscode:</span>
+                <div className="dresscode-info">
+                  <span className="info-value">{event.dresscode}</span>
+                  <div className="dresscode-image">
+                    <img src="/img/principessa.png" alt="Principessa" />
+                    <span className="dresscode-description">Strój męski: frak, biała koszula, czarna muszka, lakierki</span>
+                  </div>
+                </div>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Status:</span>
+                <span className={`info-value status-${event.status}`}>
+                  {event.status === 'active' ? 'Aktywne' : 'Zakończone'}
+                </span>
+              </div>
             </div>
-
-            {event.description && (
-              <div className="info-item">
-                <strong>Opis:</strong>
-                <p>{event.description}</p>
-              </div>
-            )}
-
-            {event.schedule && (
-              <div className="info-item">
-                <strong>Harmonogram:</strong>
-                <pre>{event.schedule}</pre>
-              </div>
-            )}
-
-            {event.program && (
-              <div className="info-item">
-                <strong>Program:</strong>
-                <pre>{event.program}</pre>
-              </div>
-            )}
           </div>
         </div>
         <div className="event-side-section">
