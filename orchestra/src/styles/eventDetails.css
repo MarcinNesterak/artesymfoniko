@@ -528,3 +528,42 @@
     font-size: 0.85em;
   }
 }
+
+.event-details-desktop-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .event-details-desktop-layout {
+    flex-direction: row;
+    gap: 32px;
+  }
+  .event-info-section {
+    width: 70%;
+    min-width: 0;
+  }
+  .event-side-section {
+    width: 30%;
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-responsive-order {
+    order: 2;
+    margin-top: 32px;
+  }
+  .musicians-card {
+    order: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .event-details-desktop-layout {
+    flex-direction: column;
+  }
+  .chat-responsive-order {
+    order: -1;
+    margin-bottom: 24px;
+  }
+}

@@ -460,7 +460,7 @@ const EventDetails = () => {
         </div>
       )}
 
-      <div className="event-details-content">
+      <div className="event-details-content event-details-desktop-layout">
         <div className="event-info-section">
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
@@ -491,11 +491,11 @@ const EventDetails = () => {
               </div>
             )}
           </div>
-
-          {/* Czat Wydarzenia - dla dyrygenta */}
-          <div className="event-info-card chat-card">
+        </div>
+        <div className="event-side-section">
+          {/* Czat na mobile nad muzykami, na desktopie pod muzykami */}
+          <div className="chat-card chat-responsive-order">
             <h2>💬 Czat Wydarzenia</h2>
-
             <div className="chat-messages">
               {messages.length > 0 ? (
                 messages.map((message) => (
@@ -555,7 +555,6 @@ const EventDetails = () => {
                 <p className="no-messages">Brak wiadomości. Napisz pierwszą!</p>
               )}
             </div>
-
             <form onSubmit={sendMessage} className="chat-form">
               <div className="chat-input-group">
                 <input
@@ -578,9 +577,6 @@ const EventDetails = () => {
               <div className="chat-counter">{newMessage.length}/500</div>
             </form>
           </div>
-        </div>
-
-        <div className="event-musicians-section">
           <div className="musicians-card">
             <h2>Zaproszeni muzycy</h2>
 
