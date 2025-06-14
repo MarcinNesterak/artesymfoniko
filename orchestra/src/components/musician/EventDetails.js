@@ -236,14 +236,19 @@ const EventDetails = () => {
                   <div className="dresscode-grid">
                     <div className="dresscode-column">
                       <div className="dresscode-image-container">
-                        <img src={`/img/${event.dresscode}.png`} alt={event.dresscode} />
+                        {(event.dresscode === 'frak' || event.dresscode === 'black' || event.dresscode === 'casual' || event.dresscode === 'other')
+                          ? (
+                            <img src={`/img/${event.dresscode || 'frak'}.png`} alt={event.dresscode || 'frak'} />
+                          ) : (
+                            <img src="/img/frak.png" alt="frak" />
+                          )}
                       </div>
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
                         <p className="dresscode-description">
-                          {event.dresscode === 'frak' && 'frak, biała koszula i biała muszka'}
-                          {event.dresscode === 'black' && 'czarna koszula i czarna marynarka'}
-                          {event.dresscode === 'casual' && 'czarna koszula i biała marynarka'}
+                          {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
+                          {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
+                          {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
                           {event.dresscode === 'other' && 'inny'}
                         </p>
                       </div>
