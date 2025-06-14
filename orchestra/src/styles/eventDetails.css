@@ -489,20 +489,22 @@
 .dresscode-column {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
 }
 
 .dresscode-image-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #fff;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-  border: 1.5px solid #e0e0e0;
-  min-height: 120px;
-  min-width: 120px;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: none;
+  border: none;
+  min-height: 0;
+  min-width: 0;
 }
 
 .dresscode-image-container img {
@@ -520,6 +522,7 @@
   gap: 4px;
   text-align: center;
   margin-top: 8px;
+  align-items: center;
 }
 
 .dresscode-label {
