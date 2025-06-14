@@ -528,15 +528,3 @@
     font-size: 0.85em;
   }
 }
-
-/* Czat na desktopie pod sekcją muzyków */
-@media (min-width: 769px) {
-  .chat-desktop-order {
-    order: 2;
-    margin-top: 32px;
-  }
-  .event-details-content {
-    display: flex;
-    flex-direction: column;
-  }
-}
