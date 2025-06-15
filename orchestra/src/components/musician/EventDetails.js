@@ -51,9 +51,8 @@ const EventDetails = () => {
     try {
       await eventsAPI.sendEventMessage(id, newMessage.trim());
       setNewMessage("");
-      fetchMessages(); // Odśwież wiadomości po wysłaniu
       setSuccessMessage("Wiadomość wysłana pomyślnie!");
-      setTimeout(() => setSuccessMessage(""), 3500);
+      setTimeout(() => setSuccessMessage(""), 2500);
     } catch (error) {
       console.error("Error sending message:", error);
       setError("Błąd podczas wysyłania wiadomości");
