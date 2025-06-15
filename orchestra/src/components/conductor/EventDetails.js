@@ -38,6 +38,7 @@ const EventDetails = () => {
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [calendarAdded, setCalendarAdded] = useState(false);
 
   useEffect(() => {
     fetchEventData();
@@ -339,6 +340,7 @@ const EventDetails = () => {
 
     const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${start}/${end}`;
     window.open(url, '_blank');
+    setCalendarAdded(true);
   };
 
   if (loading) {
@@ -369,13 +371,20 @@ const EventDetails = () => {
           >
             Powrót do listy
           </button>
-          <button
-            onClick={addToGoogleCalendar}
-            className="btn-calendar"
-            title="Dodaj do kalendarza Google"
-          >
-            📅 Dodaj do kalendarza
-          </button>
+          {/* Przycisk kalendarza Google lub komunikat */}
+          {!calendarAdded ? (
+            <button
+              onClick={addToGoogleCalendar}
+              className="btn-calendar"
+              title="Dodaj do kalendarza Google"
+            >
+              📅 Dodaj do kalendarza
+            </button>
+          ) : (
+            <div className="calendar-added-message" style={{color: 'var(--accent-color)', margin: '0 8px'}}>
+              ✔️ Dodano do kalendarza Google!
+            </div>
+          )}
           <button
             onClick={() => setShowEditModal(true)}
             className="btn-edit"

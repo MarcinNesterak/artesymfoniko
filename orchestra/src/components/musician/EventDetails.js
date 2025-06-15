@@ -16,6 +16,7 @@ const EventDetails = () => {
   const [newMessage, setNewMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [calendarAdded, setCalendarAdded] = useState(false);
 
   const userJson = localStorage.getItem("user");
   const user = userJson ? JSON.parse(userJson) : null;
@@ -71,6 +72,21 @@ const EventDetails = () => {
   const userParticipation = participants.find(
     (part) => part.userId._id === user.id
   );
+
+  const addToGoogleCalendar = () => {
+    if (!event) return;
+    const startDate = new Date(event.date);
+    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // +2h
+    const formatDate = (date) => date.toISOString().replace(/-|:|\.\d+/g, '');
+    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+    googleCalendarUrl.searchParams.append('action', 'TEMPLATE');
+    googleCalendarUrl.searchParams.append('text', event.title);
+    googleCalendarUrl.searchParams.append('dates', `${formatDate(startDate)}/${formatDate(endDate)}`);
+    googleCalendarUrl.searchParams.append('details', `${event.description || ''}\n\nHarmonogram:\n${event.schedule || ''}\n\nProgram:\n${event.program || ''}`);
+    googleCalendarUrl.searchParams.append('location', event.location || '');
+    window.open(googleCalendarUrl.toString(), '_blank');
+    setCalendarAdded(true);
+  };
 
   useEffect(() => {
     const fetchEventData = async () => {
@@ -203,6 +219,20 @@ const EventDetails = () => {
               Odpowiedz na zaproszenie
             </button>
           </div>
+          {/* Przycisk kalendarza Google */}
+          {!calendarAdded ? (
+            <button
+              onClick={addToGoogleCalendar}
+              className="btn-calendar"
+              style={{marginTop: 16}}
+            >
+              📅 Dodaj do kalendarza Google
+            </button>
+          ) : (
+            <div className="calendar-added-message" style={{marginTop: 16, color: 'var(--accent-color)'}}>
+              ✔️ Dodano do kalendarza Google!
+            </div>
+          )}
         </div>
       )}
 
@@ -296,6 +326,20 @@ const EventDetails = () => {
               <p className="participation-confirmed">
                 ✅ Potwierdziłeś udział w tym wydarzeniu
               </p>
+              {/* Przycisk kalendarza Google po potwierdzeniu udziału */}
+              {!calendarAdded ? (
+                <button
+                  onClick={addToGoogleCalendar}
+                  className="btn-calendar"
+                  style={{marginTop: 16}}
+                >
+                  📅 Dodaj do kalendarza Google
+                </button>
+              ) : (
+                <div className="calendar-added-message" style={{marginTop: 16, color: 'var(--accent-color)'}}>
+                  ✔️ Dodano do kalendarza Google!
+                </div>
+              )}
             </div>
           )}
         </div>
