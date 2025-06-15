@@ -114,28 +114,24 @@
   .dashboard {
     padding: 20px 0;
   }
-
+  
   .dashboard-header {
     flex-direction: column;
     gap: 15px;
     align-items: stretch;
   }
-
+  
   .dashboard-header h1 {
     text-align: center;
     margin-bottom: 0;
   }
-
+  
   .dashboard-actions {
     justify-content: center;
     flex-wrap: wrap;
   }
-
-  .btn-primary {
-    padding: 10px 16px;
-    display: inline-block;
-  }
-
+  
+  .btn-primary,
   .btn-secondary {
     flex: 1;
     min-width: 140px;
@@ -150,7 +146,7 @@
   .dashboard-actions {
     flex-direction: column;
   }
-
+  
   .btn-primary,
   .btn-secondary {
     width: 100%;
