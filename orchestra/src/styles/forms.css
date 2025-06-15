@@ -45,6 +45,21 @@
   margin-top: 20px;
 }
 
+.form-actions button[type="button"] {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: var(--accent-hover);
+}
+
 .musicians-list {
   max-height: 300px;
   overflow-y: auto;
@@ -285,5 +300,23 @@ input[type="date"], input[type="time"] {
   
   .dresscode-option span {
     font-size: 0.75em;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-actions button[type="button"] {
+    width: 100%;
+    background-color: var(--accent-color);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .form-actions button[type="button"]:hover {
+    background-color: var(--accent-hover);
   }
 }
