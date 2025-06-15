@@ -57,22 +57,22 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--accent-secondary);
 }
 
-button {
-  background-color: var(--button-bg);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+.btn-primary, .btn-edit, .btn-delete, .btn-cancel-invitation, .btn-invite-selected, .chat-send-btn {
+  background: #23232b;
+  color: #FFD600;
+  border: 2px solid #FFD600;
+  transition: background 0.2s, color 0.2s, border 0.2s;
 }
-
-button:hover {
-  background-color: var(--button-hover);
+.btn-primary:hover, .btn-edit:hover, .btn-delete:hover, .btn-cancel-invitation:hover, .btn-invite-selected:hover, .chat-send-btn:hover,
+.btn-primary:focus, .btn-edit:focus, .btn-delete:focus, .btn-cancel-invitation:focus, .btn-invite-selected:focus, .chat-send-btn:focus {
+  background: #333;
+  color: #FFB300;
+  border-color: #FFB300;
 }
-
-button:active {
-  background-color: var(--button-active);
+.btn-primary:active, .btn-edit:active, .btn-delete:active, .btn-cancel-invitation:active, .btn-invite-selected:active, .chat-send-btn:active {
+  background: #181818;
+  color: #FF9800;
+  border-color: #FF9800;
 }
 
 button:disabled {
