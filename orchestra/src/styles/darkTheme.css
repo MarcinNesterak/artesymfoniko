@@ -4,8 +4,8 @@
   --bg-tertiary: #2d2d2d;
   --text-primary: #e0e0e0;
   --text-secondary: #a0a0a0;
-  --accent-primary: #8c5cfc;
-  --accent-secondary: #e1d3ff;
+  --accent-primary: #FFD600;
+  --accent-secondary: #FF9800;
   --error: #cf6679;
   --success: #03dac6;
   --warning: #ffd600;
@@ -14,9 +14,9 @@
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   --input-bg: #333333;
   --input-border: #444444;
-  --button-bg: #6200ee;
-  --button-hover: #7722ff;
-  --button-active: #5500cc;
+  --button-bg: #FFD600;
+  --button-hover: #FFB300;
+  --button-active: #FF9800;
 }
 
 body {

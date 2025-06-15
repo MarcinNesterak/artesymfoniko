@@ -27,6 +27,7 @@ const EventDetails = () => {
     schedule: "",
     program: "",
     location: "",
+    dresscode: 'frak',
   });
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -56,6 +57,7 @@ const EventDetails = () => {
         schedule: eventData.schedule || "",
         program: eventData.program || "",
         location: eventData.location || "",
+        dresscode: eventData.dresscode || 'frak',
       });
 
       // Pobierz wszystkich muzyków dla selecta
@@ -128,6 +130,7 @@ const EventDetails = () => {
         schedule: editData.schedule,
         program: editData.program,
         location: editData.location,
+        dresscode: editData.dresscode,
       };
 
       await eventsAPI.updateEvent(id, updateData);
@@ -452,6 +455,28 @@ const EventDetails = () => {
                   disabled={editLoading}
                   placeholder="Np. Filharmonia Krakowska, ul. Zwierzyniecka 1"
                 />
+              </div>
+
+              <div className="form-group">
+                <label>Dresscode (ubiór panów):</label>
+                <div className="dresscode-options">
+                  <div className={`dresscode-option ${editData.dresscode === 'frak' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'frak' }))}>
+                    <img src="/img/frak.png" alt="frak" />
+                    <span>frak, biała koszula, biała muszka</span>
+                  </div>
+                  <div className={`dresscode-option ${editData.dresscode === 'black' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'black' }))}>
+                    <img src="/img/black.png" alt="black" />
+                    <span>czarna marynarka, czarna mucha/krawat, biała koszula</span>
+                  </div>
+                  <div className={`dresscode-option ${editData.dresscode === 'casual' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'casual' }))}>
+                    <img src="/img/casual.png" alt="casual" />
+                    <span>biała koszula i czarna marynarka</span>
+                  </div>
+                  <div className={`dresscode-option ${editData.dresscode === 'other' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'other' }))}>
+                    <img src="/img/other.png" alt="other" />
+                    <span>inny strój</span>
+                  </div>
+                </div>
               </div>
 
               <div className="form-actions">
