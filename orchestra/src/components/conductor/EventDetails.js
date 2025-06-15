@@ -687,8 +687,8 @@ const EventDetails = () => {
                     </div>
                     <div className="message-content">{message.content}</div>
 
-                    {/* Status przeczytania - tylko dla dyrygenta */}
-                    {message.readBy && (
+                    {/* Status przeczytania - tylko dla wiadomości dyrygenta */}
+                    {message.readBy && message.userId._id === user.id && (
                       <div className="message-read-status">
                         {(() => {
                           // Znajdź kto NIE przeczytał

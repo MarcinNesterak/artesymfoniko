@@ -100,10 +100,11 @@ router.get("/", apiLimiter, requireUser, async (req, res) => {
           );
           const lastViewedAt = lastView?.lastViewedAt || new Date(0); // Jeśli nigdy nie oglądał = 1970
 
-          // Sprawdź czy są nowe wiadomości
+          // Sprawdź czy są nowe wiadomości, ignorując wiadomości własnego autorstwa
           const newMessagesCount = await Message.countDocuments({
             eventId: event._id,
             createdAt: { $gt: lastViewedAt },
+            userId: { $ne: req.user._id }, // Ignoruj wiadomości od samego siebie
           });
 
           // Sprawdź czy wydarzenie było modyfikowane od ostatniej wizyty
