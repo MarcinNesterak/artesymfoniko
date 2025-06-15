@@ -11,6 +11,7 @@ import {
 import Message from "../models/Message.js";
 import MessageRead from "../models/MessageRead.js";
 import { apiLimiter } from '../middleware/rateLimiter.js';
+import { body, validationResult } from "express-validator";
 
 const router = express.Router();
 
@@ -204,166 +205,198 @@ router.get("/:id", apiLimiter, requireUser, async (req, res) => {
   }
 });
 
-// POST /api/events - utwórz nowe wydarzenie (tylko dyrygent)
-router.post("/", requireConductor, async (req, res) => {
-  try {
-    // Automatyczne archiwizowanie przed utworzeniem nowego
-    await autoArchiveEvents();
-
-    const { title, date, description, schedule, program, inviteUserIds, location, dresscode } = req.body;
-
-    if (!title || !date) {
-      return res.status(400).json({
-        error: "Validation error",
-        message: "Tytuł i data wydarzenia są wymagane",
-      });
+// POST /api/events - stwórz nowe wydarzenie (tylko dyrygent)
+router.post(
+  "/",
+  requireConductor,
+  [
+    // Reguły walidacji
+    body("title")
+      .not()
+      .isEmpty()
+      .trim()
+      .escape()
+      .withMessage("Tytuł wydarzenia jest wymagany."),
+    body("date")
+      .isISO8601()
+      .toDate()
+      .withMessage("Data musi być w prawidłowym formacie."),
+    body("location")
+      .not()
+      .isEmpty()
+      .trim()
+      .escape()
+      .withMessage("Lokalizacja jest wymagana."),
+    body("description")
+      .optional()
+      .trim()
+      .escape(),
+    body("dresscode")
+      .optional()
+      .isIn(['frak', 'black', 'casual', 'other'])
+      .withMessage("Nieprawidłowa wartość dresscode."),
+  ],
+  async (req, res) => {
+    // Sprawdzenie wyników walidacji
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // Sprawdź czy data jest w przyszłości
-    const eventDate = new Date(date);
-    if (eventDate <= new Date()) {
-      return res.status(400).json({
-        error: "Validation error",
-        message: "Data wydarzenia musi być w przyszłości",
-      });
-    }
+    try {
+      await autoArchiveEvents();
+      
+      const { title, date, description, schedule, program, inviteUserIds, location, dresscode } = req.body;
 
-    // Utwórz wydarzenie
-    const newEvent = new Event({
-      title,
-      date: eventDate,
-      description,
-      schedule,
-      program,
-      dresscode,
-      conductorId: req.user._id,
-      location,
-    });
-
-    await newEvent.save();
-
-    // Utwórz zaproszenia jeśli podano muzyków
-    if (inviteUserIds && inviteUserIds.length > 0) {
-      const invitations = inviteUserIds.map((userId) => ({
-        eventId: newEvent._id,
-        userId: userId,
-        status: "pending",
-      }));
-
-      await Invitation.insertMany(invitations);
-
-      // Aktualizuj licznik zaproszeń
-      newEvent.invitedCount = inviteUserIds.length;
-      await newEvent.save();
-    }
-
-    // Pobierz wydarzenie z populowanymi danymi
-    const populatedEvent = await Event.findById(newEvent._id).populate(
-      "conductorId",
-      "name email"
-    );
-
-    res.status(201).json({
-      message: "Wydarzenie zostało utworzone",
-      event: populatedEvent,
-    });
-  } catch (error) {
-    console.error("Create event error:", error);
-    res.status(500).json({
-      error: "Server error",
-      message: "Wystąpił błąd podczas tworzenia wydarzenia",
-    });
-  }
-});
-
-// PUT /api/events/:id - aktualizuj wydarzenie (tylko dyrygent-właściciel)
-router.put("/:id", requireConductor, async (req, res) => {
-  try {
-    // Automatyczne archiwizowanie przed edycją
-    await autoArchiveEvents();
-
-    const event = await Event.findById(req.params.id);
-
-    if (!event) {
-      return res.status(404).json({
-        error: "Not found",
-        message: "Wydarzenie nie zostało znalezione",
-      });
-    }
-
-    // Sprawdź czy dyrygent jest właścicielem wydarzenia
-    if (!event.conductorId.equals(req.user._id)) {
-      return res.status(403).json({
-        error: "Forbidden",
-        message: "Możesz edytować tylko swoje wydarzenia",
-      });
-    }
-
-    const { title, date, description, schedule, program, location } = req.body;
-
-    // Walidacja daty jeśli została zmieniona - ale tylko dla przyszłych wydarzeń
-    if (date && !event.archived) {
-      const eventDate = new Date(date);
-      if (eventDate <= new Date()) {
+      // Walidacja, czy data jest w przyszłości
+      if (new Date(date) <= new Date()) {
         return res.status(400).json({
-          error: "Validation error",
-          message: "Data wydarzenia musi być w przyszłości",
+          errors: [{ msg: "Data wydarzenia musi być w przyszłości." }],
         });
       }
-      event.date = eventDate;
-    } else if (date && event.archived) {
-      // Dla zarchiwizowanych wydarzeń można zmienić datę bez walidacji przyszłości
-      event.date = new Date(date);
-    }
 
-    // Sprawdź czy wydarzenie powinno być przywrócone z archiwum
-    if (date && event.archived) {
-      const newEventDate = new Date(date);
-      const now = new Date();
+      // Utwórz wydarzenie
+      const newEvent = new Event({
+        title,
+        date,
+        description,
+        schedule,
+        program,
+        dresscode,
+        conductorId: req.user._id,
+        location,
+      });
 
-      // Jeśli nowa data jest w przyszłości, przywróć z archiwum
-      if (newEventDate > now) {
-        event.archived = false;
-        console.log(
-          `📤 Event restored from archive: ${event.title} (new date: ${newEventDate})`
-        );
+      await newEvent.save();
+
+      // Utwórz zaproszenia, jeśli podano muzyków
+      if (inviteUserIds && inviteUserIds.length > 0) {
+        const invitations = inviteUserIds.map((userId) => ({
+          eventId: newEvent._id,
+          userId: userId,
+          status: "pending",
+        }));
+        await Invitation.insertMany(invitations);
+        newEvent.invitedCount = inviteUserIds.length;
+        await newEvent.save();
       }
+
+      const populatedEvent = await Event.findById(newEvent._id).populate("conductorId", "name email");
+
+      res.status(201).json({
+        message: "Wydarzenie zostało utworzone",
+        event: populatedEvent,
+      });
+    } catch (error) {
+      console.error("Create event error:", error);
+      res.status(500).json({
+        error: "Server error",
+        message: "Wystąpił błąd podczas tworzenia wydarzenia",
+      });
     }
-
-    // Aktualizuj pola
-    if (title) event.title = title;
-    if (description !== undefined) event.description = description;
-    if (schedule !== undefined) event.schedule = schedule;
-    if (program !== undefined) event.program = program;
-    if (location !== undefined) event.location = location;
-
-    await event.save();
-
-    const populatedEvent = await Event.findById(event._id).populate(
-      "conductorId",
-      "name email"
-    );
-
-    res.json({
-      message: "Wydarzenie zostało zaktualizowane",
-      event: populatedEvent,
-    });
-  } catch (error) {
-    console.error("Update event error:", error);
-    res.status(500).json({
-      error: "Server error",
-      message: "Wystąpił błąd podczas aktualizacji wydarzenia",
-    });
   }
-});
+);
 
-// Pozostałe endpointy pozostają bez zmian...
-// (DELETE, POST invite, POST respond, DELETE invitations, DELETE participants)
+// PUT /api/events/:id - aktualizuj wydarzenie (tylko dyrygent-właściciel)
+router.put(
+  "/:id",
+  requireConductor,
+  [
+    // Reguły walidacji - wszystkie opcjonalne
+    body("title")
+      .optional()
+      .not().isEmpty().withMessage("Tytuł nie może być pusty.")
+      .trim()
+      .escape(),
+    body("date")
+      .optional()
+      .isISO8601().withMessage("Nieprawidłowy format daty.")
+      .toDate(),
+    body("location")
+      .optional()
+      .not().isEmpty().withMessage("Lokalizacja nie może być pusta.")
+      .trim()
+      .escape(),
+    body("description")
+      .optional()
+      .trim()
+      .escape(),
+    body("dresscode")
+      .optional()
+      .isIn(['frak', 'black', 'casual', 'other'])
+      .withMessage("Nieprawidłowa wartość dresscode."),
+  ],
+  async (req, res) => {
+    // Sprawdzenie wyników walidacji
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    
+    try {
+      await autoArchiveEvents();
+
+      const event = await Event.findById(req.params.id);
+
+      if (!event) {
+        return res.status(404).json({ message: "Wydarzenie nie zostało znalezione" });
+      }
+
+      if (!event.conductorId.equals(req.user._id)) {
+        return res.status(403).json({ message: "Możesz edytować tylko swoje wydarzenia" });
+      }
+
+      const { title, date, description, schedule, program, location, dresscode } = req.body;
+
+      // Twoja logika walidacji daty i przywracania z archiwum
+      if (date) { // Wykonaj logikę tylko jeśli data została podana
+        if (!event.archived) {
+            const eventDate = new Date(date);
+            if (eventDate <= new Date()) {
+                return res.status(400).json({ errors: [{ msg: "Data wydarzenia musi być w przyszłości." }] });
+            }
+        } else {
+            const newEventDate = new Date(date);
+            if (newEventDate > new Date()) {
+                event.archived = false;
+                console.log(`📤 Event restored from archive: ${event.title}`);
+            }
+        }
+        event.date = date;
+      }
+      
+      // Aktualizuj pola, jeśli zostały dostarczone
+      if (title !== undefined) event.title = title;
+      if (description !== undefined) event.description = description;
+      if (schedule !== undefined) event.schedule = schedule;
+      if (program !== undefined) event.program = program;
+      if (location !== undefined) event.location = location;
+      if (dresscode !== undefined) event.dresscode = dresscode;
+      
+      event.lastModified = new Date();
+
+      await event.save();
+
+      const populatedEvent = await Event.findById(event._id).populate("conductorId", "name email");
+
+      res.json({
+        message: "Wydarzenie zostało zaktualizowane",
+        event: populatedEvent,
+      });
+    } catch (error) {
+      console.error("Update event error:", error);
+      res.status(500).json({
+        error: "Server error",
+        message: "Wystąpił błąd podczas aktualizacji wydarzenia",
+      });
+    }
+  }
+);
 
 // DELETE /api/events/:id - usuń wydarzenie (tylko dyrygent-właściciel)
 router.delete("/:id", requireConductor, async (req, res) => {
   try {
-    await autoArchiveEvents(); // Auto-archive before deletion
+    await autoArchiveEvents();
 
     const event = await Event.findById(req.params.id);
 
@@ -382,20 +415,18 @@ router.delete("/:id", requireConductor, async (req, res) => {
       });
     }
 
-    // Usuń powiązane zaproszenia i uczestnictwa
+    // Usuń wszystkie powiązane dane
     await Invitation.deleteMany({ eventId: req.params.id });
     await Participation.deleteMany({ eventId: req.params.id });
+    await Message.deleteMany({ eventId: req.params.id });
+    await MessageRead.deleteMany({ eventId: req.params.id });
 
-    // Usuń wydarzenie
+    // Na końcu usuń samo wydarzenie
     await Event.findByIdAndDelete(req.params.id);
 
     res.json({
-      message: "Wydarzenie zostało usunięte",
-      deletedEvent: {
-        id: event._id,
-        title: event.title,
-        date: event.date,
-      },
+      message: "Wydarzenie i wszystkie powiązane dane zostały usunięte",
+      deletedEventId: event._id,
     });
   } catch (error) {
     console.error("Delete event error:", error);
@@ -587,49 +618,40 @@ router.delete(
   requireConductor,
   async (req, res) => {
     try {
-      await autoArchiveEvents(); // Auto-archive before canceling invitation
+      await autoArchiveEvents();
 
       const { id: eventId, invitationId } = req.params;
 
-      // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).json({
-          error: "Not found",
-          message: "Wydarzenie nie zostało znalezione",
-        });
+        return res.status(404).json({ message: "Wydarzenie nie zostało znalezione" });
       }
 
       if (!event.conductorId.equals(req.user._id)) {
-        return res.status(403).json({
-          error: "Forbidden",
-          message: "Możesz odwoływać zaproszenia tylko do swoich wydarzeń",
-        });
+        return res.status(403).json({ message: "Możesz modyfikować tylko swoje wydarzenia" });
       }
 
-      // Usuń zaproszenie
-      const deletedInvitation = await Invitation.findByIdAndDelete(
-        invitationId
-      );
+      // Znajdź zaproszenie, upewniając się, że należy do tego wydarzenia
+      const invitation = await Invitation.findOne({
+        _id: invitationId,
+        eventId: eventId, // <-- Kluczowe zabezpieczenie
+      });
 
-      if (!deletedInvitation) {
-        return res.status(404).json({
-          error: "Not found",
-          message: "Zaproszenie nie zostało znalezione",
-        });
+      if (!invitation) {
+        return res.status(404).json({ message: "Zaproszenie nie zostało znalezione w tym wydarzeniu" });
       }
 
-      // Aktualizuj licznik zaproszeń
+      // Usuń je
+      await invitation.deleteOne();
+
+      // Aktualizuj licznik
       const totalInvitations = await Invitation.countDocuments({ eventId });
       event.invitedCount = totalInvitations;
       await event.save();
 
       res.json({
         message: "Zaproszenie zostało odwołane",
-        deletedInvitation: {
-          id: deletedInvitation._id,
-          userId: deletedInvitation.userId,
-        },
+        deletedInvitationId: invitation._id,
       });
     } catch (error) {
       console.error("Cancel invitation error:", error);
@@ -647,52 +669,47 @@ router.delete(
   requireConductor,
   async (req, res) => {
     try {
-      await autoArchiveEvents(); // Auto-archive before removing participant
+      await autoArchiveEvents();
 
       const { id: eventId, participantId } = req.params;
 
-      // Sprawdź czy wydarzenie istnieje i czy dyrygent jest właścicielem
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).json({
-          error: "Not found",
-          message: "Wydarzenie nie zostało znalezione",
-        });
+        return res.status(404).json({ message: "Wydarzenie nie zostało znalezione" });
       }
 
       if (!event.conductorId.equals(req.user._id)) {
-        return res.status(403).json({
-          error: "Forbidden",
-          message: "Możesz usuwać uczestników tylko ze swoich wydarzeń",
-        });
+        return res.status(403).json({ message: "Możesz modyfikować tylko swoje wydarzenia" });
       }
 
-      // Usuń uczestnictwo
-      const deletedParticipation = await Participation.findByIdAndDelete(
-        participantId
-      );
-
-      if (!deletedParticipation) {
-        return res.status(404).json({
-          error: "Not found",
-          message: "Uczestnictwo nie zostało znalezione",
-        });
-      }
-
-      // Aktualizuj licznik potwierdzonych uczestników
-      const confirmedCount = await Participation.countDocuments({
-        eventId,
-        status: "confirmed",
+      // Znajdź uczestnictwo, upewniając się, że należy do tego wydarzenia
+      const participation = await Participation.findOne({
+        _id: participantId,
+        eventId: eventId, // <-- Kluczowe zabezpieczenie
       });
-      event.confirmedCount = confirmedCount;
-      await event.save();
+
+      if (!participation) {
+        return res.status(404).json({ message: "Uczestnictwo nie zostało znalezione w tym wydarzeniu" });
+      }
+      
+      const wasConfirmed = participation.status === 'confirmed';
+
+      // Usuń je
+      await participation.deleteOne();
+      
+      // Jeśli usunięto potwierdzonego uczestnika, zaktualizuj licznik
+      if (wasConfirmed) {
+        const confirmedCount = await Participation.countDocuments({
+            eventId,
+            status: "confirmed",
+        });
+        event.confirmedCount = confirmedCount;
+        await event.save();
+      }
 
       res.json({
         message: "Uczestnik został usunięty z wydarzenia",
-        deletedParticipation: {
-          id: deletedParticipation._id,
-          userId: deletedParticipation.userId,
-        },
+        deletedParticipationId: participation._id,
       });
     } catch (error) {
       console.error("Remove participant error:", error);
