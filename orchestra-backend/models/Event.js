@@ -32,6 +32,12 @@ const eventSchema = new mongoose.Schema(
       maxlength: [3000, "Program nie może być dłuższy niż 3000 znaków"],
     },
 
+    dresscode: {
+      type: String,
+      enum: ['frak', 'black', 'casual', 'other'],
+      default: 'frak'
+    },
+
     conductorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
