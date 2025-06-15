@@ -69,7 +69,7 @@ const ConductorDashboard = () => {
             Archiwum
           </Link>
           <Link to="/conductor/create-event" className="btn-primary">
-            Utwórz nowe wydarzenie
+            Nowe wydarzenie
           </Link>
         </div>
       </div>
