@@ -101,6 +101,29 @@ const EventParticipation = () => {
     return new Date(dateString).toLocaleDateString('pl-PL', options);
   };
   
+  const addToGoogleCalendar = () => {
+    if (!event) return;
+
+    // Formatuj datę i czas dla Google Calendar
+    const startDate = new Date(event.date);
+    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // +2h domyślnie
+
+    const formatDate = (date) => {
+      return date.toISOString().replace(/-|:|\.\d+/g, '');
+    };
+
+    // Przygotuj URL do Google Calendar
+    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+    googleCalendarUrl.searchParams.append('action', 'TEMPLATE');
+    googleCalendarUrl.searchParams.append('text', event.title);
+    googleCalendarUrl.searchParams.append('dates', `${formatDate(startDate)}/${formatDate(endDate)}`);
+    googleCalendarUrl.searchParams.append('details', `${event.description || ''}\n\nHarmonogram:\n${event.schedule || ''}\n\nProgram:\n${event.program || ''}`);
+    googleCalendarUrl.searchParams.append('location', event.location || '');
+
+    // Otwórz w nowej karcie
+    window.open(googleCalendarUrl.toString(), '_blank');
+  };
+  
   if (loading) {
     return <div className="loading">Ładowanie szczegółów zaproszenia...</div>;
   }
@@ -178,6 +201,16 @@ const EventParticipation = () => {
             </button>
           </div>
         </div>
+
+        {!processing && (
+          <button 
+            onClick={addToGoogleCalendar}
+            className="btn-calendar"
+            title="Dodaj do Google Calendar"
+          >
+            📅 Dodaj do kalendarza Google
+          </button>
+        )}
       </div>
     </div>
   );

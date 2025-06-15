@@ -37,10 +37,20 @@ const EventDetails = () => {
     dresscode: 'frak',
   });
   const [successMessage, setSuccessMessage] = useState("");
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     fetchEventData();
   }, [id]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchEventData = async () => {
     try {
@@ -311,6 +321,26 @@ const EventDetails = () => {
     return null;
   };
 
+  const addToGoogleCalendar = () => {
+    if (!event) return;
+
+    const startDate = new Date(event.date);
+    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // +2h
+
+    const title = encodeURIComponent(event.title);
+    const details = encodeURIComponent(
+      `${event.description ? event.description + '\n\n' : ''}${
+        event.schedule ? 'Harmonogram:\n' + event.schedule + '\n\n' : ''
+      }${event.program ? 'Program:\n' + event.program : ''}`
+    );
+    const location = encodeURIComponent(event.location);
+    const start = startDate.toISOString().replace(/-|:|\.\d+/g, '');
+    const end = endDate.toISOString().replace(/-|:|\.\d+/g, '');
+
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${start}/${end}`;
+    window.open(url, '_blank');
+  };
+
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
   }
@@ -338,6 +368,13 @@ const EventDetails = () => {
             className="btn-back"
           >
             Powrót do listy
+          </button>
+          <button
+            onClick={addToGoogleCalendar}
+            className="btn-calendar"
+            title="Dodaj do kalendarza Google"
+          >
+            📅 Dodaj do kalendarza
           </button>
           <button
             onClick={() => setShowEditModal(true)}

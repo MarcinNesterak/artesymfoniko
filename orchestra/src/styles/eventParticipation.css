@@ -118,3 +118,42 @@
 .btn-back:hover {
   background-color: var(--bg-tertiary);
 }
+
+.btn-calendar {
+  display: block;
+  width: 100%;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  text-align: center;
+}
+
+.btn-calendar:hover {
+  background-color: var(--accent-hover);
+}
+
+@media (max-width: 768px) {
+  .btn-calendar {
+    margin-top: 10px;
+    font-size: 14px;
+    padding: 12px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-calendar {
+    font-size: 13px;
+    padding: 10px;
+  }
+}
