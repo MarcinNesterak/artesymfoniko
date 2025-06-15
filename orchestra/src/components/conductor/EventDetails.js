@@ -729,7 +729,7 @@ const EventDetails = () => {
                 <h3>Zaproś więcej muzyków</h3>
                 <div className="musicians-selection">
                   {availableMusicians.map((musician) => (
-                    <label key={musician._id} className="musician-checkbox">a
+                    <label key={musician._id} className="musician-checkbox">
                       <input
                         type="checkbox"
                         value={musician._id}
