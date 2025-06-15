@@ -83,7 +83,7 @@ const CreateEvent = () => {
   
   return (
     <div className="create-event">
-      <h1>Utwórz nowe wydarzenie</h1>
+      <h1>Nowe wydarzenie</h1>
       
       {error && <div className="error-message">{error}</div>}
       
