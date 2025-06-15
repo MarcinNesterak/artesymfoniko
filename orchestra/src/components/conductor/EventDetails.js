@@ -4,6 +4,13 @@ import { eventsAPI, usersAPI } from "../../services/api";
 import "../../styles/eventDetails.css";
 import SuccessMessage from '../common/SuccessMessage';
 
+const DRESSCODE_DESCRIPTIONS = {
+  frak: 'frak, biała koszula, biała muszka',
+  black: 'czarna marynarka, czarna koszula',
+  casual: 'biała koszula, czarna marynarka',
+  other: 'inny'
+};
+
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -462,19 +469,19 @@ const EventDetails = () => {
                 <div className="dresscode-options">
                   <div className={`dresscode-option ${editData.dresscode === 'frak' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'frak' }))}>
                     <img src="/img/frak.png" alt="frak" />
-                    <span>frak, biała koszula, biała muszka</span>
+                    <span>{DRESSCODE_DESCRIPTIONS['frak']}</span>
                   </div>
                   <div className={`dresscode-option ${editData.dresscode === 'black' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'black' }))}>
                     <img src="/img/black.png" alt="black" />
-                    <span>czarna marynarka, czarna mucha/krawat, biała koszula</span>
+                    <span>{DRESSCODE_DESCRIPTIONS['black']}</span>
                   </div>
                   <div className={`dresscode-option ${editData.dresscode === 'casual' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'casual' }))}>
                     <img src="/img/casual.png" alt="casual" />
-                    <span>biała koszula i czarna marynarka</span>
+                    <span>{DRESSCODE_DESCRIPTIONS['casual']}</span>
                   </div>
                   <div className={`dresscode-option ${editData.dresscode === 'other' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'other' }))}>
                     <img src="/img/other.png" alt="other" />
-                    <span>inny strój</span>
+                    <span>{DRESSCODE_DESCRIPTIONS['other']}</span>
                   </div>
                 </div>
               </div>
@@ -536,10 +543,7 @@ const EventDetails = () => {
                       <div className="dresscode-details">
                         <span className="dresscode-label">Panowie</span>
                         <p className="dresscode-description">
-                          {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
-                          {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
-                          {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
-                          {event.dresscode === 'other' && 'inny'}
+                          {DRESSCODE_DESCRIPTIONS[event.dresscode] || 'brak informacji'}
                         </p>
                       </div>
                     </div>

@@ -75,6 +75,39 @@ input:focus, select:focus, textarea:focus {
   border-color: #FF9800;
 }
 
+.btn-edit, .btn-delete {
+  background: #23232b !important;
+  color: #FFD600 !important;
+  border: 2px solid #FFD600 !important;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.btn-edit:hover, .btn-delete:hover,
+.btn-edit:focus, .btn-delete:focus {
+  background: #333 !important;
+  color: #FFB300 !important;
+  border-color: #FFB300 !important;
+}
+.btn-edit:active, .btn-delete:active {
+  background: #181818 !important;
+  color: #FF9800 !important;
+  border-color: #FF9800 !important;
+}
+
+.btn-remove-participant {
+  background: #cf6679 !important;
+  color: #fff !important;
+  border: 2px solid #cf6679 !important;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.btn-remove-participant:hover, .btn-remove-participant:focus {
+  background: #b85969 !important;
+  border-color: #b85969 !important;
+}
+.btn-remove-participant:active {
+  background: #a13a4a !important;
+  border-color: #a13a4a !important;
+}
+
 button:disabled {
   background-color: var(--border-color);
   cursor: not-allowed;
