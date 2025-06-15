@@ -210,7 +210,7 @@ router.post("/", requireConductor, async (req, res) => {
     // Automatyczne archiwizowanie przed utworzeniem nowego
     await autoArchiveEvents();
 
-    const { title, date, description, schedule, program, inviteUserIds, location } = req.body;
+    const { title, date, description, schedule, program, inviteUserIds, location, dresscode } = req.body;
 
     if (!title || !date) {
       return res.status(400).json({
@@ -235,6 +235,7 @@ router.post("/", requireConductor, async (req, res) => {
       description,
       schedule,
       program,
+      dresscode,
       conductorId: req.user._id,
       location,
     });
