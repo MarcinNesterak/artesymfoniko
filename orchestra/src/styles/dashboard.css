@@ -23,21 +23,6 @@
   margin-bottom: 20px;
 }
 
-.btn-primary {
-  background-color: var(--button-bg);
-  color: white;
-  padding: 10px 16px;
-  border-radius: 4px;
-  text-decoration: none;
-  display: inline-block;
-  transition: background-color 0.3s;
-}
-
-.btn-primary:hover {
-  background-color: var(--button-hover);
-  text-decoration: none;
-}
-
 .dashboard-actions {
   display: flex;
   gap: 10px;
