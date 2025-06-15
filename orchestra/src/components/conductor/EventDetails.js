@@ -20,7 +20,7 @@ const EventDetails = () => {
   const [participations, setParticipations] = useState([]);
   const [allMusicians, setAllMusicians] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -120,7 +120,6 @@ const EventDetails = () => {
     try {
       await eventsAPI.sendEventMessage(id, newMessage.trim());
       setNewMessage("");
-      fetchMessages();
     } catch (error) {
       console.error("Error sending message:", error);
       setError("Błąd podczas wysyłania wiadomości");
@@ -129,16 +128,22 @@ const EventDetails = () => {
     }
   };
 
-  // Auto-refresh co 5 sekund
+  // Auto-refresh co 5 sekund - jedyne źródło prawdy dla odświeżania czatu
   useEffect(() => {
-    fetchMessages();
+    // Pierwsze pobranie wiadomości
+    fetchMessages(); 
+    
+    // Ustawienie interwału
     const interval = setInterval(fetchMessages, 5000);
+    
+    // Czyszczenie interwału po odmontowaniu komponentu
     return () => clearInterval(interval);
   }, [id]);
 
   const handleEditEvent = async (e) => {
     e.preventDefault();
     setEditLoading(true);
+    setError(null);
 
     try {
       const updateData = {
@@ -161,7 +166,12 @@ const EventDetails = () => {
       setTimeout(() => setSuccessMessage(""), 3500);
     } catch (error) {
       console.error("Error updating event:", error);
-      setError("Wystąpił błąd podczas aktualizacji wydarzenia.");
+      if (error.response && error.response.data && Array.isArray(error.response.data.errors)) {
+        const errorMessages = error.response.data.errors.map(err => err.msg);
+        setError(errorMessages);
+      } else {
+        setError(["Wystąpił nieoczekiwany błąd podczas aktualizacji."]);
+      }
     } finally {
       setEditLoading(false);
     }
@@ -416,6 +426,20 @@ const EventDetails = () => {
                 ×
               </button>
             </div>
+
+            {error && (
+              <div className="error-message modal-error">
+                {Array.isArray(error) ? (
+                  <ul>
+                    {error.map((err, index) => (
+                      <li key={index}>{err}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{error}</p> 
+                )}
+              </div>
+            )}
 
             <form onSubmit={handleEditEvent} className="edit-event-form">
               <div className="form-group">

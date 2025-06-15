@@ -136,3 +136,5 @@ dist
 .pnp.*
 node_modules/
 orchestra-backend/.env
+
+orchestra/PLAN_DEPLOYMENT_PLAY_STORE.md
