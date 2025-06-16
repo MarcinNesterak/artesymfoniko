@@ -63,13 +63,13 @@ const ConductorDashboard = () => {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <h1>Panel Dyrygenta</h1>
+        <h1>Pulpit Dyrygenta</h1>
         <div className="dashboard-actions">
+          <Link to="/conductor/create-event" className="btn-create-event">
+            Nowe wydarzenie
+          </Link>
           <Link to="/conductor/archive" className="btn-secondary">
             Archiwum
-          </Link>
-          <Link to="/conductor/create-event" className="btn-primary">
-            Nowe wydarzenie
           </Link>
         </div>
       </div>

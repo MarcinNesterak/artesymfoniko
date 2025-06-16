@@ -44,6 +44,27 @@
   text-decoration: none;
 }
 
+.btn-create-event {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-create-event:hover {
+  background-color: var(--accent-secondary);
+  transform: translateY(-2px);
+  color: white;
+  text-decoration: none;
+}
+
 /* ===== Admin Footer ===== */
 
 .admin-footer {
