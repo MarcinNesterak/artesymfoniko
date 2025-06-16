@@ -677,3 +677,29 @@
     min-height: 44px;
   }
 }
+
+.btn-respond {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  text-align: center;
+}
+
+.btn-respond:hover {
+  background-color: var(--accent-secondary);
+  transform: translateY(-2px);
+  color: white;
+}
+
+.event-details-content {
+  display: flex;
+  flex-direction: column;
+}
