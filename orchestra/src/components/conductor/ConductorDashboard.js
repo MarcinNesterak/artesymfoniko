@@ -62,18 +62,6 @@ const ConductorDashboard = () => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>Pulpit Dyrygenta</h1>
-        <div className="dashboard-actions">
-          <Link to="/conductor/create-event" className="btn-create-event">
-            Nowe wydarzenie
-          </Link>
-          <Link to="/conductor/archive" className="btn-secondary">
-            Archiwum
-          </Link>
-        </div>
-      </div>
-
       {error && <div className="error-message">{error}</div>}
 
       <div className="dashboard-section">

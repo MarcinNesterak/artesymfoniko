@@ -36,10 +36,6 @@ const MusicianDashboard = () => {
   
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>Moje Wydarzenia</h1>
-      </div>
-      
       {error && <div className="error-message">{error}</div>}
       
       {loading ? (
