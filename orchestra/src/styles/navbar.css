@@ -1,110 +1,155 @@
 .navbar {
   background-color: var(--bg-secondary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border-color);
   padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
 }
 
 .navbar-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
 }
 
 .navbar-brand {
   font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--accent-secondary);
+  font-weight: 700;
+  color: var(--text-primary);
   text-decoration: none;
-  flex-shrink: 0;
 }
 
 .navbar-menu {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 25px;
 }
 
 .navbar-item {
-  color: var(--text-primary);
+  color: var(--text-secondary);
   text-decoration: none;
-  padding: 8px 12px;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.3s;
-  white-space: nowrap;
-  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 .navbar-item:hover {
-  border-bottom-color: var(--accent-secondary);
-  text-decoration: none;
+  color: var(--accent-primary);
 }
 
 .navbar-user {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 15px;
 }
 
 .navbar-username {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .navbar-logout {
   background-color: transparent;
-  color: var(--text-secondary);
   border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   padding: 6px 12px;
   border-radius: 4px;
-  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .navbar-logout:hover {
-  background-color: rgba(98, 0, 238, 0.1);
-  color: var(--accent-secondary);
+  background-color: var(--bg-tertiary);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
 }
 
-/* Mobile optimizations */
+/* --- Mobile Menu --- */
+.mobile-menu-toggle {
+  display: none; /* Ukryty na desktopie */
+  flex-direction: column;
+  justify-content: space-around;
+  width: 28px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1010;
+}
+
+.burger-line {
+  width: 28px;
+  height: 3px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu {
+  display: none; /* Ukryty na desktopie */
+}
+
+
+/* --- Responsive Styles --- */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 10px 0;
-  }
-  
-  .navbar-container {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
-  }
-  
-  .navbar-brand {
-    text-align: center;
-    font-size: 1.3rem;
-  }
-  
-  .navbar-menu {
-    justify-content: center;
-    order: 3;
-  }
-  
-  .navbar-item {
-    padding: 10px 15px;
-    text-align: center;
-    flex: 1;
-    min-width: 0;
-  }
-  
+  .navbar-menu,
   .navbar-user {
+    display: none; /* Ukryj menu desktopowe i usera */
+  }
+
+  .mobile-menu-toggle {
+    display: flex; /* Pokaż burger na mobile */
+  }
+
+  .mobile-menu {
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    order: 2;
-    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 100%; /* Start outside the screen */
+    width: 80%;
+    max-width: 300px;
+    height: 100%;
+    background-color: var(--bg-secondary);
+    box-shadow: -2px 0 8px rgba(0,0,0,0.2);
+    padding: 80px 30px 40px 30px;
+    transition: transform 0.3s ease-in-out;
+    z-index: 1005;
+  }
+
+  .navbar.mobile-open .mobile-menu {
+    transform: translateX(-100%); /* Slide in */
   }
   
-  .navbar-username {
-    font-weight: 500;
+  /* Animacja burgera w X */
+  .navbar.mobile-open .burger-line:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+  }
+  .navbar.mobile-open .burger-line:nth-child(2) {
+    opacity: 0;
+  }
+  .navbar.mobile-open .burger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+
+  .mobile-menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .mobile-menu .navbar-item {
+    font-size: 1.2rem;
+  }
+
+  .mobile-menu-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
   }
 }
 
