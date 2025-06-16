@@ -619,107 +619,61 @@
 
 @media (max-width: 1023px) {
   .dresscode-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
   .dresscode-image-container {
-    min-width: 0;
-    min-height: 0;
-    padding: 10px;
+    max-width: 80px;
   }
+
   .dresscode-image-container img {
-    width: 96px;
-    height: 96px;
+    max-height: 80px;
   }
 }
 
 @media (max-480px) {
   .dresscode-image-container img {
-    width: 72px;
-    height: 72px;
+    max-height: 70px;
   }
+
   .dresscode-details {
-    font-size: 0.95em;
-  }
-}
-
-.event-details-desktop-layout {
-  display: flex;
-  flex-direction: column;
-}
-
-@media (min-width: 1024px) {
-  .event-details-desktop-layout {
-    flex-direction: row;
-    gap: 32px;
-  }
-  .event-info-section {
-    width: 50%;
-    min-width: 0;
-  }
-  .event-side-section {
-    width: 50%;
-    min-width: 260px;
-    display: flex;
-    flex-direction: column;
-  }
-  .chat-responsive-order {
-    order: 2;
-    margin-top: 32px;
-  }
-  .musicians-card {
-    order: 1;
-  }
-}
-
-@media (max-width: 1023px) {
-  .event-details-desktop-layout {
-    flex-direction: column;
-  }
-  .chat-responsive-order {
-    order: -1;
-    margin-bottom: 24px;
+    padding-left: 15px;
   }
 }
 
 .event-extra-info {
-  margin-top: 12px;
-  padding: 8px 0 0 0;
-  word-break: break-word;
-  max-width: 100%;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
 }
 
 .event-extra-info pre {
-  background: none;
-  color: inherit;
-  font-size: 1em;
-  padding: 0;
-  margin: 0;
+  background-color: var(--bg-tertiary);
+  padding: 10px;
+  border-radius: 4px;
   white-space: pre-wrap;
+  font-family: inherit;
+  margin: 10px 0 0 0;
+  color: var(--text-primary);
 }
 
 .btn-respond {
-  display: inline-block;
-  padding: 12px 24px;
-  background-color: var(--accent-primary);
-  color: white;
+  padding: 10px 20px;
   border: none;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 1rem;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-  text-align: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  flex: 1;
 }
 
 .btn-respond:hover {
-  background-color: var(--accent-secondary);
-  transform: translateY(-2px);
-  color: white;
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .event-details-content {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
