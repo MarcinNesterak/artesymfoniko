@@ -16,7 +16,15 @@
 .event-actions {
   display: flex;
   gap: 10px;
+  align-items: stretch;
+}
+
+.event-actions > button {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  padding: 10px 15px;
+  height: 100%;
 }
 
 .btn-back,
@@ -24,7 +32,6 @@
   background-color: transparent;
   border: 1px solid var(--border-color) !important;
   color: var(--text-primary);
-  padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -43,7 +50,6 @@
   background-color: var(--error);
   color: white;
   border: none;
-  padding: 8px 15px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
