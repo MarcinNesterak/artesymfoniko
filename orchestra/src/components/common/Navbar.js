@@ -22,7 +22,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="container navbar-container">
         <Link to={user.role === 'conductor' ? '/conductor/dashboard' : '/musician/dashboard'} className="navbar-brand">
-          Orkiestra App
+          Artesymfoniko
         </Link>
         
         <div className="navbar-menu">
