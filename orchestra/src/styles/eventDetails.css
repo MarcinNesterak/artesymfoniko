@@ -22,7 +22,7 @@
 .btn-back,
 .btn-calendar {
   background-color: transparent;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color) !important;
   color: var(--text-primary);
   padding: 8px 15px;
   border-radius: 4px;
@@ -61,8 +61,15 @@
 
 .event-details-content {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr; /* Domyślnie jedna kolumna (mobile) */
   gap: 20px;
+}
+
+@media (min-width: 1024px) {
+  .event-details-content {
+    grid-template-columns: 2fr 1fr; /* Dwie kolumny na desktopie */
+    gap: 32px;
+  }
 }
 
 .event-info-card,

@@ -583,7 +583,7 @@ const EventDetails = () => {
         </div>
       )}
 
-      <div className="event-details-content event-details-desktop-layout">
+      <div className="event-details-content">
         <div className="event-info-section">
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
