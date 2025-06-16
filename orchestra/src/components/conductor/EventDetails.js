@@ -584,11 +584,10 @@ const EventDetails = () => {
       )}
 
       <div className="event-details-content">
-        <div className="event-info-section">
-          <div className="event-info-card">
-            <h2>Informacje o wydarzeniu</h2>
-            <div className="event-info-grid">
-              {/* <div className="info-item">
+        <div className="event-info-card">
+          <h2>Informacje o wydarzeniu</h2>
+          <div className="event-info-grid">
+            {/* <div className="info-item">
                 <span className="info-label">Nazwa:</span>
                 <span className="info-value">{event.name}</span>
               </div> */}
@@ -642,242 +641,240 @@ const EventDetails = () => {
                     event.status === 'cancelled' ? 'Anulowane' : 'Nieznany'}
                 </span>
               </div> */}
+          </div>
+          {event.description && (
+            <div className="event-extra-info">
+              <strong>Opis:</strong>
+              <p>{event.description}</p>
             </div>
-            {event.description && (
-              <div className="event-extra-info">
-                <strong>Opis:</strong>
-                <p>{event.description}</p>
-              </div>
-            )}
-            {event.schedule && (
-              <div className="event-extra-info">
-                <strong>Harmonogram:</strong>
-                <pre>{event.schedule}</pre>
-              </div>
-            )}
-            {event.program && (
-              <div className="event-extra-info">
-                <strong>Program koncertu:</strong>
-                <pre>{event.program}</pre>
-              </div>
+          )}
+          {event.schedule && (
+            <div className="event-extra-info">
+              <strong>Harmonogram:</strong>
+              <pre>{event.schedule}</pre>
+            </div>
+          )}
+          {event.program && (
+            <div className="event-extra-info">
+              <strong>Program koncertu:</strong>
+              <pre>{event.program}</pre>
+            </div>
+          )}
+        </div>
+
+        {/* Czat Wydarzenia */}
+        <div className="chat-card">
+          <h2>💬 Czat Wydarzenia</h2>
+          <div className="chat-messages">
+            {messages.length > 0 ? (
+              messages.map((message) => (
+                <div key={message._id} className="chat-message">
+                  <div className="message-header">
+                    <span className="message-author">
+                      {message.userId.name}
+                      {message.userId._id === user.id && " (Ty)"}
+                    </span>
+                    <span className="message-time">
+                      {new Date(message.createdAt).toLocaleString("pl-PL", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                  <div className="message-content">{message.content}</div>
+
+                  {/* Status przeczytania - tylko dla wiadomości dyrygenta */}
+                  {message.readBy && message.userId._id === user.id && (
+                    <div className="message-read-status">
+                      {(() => {
+                        // Znajdź kto NIE przeczytał
+                        const allParticipants = message.allParticipants || [];
+                        const readByNames = message.readBy.map(
+                          (read) => read.name
+                        );
+                        const notReadBy = allParticipants
+                          .map((p) => p.name)
+                          .filter((name) => !readByNames.includes(name));
+
+                        return (
+                          <small className="read-info">
+                            {notReadBy.length > 0 ? (
+                              <>
+                                ⚠️ Nie przeczytali:{" "}
+                                <span className="not-read-list">
+                                  {notReadBy.join(", ")}
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                ✅ Wszyscy przeczytali ({message.readCount}/
+                                {message.participantCount})
+                              </>
+                            )}
+                          </small>
+                        );
+                      })()}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="no-messages">Brak wiadomości. Napisz pierwszą!</p>
             )}
           </div>
+          <form onSubmit={sendMessage} className="chat-form">
+            <div className="chat-input-group">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Napisz wiadomość..."
+                disabled={sendingMessage}
+                maxLength={500}
+                className="chat-input"
+              />
+              <button
+                type="submit"
+                disabled={!newMessage.trim() || sendingMessage}
+                className="chat-send-btn"
+              >
+                {sendingMessage ? "📤" : "➤"}
+              </button>
+            </div>
+            <div className="chat-counter">{newMessage.length}/500</div>
+          </form>
+        </div>
+        
+        <div className="musicians-card">
+          <h2>Zaproszeni muzycy</h2>
 
-          {/* Czat Wydarzenia */}
-          <div className="chat-card">
-            <h2>💬 Czat Wydarzenia</h2>
-            <div className="chat-messages">
-              {messages.length > 0 ? (
-                messages.map((message) => (
-                  <div key={message._id} className="chat-message">
-                    <div className="message-header">
-                      <span className="message-author">
-                        {message.userId.name}
-                        {message.userId._id === user.id && " (Ty)"}
-                      </span>
-                      <span className="message-time">
-                        {new Date(message.createdAt).toLocaleString("pl-PL", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                    <div className="message-content">{message.content}</div>
+          {invitations.length > 0 ? (
+            <div className="musicians-list">
+              {[...invitations]
+                .sort((a, b) => {
+                  const statusA = getParticipationStatus(a.userId._id);
+                  const statusB = getParticipationStatus(b.userId._id);
+                  // Zaakceptowani na górze
+                  if (statusA === "Zaakceptowano" && statusB !== "Zaakceptowano") return -1;
+                  if (statusA !== "Zaakceptowano" && statusB === "Zaakceptowano") return 1;
+                  // Oczekujący przed odrzuconymi
+                  if (statusA === "Oczekująca" && statusB === "Odrzucono") return -1;
+                  if (statusA === "Odrzucono" && statusB === "Oczekująca") return 1;
+                  // Potem alfabetycznie
+                  return a.userId.name.localeCompare(b.userId.name, 'pl');
+                })
+                .map((invitation) => {
+                  const musician = invitation.userId;
+                  if (!musician) return null;
 
-                    {/* Status przeczytania - tylko dla wiadomości dyrygenta */}
-                    {message.readBy && message.userId._id === user.id && (
-                      <div className="message-read-status">
-                        {(() => {
-                          // Znajdź kto NIE przeczytał
-                          const allParticipants = message.allParticipants || [];
-                          const readByNames = message.readBy.map(
-                            (read) => read.name
-                          );
-                          const notReadBy = allParticipants
-                            .map((p) => p.name)
-                            .filter((name) => !readByNames.includes(name));
+                  const status = getParticipationStatus(musician._id);
+                  const participation = participations.find(
+                    (p) => p.userId._id === musician._id
+                  );
+                  let statusClass = "status-pending";
 
-                          return (
-                            <small className="read-info">
-                              {notReadBy.length > 0 ? (
-                                <>
-                                  ⚠️ Nie przeczytali:{" "}
-                                  <span className="not-read-list">
-                                    {notReadBy.join(", ")}
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  ✅ Wszyscy przeczytali ({message.readCount}/
-                                  {message.participantCount})
-                                </>
-                              )}
-                            </small>
-                          );
-                        })()}
+                  if (status === "Zaakceptowano") {
+                    statusClass = "status-confirmed";
+                  } else if (status === "Odrzucono") {
+                    statusClass = "status-declined";
+                  }
+
+                  return (
+                    <div key={invitation._id} className="musician-item">
+                      <div className="musician-info">
+                        <div className="musician-name">{musician.name}</div>
+                        <div className="musician-instrument">
+                          {musician.instrument || "Instrument nieznany"}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="no-messages">Brak wiadomości. Napisz pierwszą!</p>
+                      <div className={`invitation-status ${statusClass}`}>
+                        {status}
+                      </div>
+                      <div className="musician-actions">
+                        {status === "Oczekująca" && (
+                          <button
+                            onClick={() =>
+                              cancelInvitation(invitation._id, musician.name)
+                            }
+                            className="btn-cancel-invitation"
+                            title="Odwołaj zaproszenie"
+                          >
+                            Odwołaj
+                          </button>
+                        )}
+                        {status === "Zaakceptowano" && participation && (
+                          <button
+                            onClick={() =>
+                              removeParticipant(
+                                participation._id,
+                                musician.name
+                              )
+                            }
+                            className="btn-remove-participant"
+                            title="Usuń z uczestników"
+                          >
+                            Usuń
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <p>Nie zaproszono jeszcze żadnych muzyków.</p>
+          )}
+
+          {availableMusicians.length > 0 && (
+            <div className="add-musicians-section">
+              <h3>Zaproś więcej muzyków</h3>
+              <div className="musicians-selection">
+                {availableMusicians.map((musician) => (
+                  <label key={musician._id} className="musician-checkbox">
+                    <input
+                      type="checkbox"
+                      value={musician._id}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedMusicians((prev) => [
+                            ...prev,
+                            musician._id,
+                          ]);
+                        } else {
+                          setSelectedMusicians((prev) =>
+                            prev.filter((id) => id !== musician._id)
+                          );
+                        }
+                      }}
+                      checked={selectedMusicians.includes(musician._id)}
+                    />
+                    <span className="musician-label">
+                      {musician.name} (
+                      {musician.instrument || "Instrument nieznany"})
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {selectedMusicians.length > 0 && (
+                <div className="invitation-actions">
+                  <button
+                    onClick={sendMultipleInvitations}
+                    className="btn-invite-selected"
+                  >
+                    Zaproś wybranych ({selectedMusicians.length})
+                  </button>
+                  <button
+                    onClick={() => setSelectedMusicians([])}
+                    className="btn-clear-selection"
+                  >
+                    Wyczyść wybór
+                  </button>
+                </div>
               )}
             </div>
-            <form onSubmit={sendMessage} className="chat-form">
-              <div className="chat-input-group">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Napisz wiadomość..."
-                  disabled={sendingMessage}
-                  maxLength={500}
-                  className="chat-input"
-                />
-                <button
-                  type="submit"
-                  disabled={!newMessage.trim() || sendingMessage}
-                  className="chat-send-btn"
-                >
-                  {sendingMessage ? "📤" : "➤"}
-                </button>
-              </div>
-              <div className="chat-counter">{newMessage.length}/500</div>
-            </form>
-          </div>
-        </div>
-        <div className="event-side-section">
-          <div className="musicians-card">
-            <h2>Zaproszeni muzycy</h2>
-
-            {invitations.length > 0 ? (
-              <div className="musicians-list">
-                {[...invitations]
-                  .sort((a, b) => {
-                    const statusA = getParticipationStatus(a.userId._id);
-                    const statusB = getParticipationStatus(b.userId._id);
-                    // Zaakceptowani na górze
-                    if (statusA === "Zaakceptowano" && statusB !== "Zaakceptowano") return -1;
-                    if (statusA !== "Zaakceptowano" && statusB === "Zaakceptowano") return 1;
-                    // Oczekujący przed odrzuconymi
-                    if (statusA === "Oczekująca" && statusB === "Odrzucono") return -1;
-                    if (statusA === "Odrzucono" && statusB === "Oczekująca") return 1;
-                    // Potem alfabetycznie
-                    return a.userId.name.localeCompare(b.userId.name, 'pl');
-                  })
-                  .map((invitation) => {
-                    const musician = invitation.userId;
-                    if (!musician) return null;
-
-                    const status = getParticipationStatus(musician._id);
-                    const participation = participations.find(
-                      (p) => p.userId._id === musician._id
-                    );
-                    let statusClass = "status-pending";
-
-                    if (status === "Zaakceptowano") {
-                      statusClass = "status-confirmed";
-                    } else if (status === "Odrzucono") {
-                      statusClass = "status-declined";
-                    }
-
-                    return (
-                      <div key={invitation._id} className="musician-item">
-                        <div className="musician-info">
-                          <div className="musician-name">{musician.name}</div>
-                          <div className="musician-instrument">
-                            {musician.instrument || "Instrument nieznany"}
-                          </div>
-                        </div>
-                        <div className={`invitation-status ${statusClass}`}>
-                          {status}
-                        </div>
-                        <div className="musician-actions">
-                          {status === "Oczekująca" && (
-                            <button
-                              onClick={() =>
-                                cancelInvitation(invitation._id, musician.name)
-                              }
-                              className="btn-cancel-invitation"
-                              title="Odwołaj zaproszenie"
-                            >
-                              Odwołaj
-                            </button>
-                          )}
-                          {status === "Zaakceptowano" && participation && (
-                            <button
-                              onClick={() =>
-                                removeParticipant(
-                                  participation._id,
-                                  musician.name
-                                )
-                              }
-                              className="btn-remove-participant"
-                              title="Usuń z uczestników"
-                            >
-                              Usuń
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            ) : (
-              <p>Nie zaproszono jeszcze żadnych muzyków.</p>
-            )}
-
-            {availableMusicians.length > 0 && (
-              <div className="add-musicians-section">
-                <h3>Zaproś więcej muzyków</h3>
-                <div className="musicians-selection">
-                  {availableMusicians.map((musician) => (
-                    <label key={musician._id} className="musician-checkbox">
-                      <input
-                        type="checkbox"
-                        value={musician._id}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedMusicians((prev) => [
-                              ...prev,
-                              musician._id,
-                            ]);
-                          } else {
-                            setSelectedMusicians((prev) =>
-                              prev.filter((id) => id !== musician._id)
-                            );
-                          }
-                        }}
-                        checked={selectedMusicians.includes(musician._id)}
-                      />
-                      <span className="musician-label">
-                        {musician.name} (
-                        {musician.instrument || "Instrument nieznany"})
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                {selectedMusicians.length > 0 && (
-                  <div className="invitation-actions">
-                    <button
-                      onClick={sendMultipleInvitations}
-                      className="btn-invite-selected"
-                    >
-                      Zaproś wybranych ({selectedMusicians.length})
-                    </button>
-                    <button
-                      onClick={() => setSelectedMusicians([])}
-                      className="btn-clear-selection"
-                    >
-                      Wyczyść wybór
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />

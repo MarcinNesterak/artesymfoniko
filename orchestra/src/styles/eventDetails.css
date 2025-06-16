@@ -63,17 +63,37 @@
   display: grid;
   grid-template-columns: 1fr; /* Domyślnie jedna kolumna (mobile) */
   gap: 20px;
+  grid-template-areas:
+    "info"
+    "chat"
+    "musicians";
 }
 
 @media (min-width: 1024px) {
   .event-details-content {
     grid-template-columns: 2fr 1fr; /* Dwie kolumny na desktopie */
+    grid-template-areas:
+      "info chat"
+      "info musicians";
     gap: 32px;
   }
 }
 
-.event-info-card,
+.event-info-card {
+  grid-area: info;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--card-shadow);
+}
+
+.chat-card {
+  grid-area: chat;
+  margin-top: 20px;
+}
+
 .musicians-card {
+  grid-area: musicians;
   background-color: var(--card-bg);
   border-radius: 8px;
   padding: 20px;
@@ -233,10 +253,6 @@
 }
 
 /* Chat Styles */
-.chat-card {
-  margin-top: 20px;
-}
-
 .chat-messages {
   max-height: 300px;
   overflow-y: auto;
@@ -670,10 +686,4 @@
 .btn-respond:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-}
-
-.event-details-content {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
 }
