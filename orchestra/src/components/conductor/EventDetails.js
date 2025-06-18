@@ -66,13 +66,17 @@ const EventDetails = () => {
 
       // Ustaw dane do edycji
       const eventData = eventResponse.event;
+      const scheduleText = Array.isArray(eventData.schedule)
+        ? eventData.schedule.map(item => `${item.time} - ${item.activity}`).join('\\n')
+        : eventData.schedule || "";
+
       setEditData({
         title: eventData.title || "",
         date: eventData.date
           ? new Date(eventData.date).toISOString().slice(0, 16)
           : "",
         description: eventData.description || "",
-        schedule: eventData.schedule || "",
+        schedule: scheduleText,
         program: eventData.program || "",
         location: eventData.location || "",
         dresscode: eventData.dresscode || 'frak',
@@ -650,8 +654,18 @@ const EventDetails = () => {
           )}
           {event.schedule && (
             <div className="event-extra-info">
-              <strong>Harmonogram:</strong>
-              <pre>{event.schedule}</pre>
+              <h3>Harmonogram</h3>
+              {Array.isArray(event.schedule) && event.schedule.length > 0 ? (
+                <ul>
+                  {event.schedule.map((item, index) => (
+                    <li key={index}>
+                      <strong>{item.time}</strong> - {item.activity}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>{event.schedule && !Array.isArray(event.schedule) ? event.schedule : 'Brak szczegółowego harmonogramu.'}</p>
+              )}
             </div>
           )}
           {event.program && (
