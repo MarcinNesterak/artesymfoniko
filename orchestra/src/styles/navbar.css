@@ -118,7 +118,7 @@
     transition: transform 0.3s ease-in-out;
     z-index: 1005;
   }
-
+  
   .navbar.mobile-open .mobile-menu {
     transform: translateX(-100%); /* Slide in */
   }
@@ -139,7 +139,7 @@
     flex-direction: column;
     gap: 30px;
   }
-
+  
   .mobile-menu .navbar-item {
     font-size: 1.2rem;
   }

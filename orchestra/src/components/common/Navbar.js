@@ -23,22 +23,22 @@ const Navbar = () => {
   if (!user || location.pathname === '/login') {
     return null;
   }
-
+  
   const conductorLinks = (
-    <>
-      <Link to="/conductor/dashboard" className="navbar-item">Dashboard</Link>
-      <Link to="/conductor/create-event" className="navbar-item">Utwórz Wydarzenie</Link>
-      <Link to="/conductor/musicians" className="navbar-item">Muzycy</Link>
-      <Link to="/conductor/archive" className="navbar-item">Archiwum</Link>
-    </>
+            <>
+              <Link to="/conductor/dashboard" className="navbar-item">Dashboard</Link>
+              <Link to="/conductor/create-event" className="navbar-item">Utwórz Wydarzenie</Link>
+              <Link to="/conductor/musicians" className="navbar-item">Muzycy</Link>
+              <Link to="/conductor/archive" className="navbar-item">Archiwum</Link>
+            </>
   );
 
   const musicianLinks = (
-    <>
-      <Link to="/musician/dashboard" className="navbar-item">Moje Wydarzenia</Link>
-      <Link to="/musician/archive" className="navbar-item">Archiwum</Link>
-      <Link to="/musician/profile" className="navbar-item">Moje Dane</Link>
-    </>
+            <>
+              <Link to="/musician/dashboard" className="navbar-item">Moje Wydarzenia</Link>
+              <Link to="/musician/archive" className="navbar-item">Archiwum</Link>
+              <Link to="/musician/profile" className="navbar-item">Moje Dane</Link>
+            </>
   );
 
   const navLinks = user.role === 'conductor' ? conductorLinks : musicianLinks;

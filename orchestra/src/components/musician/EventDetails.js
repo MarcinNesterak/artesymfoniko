@@ -202,22 +202,22 @@ const EventDetails = () => {
       </div>
 
       {/* Zaproszenie na górze */}
-      {userInvitation && !userParticipation && (
+          {userInvitation && !userParticipation && (
         <div className="event-info-card invitation-card" style={{marginBottom: 24}}>
-          <h2>Zaproszenie</h2>
-          <p>Zostałeś zaproszony do tego wydarzenia.</p>
-          <div className="invitation-actions">
-            <button
-              onClick={() =>
-                navigate(
-                  `/musician/events/${id}/participate/${userInvitation._id}`
-                )
-              }
-              className="btn-respond"
-            >
-              Odpowiedz na zaproszenie
-            </button>
-          </div>
+              <h2>Zaproszenie</h2>
+              <p>Zostałeś zaproszony do tego wydarzenia.</p>
+              <div className="invitation-actions">
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/musician/events/${id}/participate/${userInvitation._id}`
+                    )
+                  }
+                  className="btn-respond"
+                >
+                  Odpowiedz na zaproszenie
+                </button>
+              </div>
           {/* Przycisk kalendarza Google */}
           {!calendarAdded ? (
             <button
@@ -306,8 +306,18 @@ const EventDetails = () => {
             )}
             {event.schedule && (
               <div className="event-extra-info">
-                <strong>Harmonogram:</strong>
-                <pre>{event.schedule}</pre>
+                <h3>Harmonogram</h3>
+                {Array.isArray(event.schedule) ? (
+                  <ul>
+                    {event.schedule.map((item, index) => (
+                      <li key={index}>
+                        <strong>{item.time}</strong> - {item.activity}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{event.schedule || 'Brak szczegółowego harmonogramu.'}</p>
+                )}
               </div>
             )}
             {event.program && (
