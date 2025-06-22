@@ -55,10 +55,9 @@ const EventCard = ({ event, linkTo, showDeleteButton = false, onDelete }) => {
                 <span>{formatDate(event.date)}</span>
               </div>
 
-              <div className="event-description">
-                {event.description && event.description.length > 100
-                  ? `${event.description.substring(0, 100)}...`
-                  : event.description}
+              <div className="event-location">
+                <i className="event-icon">📍</i>
+                <span>{event.location || 'Brak lokalizacji'}</span>
               </div>
             </div>
           </div>
