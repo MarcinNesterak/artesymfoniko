@@ -162,17 +162,11 @@ const EventDetails = () => {
 
       await eventsAPI.updateEvent(id, updateData);
 
-      // Zamiast pobierać wszystko od nowa, zaktualizujmy tylko stan eventu
-      setEvent(prevEvent => ({
-        ...prevEvent,
-        ...updateData,
-        // Upewnijmy się, że data jest w formacie ISO, jeśli backend jej nie zwraca
-        date: new Date(updateData.date).toISOString(),
-      }));
+      // Po udanej edycji, przekieruj na dashboard z informacją o sukcesie
+      navigate("/conductor/dashboard", { 
+        state: { successMessage: "Wydarzenie zostało zaktualizowane pomyślnie!" } 
+      });
 
-      setShowEditModal(false);
-      setSuccessMessage("Wydarzenie zostało zaktualizowane pomyślnie!");
-      setTimeout(() => setSuccessMessage(""), 2500);
     } catch (error) {
       console.error("Error updating event:", error);
       if (error.response && error.response.data && Array.isArray(error.response.data.errors)) {
