@@ -298,97 +298,63 @@ router.post(
   }
 );
 
-// PUT /api/events/:id - aktualizuj wydarzenie (tylko dyrygent-właściciel)
+// PUT /api/events/:id - zaktualizuj wydarzenie (tylko dyrygent-właściciel)
 router.put(
   "/:id",
   requireConductor,
   [
-    // Reguły walidacji - wszystkie opcjonalne
-    body("title")
-      .optional()
-      .not().isEmpty().withMessage("Tytuł nie może być pusty.")
-      .trim()
-      .escape(),
-    body("date")
-      .optional()
-      .isISO8601().withMessage("Nieprawidłowy format daty.")
-      .toDate(),
-    body("location")
-      .optional()
-      .not().isEmpty().withMessage("Lokalizacja nie może być pusta.")
-      .trim()
-      .escape(),
-    body("description")
-      .optional()
-      .trim()
-      .escape(),
-    body("dresscode")
-      .optional()
-      .isIn(['frak', 'black', 'casual', 'other'])
-      .withMessage("Nieprawidłowa wartość dresscode."),
+    // Walidacja, podobna do tworzenia
+    body("title").optional().notEmpty().trim().escape().withMessage("Tytuł nie może być pusty."),
+    body("date").optional().isISO8601().toDate().withMessage("Nieprawidłowy format daty."),
+    body("location").optional().notEmpty().trim().escape().withMessage("Lokalizacja nie może być pusta."),
+    body("description").optional().trim().escape(),
+    body("schedule").optional().trim().escape(),
+    body("program").optional().trim().escape(),
+    body("dresscode").optional().isIn(['frak', 'black', 'casual', 'other']).withMessage("Nieprawidłowa wartość dresscode."),
   ],
   async (req, res) => {
-    // Sprawdzenie wyników walidacji
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
-    try {
-      await autoArchiveEvents();
 
+    try {
       const event = await Event.findById(req.params.id);
 
       if (!event) {
-        return res.status(404).json({ message: "Wydarzenie nie zostało znalezione" });
+        return res.status(404).json({ message: "Wydarzenie nie znalezione." });
       }
 
-      if (!event.conductorId.equals(req.user._id)) {
-        return res.status(403).json({ message: "Możesz edytować tylko swoje wydarzenia" });
+      // Sprawdź, czy dyrygent jest właścicielem wydarzenia
+      if (event.conductorId.toString() !== req.user._id.toString()) {
+        return res
+          .status(403)
+          .json({ message: "Brak uprawnień do edycji tego wydarzenia." });
       }
 
+      // Aktualizuj pola, które zostały przesłane w ciele żądania
       const { title, date, description, schedule, program, location, dresscode } = req.body;
-
-      // Twoja logika walidacji daty i przywracania z archiwum
-      if (date) { // Wykonaj logikę tylko jeśli data została podana
-        if (!event.archived) {
-            const eventDate = new Date(date);
-            if (eventDate <= new Date()) {
-                return res.status(400).json({ errors: [{ msg: "Data wydarzenia musi być w przyszłości." }] });
-            }
-        } else {
-            const newEventDate = new Date(date);
-            if (newEventDate > new Date()) {
-                event.archived = false;
-                console.log(`📤 Event restored from archive: ${event.title}`);
-            }
-        }
-        event.date = date;
-      }
+      if (title) event.title = title;
+      if (date) event.date = date;
+      if (description) event.description = description;
+      if (schedule) event.schedule = schedule;
+      if (program) event.program = program;
+      if (location) event.location = location;
+      if (dresscode) event.dresscode = dresscode;
       
-      // Aktualizuj pola, jeśli zostały dostarczone
-      if (title !== undefined) event.title = title;
-      if (description !== undefined) event.description = description;
-      if (schedule !== undefined) event.schedule = schedule;
-      if (program !== undefined) event.program = program;
-      if (location !== undefined) event.location = location;
-      if (dresscode !== undefined) event.dresscode = dresscode;
-      
+      // Oznacz jako zmodyfikowane
       event.lastModified = new Date();
 
-      await event.save();
-
-      const populatedEvent = await Event.findById(event._id).populate("conductorId", "name email");
+      const updatedEvent = await event.save();
 
       res.json({
-        message: "Wydarzenie zostało zaktualizowane",
-        event: populatedEvent,
+        message: "Wydarzenie zostało pomyślnie zaktualizowane.",
+        event: updatedEvent,
       });
     } catch (error) {
       console.error("Update event error:", error);
       res.status(500).json({
-        error: "Server error",
-        message: "Wystąpił błąd podczas aktualizacji wydarzenia",
+        message: "Błąd serwera podczas aktualizacji wydarzenia.",
       });
     }
   }
