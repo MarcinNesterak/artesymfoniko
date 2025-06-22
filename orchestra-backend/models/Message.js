@@ -15,6 +15,10 @@ const messageSchema = new mongoose.Schema({
     type: String,
     required: true,
     maxlength: 500
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

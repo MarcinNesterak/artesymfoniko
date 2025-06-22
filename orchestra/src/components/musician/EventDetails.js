@@ -157,6 +157,32 @@ const EventDetails = () => {
     }
   }, [id, event]);
 
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm("Czy na pewno chcesz usunąć tę wiadomość?")) {
+      return;
+    }
+    try {
+      await eventsAPI.deleteEventMessage(id, messageId);
+      fetchMessages(); // Natychmiastowe odświeżenie
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      setError("Nie udało się usunąć wiadomości.");
+    }
+  };
+
+  const handleParticipation = async (status) => {
+    setLoading(true);
+    try {
+      await eventsAPI.updateParticipationStatus(id, status);
+      fetchMessages(); // Natychmiastowe odświeżenie
+    } catch (error) {
+      console.error("Error updating participation status:", error);
+      setError("Nie udało się zaktualizować statusu uczestnictwa.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
   }
@@ -386,31 +412,33 @@ const EventDetails = () => {
               <h2>💬 Czat Wydarzenia</h2>
 
               <div className="chat-messages">
-                {messages.length > 0 ? (
-                  messages.map((message) => (
-                    <div key={message._id} className="chat-message">
-                      <div className="message-header">
-                        <span className="message-author">
-                          {message.userId.name}
-                          {message.userId._id === user.id && " (Ty)"}
-                        </span>
-                        <span className="message-time">
-                          {new Date(message.createdAt).toLocaleString("pl-PL", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      <div className="message-content">{message.content}</div>
+                {messages.map((msg) => (
+                  <div
+                    key={msg._id}
+                    className={`chat-message ${
+                      msg.userId._id === user.id ? "my-message" : "other-message"
+                    }`}
+                  >
+                    <div className="message-header">
+                      <strong>{msg.userId.name}</strong>
+                      <span className="message-time">
+                        {new Date(msg.createdAt).toLocaleString("pl-PL")}
+                      </span>
                     </div>
-                  ))
-                ) : (
-                  <p className="no-messages">
-                    Brak wiadomości. Napisz pierwszą!
-                  </p>
-                )}
+                    <p className={`message-content ${msg.isDeleted ? 'deleted-message' : ''}`}>
+                      {msg.content}
+                    </p>
+                    {msg.userId._id === user.id && !msg.isDeleted && (
+                      <button 
+                        onClick={() => handleDeleteMessage(msg._id)}
+                        className="btn-delete-message"
+                        title="Usuń wiadomość"
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
 
               <form onSubmit={sendMessage} className="chat-form">

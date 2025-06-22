@@ -144,6 +144,21 @@ const EventDetails = () => {
     return () => clearInterval(interval);
   }, [id]);
 
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm("Czy na pewno chcesz usunąć tę wiadomość?")) {
+      return;
+    }
+    try {
+      await eventsAPI.deleteEventMessage(id, messageId);
+      // Wiadomości odświeżą się automatycznie przez interwał,
+      // ale możemy wywołać fetchMessages() dla natychmiastowego efektu.
+      fetchMessages(); 
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      setError("Nie udało się usunąć wiadomości.");
+    }
+  };
+
   const handleEditEvent = async (e) => {
     e.preventDefault();
     setEditLoading(true);
@@ -675,31 +690,38 @@ const EventDetails = () => {
           <h2>💬 Czat Wydarzenia</h2>
           <div className="chat-messages">
             {messages.length > 0 ? (
-              messages.map((message) => (
-                <div key={message._id} className="chat-message">
+              messages.map((msg) => (
+                <div
+                  key={msg._id}
+                  className={`chat-message ${
+                    msg.userId._id === user.id ? "my-message" : "other-message"
+                  }`}
+                >
                   <div className="message-header">
-                    <span className="message-author">
-                      {message.userId.name}
-                      {message.userId._id === user.id && " (Ty)"}
-                    </span>
+                    <strong>{msg.userId.name}</strong>
                     <span className="message-time">
-                      {new Date(message.createdAt).toLocaleString("pl-PL", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {new Date(msg.createdAt).toLocaleString("pl-PL")}
                     </span>
                   </div>
-                  <div className="message-content">{message.content}</div>
-
+                  <p className={`message-content ${msg.isDeleted ? 'deleted-message' : ''}`}>
+                    {msg.content}
+                  </p>
+                  {msg.userId._id === user.id && !msg.isDeleted && (
+                    <button 
+                      onClick={() => handleDeleteMessage(msg._id)}
+                      className="btn-delete-message"
+                      title="Usuń wiadomość"
+                    >
+                      🗑️
+                    </button>
+                  )}
                   {/* Status przeczytania - tylko dla wiadomości dyrygenta */}
-                  {message.readBy && message.userId._id === user.id && (
+                  {msg.readBy && msg.userId._id === user.id && (
                     <div className="message-read-status">
                       {(() => {
                         // Znajdź kto NIE przeczytał
-                        const allParticipants = message.allParticipants || [];
-                        const readByNames = message.readBy.map(
+                        const allParticipants = msg.allParticipants || [];
+                        const readByNames = msg.readBy.map(
                           (read) => read.name
                         );
                         const notReadBy = allParticipants
@@ -717,8 +739,8 @@ const EventDetails = () => {
                               </>
                             ) : (
                               <>
-                                ✅ Wszyscy przeczytali ({message.readCount}/
-                                {message.participantCount})
+                                ✅ Wszyscy przeczytali ({msg.readCount}/
+                                {msg.participantCount})
                               </>
                             )}
                           </small>

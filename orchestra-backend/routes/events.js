@@ -1027,4 +1027,36 @@ router.post("/admin/restore", requireUser, async (req, res) => {
     });
   }
 });
+
+// DELETE /api/events/:eventId/messages/:messageId - usuń wiadomość (tylko autor)
+router.delete(
+  "/:eventId/messages/:messageId",
+  requireUser,
+  async (req, res) => {
+    try {
+      const { messageId } = req.params;
+      const message = await Message.findById(messageId);
+
+      if (!message) {
+        return res.status(404).json({ message: "Wiadomość nie została znaleziona." });
+      }
+
+      // Sprawdź, czy użytkownik jest autorem wiadomości
+      if (message.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: "Nie masz uprawnień do usunięcia tej wiadomości." });
+      }
+
+      // "Miękkie" usunięcie
+      message.isDeleted = true;
+      message.content = "Wiadomość została usunięta.";
+      await message.save();
+
+      res.status(200).json({ message: "Wiadomość została usunięta." });
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      res.status(500).json({ message: "Błąd serwera podczas usuwania wiadomości." });
+    }
+  }
+);
+
 export default router;

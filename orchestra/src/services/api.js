@@ -1,6 +1,7 @@
 // Konfiguracja API
 const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "https://artesymfoniko-production.up.railway.app";
+  process.env.REACT_APP_API_URL ||
+  "https://artesymfoniko-production.up.railway.app";
 
 // Funkcja pomocnicza do pobierania tokena
 const getAuthToken = () => {
@@ -274,6 +275,18 @@ export const eventsAPI = {
         method: "POST",
         headers: getHeaders(true),
         body: JSON.stringify({ content }),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Usuń wiadomość (tylko autor)
+  deleteEventMessage: async (eventId, messageId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/messages/${messageId}`,
+      {
+        method: "DELETE",
+        headers: getHeaders(true),
       }
     );
     return handleResponse(response);
