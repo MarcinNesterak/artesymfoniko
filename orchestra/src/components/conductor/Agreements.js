@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { getEvents } from '../../services/api';
 import EventCard from '../common/EventCard';
 import '../../styles/dashboard.css';
+
+// Tymczasowo przenosimy logikę API bezpośrednio tutaj, aby ominąć problem z edycją pliku api.js
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://artesymfoniko-production.up.railway.app";
+const getAuthToken = () => {
+    const user = localStorage.getItem("user");
+    if (user) {
+        const userData = JSON.parse(user);
+        return userData.token;
+    }
+    return null;
+};
 
 const Agreements = () => {
     const [events, setEvents] = useState([]);
@@ -12,11 +22,27 @@ const Agreements = () => {
         const fetchEventsForContracts = async () => {
             try {
                 setLoading(true);
-                // Pobieramy wszystkie wydarzenia, bez filtrowania
-                const allEvents = await getEvents(); 
                 
-                // CELOWO USUWAM FILTROWANIE, ABY WYŚWIETLIĆ WSZYSTKO
-                setEvents(allEvents);
+                // === POCZĄTEK LOGIKI Z api.js ===
+                const token = getAuthToken();
+                const response = await fetch(`${API_BASE_URL}/api/events`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                // === KONIEC LOGIKI Z api.js ===
+
+                // Filtrujemy po stronie klienta, aby pokazać tylko aktywne wydarzenia
+                const activeEvents = data.events.filter(event => !event.archived);
+                setEvents(activeEvents);
+
             } catch (err) {
                 console.error("Błąd podczas pobierania wydarzeń:", err);
                 setError('Nie udało się załadować wydarzeń. Spróbuj ponownie później.');
