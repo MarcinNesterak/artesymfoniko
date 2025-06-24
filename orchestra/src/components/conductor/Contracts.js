@@ -13,8 +13,8 @@ const Contracts = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Pobieramy tylko aktywne wydarzenia, które mogą wymagać umów
-        const response = await eventsAPI.getEvents(false);
+        // Pobieramy WSZYSTKIE wydarzenia, bez filtrowania po statusie archiwum
+        const response = await eventsAPI.getEvents();
         setEvents(response.events);
         setError(null);
       } catch (err) {
