@@ -14,8 +14,8 @@ const Contracts = () => {
       try {
         setLoading(true);
         // Pobieramy tylko aktywne wydarzenia, które mogą wymagać umów
-        const activeEvents = await eventsAPI.getEvents(false);
-        setEvents(activeEvents);
+        const response = await eventsAPI.getEvents(false);
+        setEvents(response.events);
         setError(null);
       } catch (err) {
         setError('Nie udało się załadować wydarzeń. Spróbuj ponownie później.');
