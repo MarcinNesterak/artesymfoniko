@@ -4,7 +4,7 @@ import { eventsAPI } from '../../services/api';
 import '../../styles/contracts.css';
 
 const Contracts = () => {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -13,12 +13,12 @@ const Contracts = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Pobieramy WSZYSTKIE wydarzenia, bez filtrowania po statusie archiwum
         const response = await eventsAPI.getEvents();
-        setEvents(response.events);
+        setEvents(response.events || []);
         setError(null);
       } catch (err) {
         setError('Nie udało się załadować wydarzeń. Spróbuj ponownie później.');
+        setEvents([]);
         console.error(err);
       } finally {
         setLoading(false);
@@ -40,6 +40,10 @@ const Contracts = () => {
     return <div className="contracts-container"><p className="error-message">{error}</p></div>;
   }
 
+  if (!events) {
+    return null;
+  }
+
   return (
     <div className="contracts-container">
       <h2>Zarządzaj Umowami</h2>
@@ -59,7 +63,7 @@ const Contracts = () => {
           ))}
         </ul>
       ) : (
-        <p>Brak aktywnych wydarzeń do wygenerowania umów.</p>
+        <p>Brak wydarzeń do wygenerowania umów.</p>
       )}
     </div>
   );
