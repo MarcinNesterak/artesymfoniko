@@ -29,7 +29,7 @@ const Navbar = () => {
               <Link to="/conductor/dashboard" className="navbar-item">Dashboard</Link>
               <Link to="/conductor/create-event" className="navbar-item">Utwórz Wydarzenie</Link>
               <Link to="/conductor/musicians" className="navbar-item">Muzycy</Link>
-              <Link to="/conductor/contracts" className="navbar-item">Umowy</Link>
+              <Link to="/conductor/contracts" className="navbar-item">Umowy </Link>
               <Link to="/conductor/archive" className="navbar-item">Archiwum</Link>
             </>
   );
