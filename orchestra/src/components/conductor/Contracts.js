@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { eventsAPI } from '../../services/api';
 import '../../styles/contracts.css';
 
@@ -6,6 +7,7 @@ const Contracts = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -27,8 +29,7 @@ const Contracts = () => {
   }, []);
 
   const handleGenerateContract = (eventId) => {
-    // TODO: Implementacja logiki generowania umowy
-    alert(`Generowanie umowy dla wydarzenia o ID: ${eventId}`);
+    navigate(`/conductor/contracts/${eventId}`);
   };
 
   if (loading) {
