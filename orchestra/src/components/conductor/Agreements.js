@@ -15,11 +15,8 @@ const Agreements = () => {
                 // Pobieramy wszystkie wydarzenia, bez filtrowania
                 const allEvents = await getEvents(); 
                 
-                // Opcjonalnie: filtrujemy po stronie klienta, jeśli jest taka potrzeba
-                // Na razie pokazujemy wszystkie, żeby potwierdzić, że działają
-                const activeEvents = allEvents.filter(event => new Date(event.date) >= new Date() && !event.isArchived);
-                
-                setEvents(activeEvents);
+                // CELOWO USUWAM FILTROWANIE, ABY WYŚWIETLIĆ WSZYSTKO
+                setEvents(allEvents);
             } catch (err) {
                 console.error("Błąd podczas pobierania wydarzeń:", err);
                 setError('Nie udało się załadować wydarzeń. Spróbuj ponownie później.');
