@@ -46,6 +46,18 @@ const Contracts = () => {
 
   return (
     <div className="contracts-container">
+      <div style={{ border: '2px solid red', padding: '10px', margin: '20px', backgroundColor: '#f0f0f0' }}>
+        <h3>Panel Debugowania</h3>
+        <pre>
+          {JSON.stringify({
+            loading,
+            error,
+            eventsCount: events ? events.length : 'null',
+            events: events
+          }, null, 2)}
+        </pre>
+      </div>
+
       <h2>Zarządzaj Umowami</h2>
       {events.length > 0 ? (
         <ul className="events-list">
