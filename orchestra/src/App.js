@@ -7,7 +7,7 @@ import CreateEvent from './components/conductor/CreateEvent';
 import EventDetails from './components/conductor/EventDetails';
 import ConductorArchive from './components/conductor/ConductorArchive';
 import ManageMusicians from './components/conductor/ManageMusicians';
-import Contracts from './components/conductor/Contracts';
+import Agreements from './components/conductor/Agreements';
 import ContractDetails from './components/conductor/ContractDetails';
 import MusicianDashboard from './components/musician/MusicianDashboard';
 import EventParticipation from './components/musician/EventParticipation';
@@ -84,7 +84,7 @@ function App() {
             path="/conductor/contracts"
             element={
               <ProtectedRoute allowedRole="conductor">
-                <Contracts />
+                <Agreements />
               </ProtectedRoute>
             } 
           />
