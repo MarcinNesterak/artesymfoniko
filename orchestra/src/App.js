@@ -7,6 +7,7 @@ import CreateEvent from './components/conductor/CreateEvent';
 import EventDetails from './components/conductor/EventDetails';
 import ConductorArchive from './components/conductor/ConductorArchive';
 import ManageMusicians from './components/conductor/ManageMusicians';
+import Contracts from './components/conductor/Contracts';
 import MusicianDashboard from './components/musician/MusicianDashboard';
 import EventParticipation from './components/musician/EventParticipation';
 import MusicianEventDetails from './components/musician/EventDetails';
@@ -77,6 +78,14 @@ function App() {
                 <ManageMusicians />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/conductor/contracts"
+            element={
+              <ProtectedRoute allowedRole="conductor">
+                <Contracts />
+              </ProtectedRoute>
+            }
           />
           
           {/* Musician Routes */}
