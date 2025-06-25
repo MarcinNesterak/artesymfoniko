@@ -104,7 +104,7 @@ router.get("/", apiLimiter, requireUser, async (req, res) => {
           const newMessagesCount = await Message.countDocuments({
             eventId: event._id,
             createdAt: { $gt: lastViewedAt },
-            userId: { $ne: req.user._id }, // Ignoruj wiadomości od samego siebie
+            userId: { $ne: req.user._id.toString() }, // Ignoruj wiadomości od samego siebie
           });
 
           // Sprawdź czy wydarzenie było modyfikowane od ostatniej wizyty
