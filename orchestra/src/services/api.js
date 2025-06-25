@@ -171,11 +171,9 @@ export const eventsAPI = {
   // Pobierz wydarzenia
   getEvents: async (archived) => {
     let url = `${API_BASE_URL}/api/events`;
-    // Dodaj parametr tylko jeśli jest jawnie zdefiniowany jako true lub false
     if (archived === true || archived === false) {
       url += `?archived=${archived}`;
     }
-    
     const response = await fetch(url, {
       method: "GET",
       headers: getHeaders(true),
@@ -192,7 +190,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Utwórz wydarzenie (tylko dyrygent)
+  // Utwórz wydarzenie
   createEvent: async (eventData) => {
     const response = await fetch(`${API_BASE_URL}/api/events`, {
       method: "POST",
@@ -202,7 +200,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Aktualizuj wydarzenie (tylko dyrygent-właściciel)
+  // Aktualizuj wydarzenie
   updateEvent: async (id, eventData) => {
     const response = await fetch(`${API_BASE_URL}/api/events/${id}`, {
       method: "PUT",
@@ -212,7 +210,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Usuń wydarzenie (tylko dyrygent-właściciel)
+  // Usuń wydarzenie
   deleteEvent: async (id) => {
     const response = await fetch(`${API_BASE_URL}/api/events/${id}`, {
       method: "DELETE",
@@ -221,7 +219,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Zaproś muzyków do wydarzenia (tylko dyrygent-właściciel)
+  // Zaproś muzyków
   inviteMusicians: async (eventId, userIds) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/invite`,
@@ -234,7 +232,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Odwołaj zaproszenie (tylko dyrygent-właściciel)
+  // Odwołaj zaproszenie
   cancelInvitation: async (eventId, invitationId) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/invitations/${invitationId}`,
@@ -246,7 +244,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Usuń uczestnika z wydarzenia (tylko dyrygent-właściciel)
+  // Usuń uczestnika
   removeParticipant: async (eventId, participantId) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/participants/${participantId}`,
@@ -258,44 +256,81 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Potwierdź uczestnictwo (muzyk)
-  confirmParticipation: async (eventId, invitationId) => {
+  // Odpowiedz na zaproszenie
+  updateParticipationStatus: async (eventId, status) => {
     const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/invitations/${invitationId}/confirm`,
+      `${API_BASE_URL}/api/events/${eventId}/respond`,
       {
         method: "POST",
+        headers: getHeaders(true),
+        body: JSON.stringify({ status }),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Pobierz wiadomości
+  getEventMessages: async (eventId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/messages`,
+      {
+        method: "GET",
         headers: getHeaders(true),
       }
     );
     return handleResponse(response);
   },
 
-  // Odrzuć zaproszenie (muzyk)
-  rejectInvitation: async (eventId, invitationId) => {
+  // Wyślij wiadomość
+  sendEventMessage: async (eventId, content) => {
     const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/invitations/${invitationId}/reject`,
+      `${API_BASE_URL}/api/events/${eventId}/messages`,
       {
         method: "POST",
+        headers: getHeaders(true),
+        body: JSON.stringify({ content }),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Usuń wiadomość
+  deleteEventMessage: async (eventId, messageId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/messages/${messageId}`,
+      {
+        method: "DELETE",
         headers: getHeaders(true),
       }
     );
     return handleResponse(response);
   },
 
-  // Wypisz się z wydarzenia (muzyk)
-  leaveEvent: async (eventId) => {
+  // Oznacz jako przeczytane
+  markMessagesAsRead: async (eventId, messageIds) => {
     const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/leave`,
+      `${API_BASE_URL}/api/events/${eventId}/messages/mark-read`,
       {
         method: "POST",
+        headers: getHeaders(true),
+        body: JSON.stringify({ messageIds }),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Aktualizuj ostatnią wizytę
+  updateLastView: async (eventId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/update-last-view`,
+      {
+        method: "PUT",
         headers: getHeaders(true),
       }
     );
     return handleResponse(response);
   },
 };
-
-
 
 // Storage (dane użytkownika w localStorage)
 export const storage = {
