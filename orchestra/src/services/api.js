@@ -295,45 +295,7 @@ export const eventsAPI = {
   },
 };
 
-// Chat API
-export const chatAPI = {
-  // Pobierz wiadomości dla wydarzenia
-  getMessages: async (eventId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/messages`,
-      {
-        method: "GET",
-        headers: getHeaders(true),
-      }
-    );
-    return handleResponse(response);
-  },
 
-  // Wyślij wiadomość
-  sendMessage: async (eventId, content) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/messages`,
-      {
-        method: "POST",
-        headers: getHeaders(true),
-        body: JSON.stringify({ content }),
-      }
-    );
-    return handleResponse(response);
-  },
-
-  // Oznacz wiadomości jako przeczytane
-  markAsRead: async (eventId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/messages/read`,
-      {
-        method: "POST",
-        headers: getHeaders(true),
-      }
-    );
-    return handleResponse(response);
-  },
-};
 
 // Storage (dane użytkownika w localStorage)
 export const storage = {
