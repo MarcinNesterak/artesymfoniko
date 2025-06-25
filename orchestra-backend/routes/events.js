@@ -736,11 +736,13 @@ router.get("/:id/messages", requireUser, async (req, res) => {
 
           return {
             ...message.toObject(),
-            readBy: reads.map((read) => ({
-              userId: read.userId._id,
-              name: read.userId.name,
-              readAt: read.readAt,
-            })),
+            readBy: reads
+              .filter(read => read.userId)
+              .map((read) => ({
+                userId: read.userId._id,
+                name: read.userId.name,
+                readAt: read.readAt,
+              })),
             readCount: reads.length,
             participantCount: participants.length,
             allParticipants: participants.map((p) => ({
@@ -802,8 +804,15 @@ router.post("/:id/messages", requireUser, async (req, res) => {
 
     // Sprawdź czy to dyrygent właściciel wydarzenia
     const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: "Wydarzenie, do którego próbujesz wysłać wiadomość, nie istnieje.",
+      });
+    }
+
     const isConductor =
-      req.user.role === "conductor" && event?.conductorId.equals(req.user._id);
+      req.user.role === "conductor" && event.conductorId.equals(req.user._id);
 
     if (!participation && !isConductor) {
       return res.status(403).json({
