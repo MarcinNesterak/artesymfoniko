@@ -169,10 +169,13 @@ export const usersAPI = {
 // Events API
 export const eventsAPI = {
   // Pobierz wydarzenia
-  getEvents: async (archived = false) => {
-    const url = `${API_BASE_URL}/api/events${
-      archived !== undefined ? `?archived=${archived}` : ""
-    }`;
+  getEvents: async (archived) => {
+    let url = `${API_BASE_URL}/api/events`;
+    // Dodaj parametr tylko jeśli jest jawnie zdefiniowany jako true lub false
+    if (archived === true || archived === false) {
+      url += `?archived=${archived}`;
+    }
+    
     const response = await fetch(url, {
       method: "GET",
       headers: getHeaders(true),
@@ -255,8 +258,47 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Pobierz wiadomości czatu wydarzenia
-  getEventMessages: async (eventId) => {
+  // Potwierdź uczestnictwo (muzyk)
+  confirmParticipation: async (eventId, invitationId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/invitations/${invitationId}/confirm`,
+      {
+        method: "POST",
+        headers: getHeaders(true),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Odrzuć zaproszenie (muzyk)
+  rejectInvitation: async (eventId, invitationId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/invitations/${invitationId}/reject`,
+      {
+        method: "POST",
+        headers: getHeaders(true),
+      }
+    );
+    return handleResponse(response);
+  },
+
+  // Wypisz się z wydarzenia (muzyk)
+  leaveEvent: async (eventId) => {
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/${eventId}/leave`,
+      {
+        method: "POST",
+        headers: getHeaders(true),
+      }
+    );
+    return handleResponse(response);
+  },
+};
+
+// Chat API
+export const chatAPI = {
+  // Pobierz wiadomości dla wydarzenia
+  getMessages: async (eventId) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/messages`,
       {
@@ -267,8 +309,8 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Wyślij wiadomość do czatu wydarzenia
-  sendEventMessage: async (eventId, content) => {
+  // Wyślij wiadomość
+  sendMessage: async (eventId, content) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/messages`,
       {
@@ -280,88 +322,34 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Usuń wiadomość (tylko autor)
-  deleteEventMessage: async (eventId, messageId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/messages/${messageId}`,
-      {
-        method: "DELETE",
-        headers: getHeaders(true),
-      }
-    );
-    return handleResponse(response);
-  },
-
   // Oznacz wiadomości jako przeczytane
-  markMessagesAsRead: async (eventId, messageIds) => {
+  markAsRead: async (eventId) => {
     const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/messages/mark-read`,
+      `${API_BASE_URL}/api/events/${eventId}/messages/read`,
       {
         method: "POST",
         headers: getHeaders(true),
-        body: JSON.stringify({ messageIds }),
       }
     );
-    return handleResponse(response);
-  },
-
-  // Aktualizuj ostatnią wizytę wydarzenia
-  updateLastView: async (eventId) => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/events/${eventId}/update-last-view`,
-      {
-        method: "PUT",
-        headers: getHeaders(true),
-      }
-    );
-    return handleResponse(response);
-  },
-  // Backup i restore
-  getBackup: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/events/admin/backup`, {
-      method: "GET",
-      headers: getHeaders(true),
-    });
-    return handleResponse(response);
-  },
-
-  restoreBackup: async (backupData) => {
-    const response = await fetch(`${API_BASE_URL}/api/events/admin/restore`, {
-      method: "POST",
-      headers: getHeaders(true),
-      body: JSON.stringify(backupData),
-    });
     return handleResponse(response);
   },
 };
 
-// Funkcje pomocnicze dla localStorage
+// Storage (dane użytkownika w localStorage)
 export const storage = {
-  // Zapisz dane użytkownika (z tokenem)
-  setUser: (userData) => {
-    localStorage.setItem("user", JSON.stringify(userData));
+  // Zapisz użytkownika
+  setUser: (user) => {
+    localStorage.setItem("user", JSON.stringify(user));
   },
 
-  // Pobierz dane użytkownika
+  // Pobierz użytkownika
   getUser: () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   },
 
-  // Usuń dane użytkownika (wylogowanie)
+  // Usuń użytkownika
   removeUser: () => {
     localStorage.removeItem("user");
-  },
-
-  // Sprawdź czy użytkownik jest zalogowany
-  isAuthenticated: () => {
-    const user = storage.getUser();
-    return user && user.token;
-  },
-
-  // Pobierz rolę użytkownika
-  getUserRole: () => {
-    const user = storage.getUser();
-    return user ? user.role : null;
   },
 };
