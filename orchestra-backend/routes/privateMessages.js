@@ -5,7 +5,7 @@ const User = require('../models/User');
 const PrivateMessage = require('../models/PrivateMessage');
 const mongoose = require('mongoose');
 
-// @route   POST /api/private-messages
+// @route   POST /
 // @desc    Wyślij nową wiadomość prywatną
 // @access  Private
 router.post('/', auth, async (req, res) => {
@@ -55,7 +55,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// @route   GET /api/private-messages/conversations
+// @route   GET /conversations
 // @desc    Pobierz listę wszystkich konwersacji użytkownika
 // @access  Private
 router.get('/conversations', auth, async (req, res) => {
@@ -141,22 +141,19 @@ router.get('/conversations', auth, async (req, res) => {
   }
 });
 
-// @route   GET /api/private-messages/conversations/:otherUserId
+// @route   GET /conversations/:otherUserId
 // @desc    Pobierz historię wiadomości z konkretnym użytkownikiem
 // @access  Private
 router.get('/conversations/:otherUserId', auth, async (req, res) => {
   try {
     const currentUserId = req.user.id;
     const otherUserId = req.params.otherUserId;
-
     const conversationId = PrivateMessage.getConversationId(currentUserId, otherUserId);
-
     const messages = await PrivateMessage.find({ conversationId })
       .sort({ createdAt: 'asc' })
       .populate('senderId', 'name role')
       .populate('recipientId', 'name role')
       .populate('eventId', 'title');
-
     res.json(messages);
   } catch (error) {
     console.error('Błąd podczas pobierania historii konwersacji:', error);
@@ -164,7 +161,7 @@ router.get('/conversations/:otherUserId', auth, async (req, res) => {
   }
 });
 
-// @route   PUT /api/private-messages/conversations/:otherUserId/read
+// @route   PUT /conversations/:otherUserId/read
 // @desc    Oznacz wiadomości w konwersacji jako przeczytane
 // @access  Private
 router.put('/conversations/:otherUserId/read', auth, async (req, res) => {
