@@ -1,5 +1,5 @@
 import express from 'express';
-import auth from '../middleware/auth.js';
+import { requireUser as auth } from '../middleware/auth.js';
 import User from '../models/User.js';
 import PrivateMessage from '../models/PrivateMessage.js';
 import mongoose from 'mongoose';
