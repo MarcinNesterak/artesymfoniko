@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { privateMessagesAPI } from '../../services/messagesAPI';
 import { storage } from '../../services/api';
 
-const ChatWindow = ({ participantId, eventId = null }) => {
+const ChatWindow = ({ participantId, eventId = null, onMessagesRead }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,8 +24,12 @@ const ChatWindow = ({ participantId, eventId = null }) => {
         const history = await privateMessagesAPI.getConversationHistory(participantId);
         setMessages(history);
         
-        // Oznacz wiadomości jako przeczytane
+        // Oznacz wiadomości jako przeczytane i powiadom resztę aplikacji
         await privateMessagesAPI.markAsRead(participantId);
+        window.dispatchEvent(new CustomEvent('messagesRead')); // Powiadomienie dla Navbar
+        if (onMessagesRead) {
+          onMessagesRead(participantId); // Powiadomienie dla ConversationList
+        }
       } catch (err) {
         setError('Nie udało się załadować wiadomości.');
         console.error(err);
@@ -35,7 +39,7 @@ const ChatWindow = ({ participantId, eventId = null }) => {
     };
 
     fetchMessages();
-  }, [participantId]);
+  }, [participantId, onMessagesRead]);
 
   useEffect(() => {
     scrollToBottom();
@@ -76,6 +80,9 @@ const ChatWindow = ({ participantId, eventId = null }) => {
       <div className="chat-messages-container">
         {messages.map(msg => (
           <div key={msg._id} className={`chat-bubble-wrapper ${msg.senderId._id === currentUser.id ? 'sent' : 'received'}`}>
+            <div className="message-sender-name">
+              {msg.senderId._id === currentUser.id ? 'Ty' : msg.senderId.name}
+            </div>
             {msg.eventId && (
               <div className="event-context-tag">
                 Dotyczy wydarzenia: <strong>{msg.eventId.title}</strong>

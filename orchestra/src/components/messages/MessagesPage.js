@@ -41,6 +41,16 @@ const MessagesPage = () => {
     setSelectedConversationId(participantId);
   };
 
+  const handleMessagesRead = (readParticipantId) => {
+    setConversations(prevConvs => 
+      prevConvs.map(conv =>
+        conv.participant._id === readParticipantId
+          ? { ...conv, unreadCount: 0 }
+          : conv
+      )
+    );
+  };
+
   if (loading) {
     return <div className="loading">Ładowanie wiadomości...</div>;
   }
@@ -61,7 +71,10 @@ const MessagesPage = () => {
       </div>
       <div className="chat-window-panel">
         {selectedConversationId ? (
-          <ChatWindow participantId={selectedConversationId} />
+          <ChatWindow
+            participantId={selectedConversationId}
+            onMessagesRead={handleMessagesRead}
+          />
         ) : (
           <div className="no-conversation-selected">
             {conversations.length > 0 ? (

@@ -33,10 +33,16 @@ const Navbar = () => {
     };
 
     fetchUnread();
-    const interval = setInterval(fetchUnread, 30000); // Poll every 30 seconds
+    const interval = setInterval(fetchUnread, 30000);
 
-    return () => clearInterval(interval);
-  }, [user]);
+    // Nasłuchuj na niestandardowe zdarzenie, aby odświeżyć natychmiast
+    window.addEventListener('messagesRead', fetchUnread);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('messagesRead', fetchUnread);
+    }
+  }, [user?.id]);
   
   const handleLogout = () => {
     storage.removeUser();
