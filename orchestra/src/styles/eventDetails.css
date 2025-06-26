@@ -329,6 +329,8 @@
   color: var(--text-primary);
   line-height: 1.4;
   word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 .chat-form {
