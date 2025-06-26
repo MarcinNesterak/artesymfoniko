@@ -145,6 +145,11 @@
   word-break: break-all;
 }
 
+.event-extra-info pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .musicians-list {
   margin-top: 15px;
 }
@@ -689,13 +694,8 @@
 }
 
 .event-extra-info pre {
-  background-color: var(--bg-tertiary);
-  padding: 10px;
-  border-radius: 4px;
   white-space: pre-wrap;
-  font-family: inherit;
-  margin: 10px 0 0 0;
-  color: var(--text-primary);
+  word-break: break-word;
 }
 
 .btn-respond {
