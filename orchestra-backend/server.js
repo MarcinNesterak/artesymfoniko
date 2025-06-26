@@ -3,12 +3,17 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+
+// Middleware
+import { apiLimiter } from "./middleware/rateLimiter.js";
+
+// Routes
 import usersRoutes from "./routes/users.js";
 import authRoutes from "./routes/auth.js";
 import eventsRoutes from "./routes/events.js";
-import { apiLimiter } from "./middleware/rateLimiter.js";
-import session from "express-session";
-import MongoStore from "connect-mongo";
+import privateMessageRoutes from "./routes/privateMessages.js"; // IMPORT
 
 // Import models
 import User from "./models/User.js";
@@ -61,12 +66,12 @@ app.use(
       mongoUrl: process.env.MONGODB_URI,
       collectionName: "sessions",
       ttl: 14 * 24 * 60 * 60, // 14 dni
-      autoRemove: "native", // używa natywnego TTL MongoDB
+      autoRemove: "native",
     }),
     cookie: {
-      secure: process.env.NODE_ENV === "production", // true w produkcji
+      secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 dni
+      maxAge: 14 * 24 * 60 * 60 * 1000,
     },
   })
 );
@@ -89,6 +94,7 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/events", eventsRoutes);
+app.use("/api/private-messages", privateMessageRoutes); // UŻYCIE
 
 // Health check routes
 app.get("/", (req, res) => {

@@ -742,3 +742,42 @@
 .btn-delete-message:hover {
   color: var(--danger-color);
 }
+
+.musician-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cancel-invitation,
+.btn-remove-participant,
+.btn-private-message {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-private-message {
+  font-size: 1.1rem;
+  padding: 4px 8px;
+}
+
+.btn-cancel-invitation:hover,
+.btn-remove-participant:hover,
+.btn-private-message:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.chat-modal .modal-body {
+  padding: 0;
+  height: 70vh;
+}
+
+.chat-modal .chat-window {
+  border-radius: 0 0 8px 8px;
+}

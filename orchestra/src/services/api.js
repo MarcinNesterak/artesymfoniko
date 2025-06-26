@@ -332,6 +332,46 @@ export const eventsAPI = {
   },
 };
 
+// Private Messages API
+export const privateMessagesAPI = {
+  // Pobierz listę konwersacji
+  getConversations: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations`, {
+      method: 'GET',
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
+
+  // Pobierz historię konkretnej konwersacji
+  getConversationHistory: async (otherUserId) => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations/${otherUserId}`, {
+      method: 'GET',
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
+
+  // Wyślij wiadomość prywatną
+  sendPrivateMessage: async ({ recipientId, eventId, content }) => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      body: JSON.stringify({ recipientId, eventId, content }),
+    });
+    return handleResponse(response);
+  },
+
+  // Oznacz wiadomości w konwersacji jako przeczytane
+  markConversationAsRead: async (otherUserId) => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations/${otherUserId}/read`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
+};
+
 // Storage (dane użytkownika w localStorage)
 export const storage = {
   // Zapisz użytkownika
