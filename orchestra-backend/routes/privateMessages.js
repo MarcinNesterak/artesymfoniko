@@ -15,8 +15,8 @@ router.post('/', auth, async (req, res) => {
 
   try {
     // 1. Walidacja
-    if (!recipientId || !content || !eventId) {
-      return res.status(400).json({ msg: 'Proszę podać odbiorcę, treść wiadomości i ID wydarzenia.' });
+    if (!recipientId || !content) {
+      return res.status(400).json({ msg: 'Proszę podać odbiorcę i treść wiadomości.' });
     }
 
     if (senderId === recipientId) {
@@ -154,7 +154,8 @@ router.get('/conversations/:otherUserId', auth, async (req, res) => {
     const messages = await PrivateMessage.find({ conversationId })
       .sort({ createdAt: 'asc' })
       .populate('senderId', 'name role')
-      .populate('recipientId', 'name role');
+      .populate('recipientId', 'name role')
+      .populate('eventId', 'title');
 
     res.json(messages);
   } catch (error) {

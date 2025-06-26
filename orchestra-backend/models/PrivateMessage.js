@@ -9,7 +9,7 @@ const privateMessageSchema = new mongoose.Schema({
   eventId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Event', 
-    required: true 
+    required: false
   },
   senderId: { 
     type: mongoose.Schema.Types.ObjectId, 

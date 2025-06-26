@@ -15,6 +15,7 @@ import MusicianEventDetails from './components/musician/EventDetails';
 import MusicianArchive from './components/musician/MusicianArchive';
 import MyProfile from './components/musician/MyProfile';
 import Navbar from './components/common/Navbar';
+import MessagesPage from './components/messages/MessagesPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -96,6 +97,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/conductor/messages"
+            element={
+              <ProtectedRoute allowedRole="conductor">
+                <MessagesPage />
+              </ProtectedRoute>
+            } 
+          />
           
           {/* Musician Routes */}
           <Route 
@@ -135,6 +144,14 @@ function App() {
             element={
               <ProtectedRoute allowedRole="musician">
                 <MyProfile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/musician/messages"
+            element={
+              <ProtectedRoute allowedRole="musician">
+                <MessagesPage />
               </ProtectedRoute>
             } 
           />

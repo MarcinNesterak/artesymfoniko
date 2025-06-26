@@ -30,6 +30,7 @@ const Navbar = () => {
               <Link to="/conductor/create-event" className="navbar-item">Utwórz Wydarzenie</Link>
               <Link to="/conductor/musicians" className="navbar-item">Muzycy</Link>
               <Link to="/conductor/contracts" className="navbar-item">Umowy</Link>
+              <Link to="/conductor/messages" className="navbar-item">Wiadomości</Link>
               <Link to="/conductor/archive" className="navbar-item">Archiwum</Link>
             </>
   );
@@ -37,6 +38,7 @@ const Navbar = () => {
   const musicianLinks = (
             <>
               <Link to="/musician/dashboard" className="navbar-item">Moje Wydarzenia</Link>
+              <Link to="/musician/messages" className="navbar-item">Wiadomości</Link>
               <Link to="/musician/archive" className="navbar-item">Archiwum</Link>
               <Link to="/musician/profile" className="navbar-item">Moje Dane</Link>
             </>

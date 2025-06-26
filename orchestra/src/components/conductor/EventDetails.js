@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { eventsAPI, usersAPI } from "../../services/api";
+import ChatWindow from "../messages/ChatWindow";
 import "../../styles/eventDetails.css";
 import SuccessMessage from '../common/SuccessMessage';
 
@@ -45,6 +46,8 @@ const EventDetails = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [calendarAdded, setCalendarAdded] = useState(false);
+  const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
 
   useEffect(() => {
     fetchEventData();
@@ -373,6 +376,16 @@ const EventDetails = () => {
     const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}&dates=${start}/${end}`;
     window.open(url, '_blank');
     setCalendarAdded(true);
+  };
+
+  const openChatModal = (participant) => {
+    setSelectedParticipant(participant);
+    setChatModalOpen(true);
+  };
+
+  const closeChatModal = () => {
+    setChatModalOpen(false);
+    setSelectedParticipant(null);
   };
 
   if (loading) {
@@ -852,6 +865,15 @@ const EventDetails = () => {
                             Usuń
                           </button>
                         )}
+                        {status === "Zaakceptowano" && (
+                          <button
+                            onClick={() => openChatModal(musician)}
+                            className="btn-private-message"
+                            title={`Wiadomość do ${musician.name}`}
+                          >
+                            💬
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -912,6 +934,26 @@ const EventDetails = () => {
           </div>
         </div>
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
+
+      {/* Modal Czat Prywatny */}
+      {isChatModalOpen && selectedParticipant && (
+        <div className="modal-overlay" onClick={closeChatModal}>
+          <div className="modal-content chat-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Wiadomość do: {selectedParticipant.name}</h2>
+              <button className="modal-close" onClick={closeChatModal}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <ChatWindow
+                participantId={selectedParticipant._id}
+                eventId={id}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
