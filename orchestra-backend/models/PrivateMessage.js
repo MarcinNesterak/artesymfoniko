@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const privateMessageSchema = new mongoose.Schema({
   conversationId: {
@@ -40,4 +40,4 @@ privateMessageSchema.statics.getConversationId = function(userId1, userId2) {
   return [userId1, userId2].sort().join('_');
 };
 
-module.exports = mongoose.model('PrivateMessage', privateMessageSchema); 
+export default mongoose.model('PrivateMessage', privateMessageSchema); 
