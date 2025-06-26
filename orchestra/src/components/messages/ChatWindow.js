@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { privateMessagesAPI } from '../../services/api';
+import { privateMessagesAPI } from '../../services/messagesAPI';
 import { storage } from '../../services/api';
 
 const ChatWindow = ({ participantId, eventId = null }) => {
@@ -25,7 +25,7 @@ const ChatWindow = ({ participantId, eventId = null }) => {
         setMessages(history);
         
         // Oznacz wiadomości jako przeczytane
-        await privateMessagesAPI.markConversationAsRead(participantId);
+        await privateMessagesAPI.markAsRead(participantId);
       } catch (err) {
         setError('Nie udało się załadować wiadomości.');
         console.error(err);
@@ -46,16 +46,13 @@ const ChatWindow = ({ participantId, eventId = null }) => {
     if (!newMessage.trim()) return;
 
     try {
-      const messagePayload = {
-        recipientId: participantId,
-        content: newMessage.trim(),
-      };
+      setError('');
 
-      if (eventId) {
-        messagePayload.eventId = eventId;
-      }
-      
-      const sentMessage = await privateMessagesAPI.sendPrivateMessage(messagePayload);
+      const sentMessage = await privateMessagesAPI.sendMessage(
+        participantId,
+        newMessage.trim(),
+        eventId
+      );
 
       setMessages(prevMessages => [...prevMessages, sentMessage]);
       setNewMessage('');

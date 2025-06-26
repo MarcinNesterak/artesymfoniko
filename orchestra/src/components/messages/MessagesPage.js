@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { privateMessagesAPI } from '../../services/api';
+import { privateMessagesAPI } from '../../services/messagesAPI';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
 import '../../styles/messages.css'; // Ten plik też za chwilę stworzymy
