@@ -94,7 +94,7 @@ function App() {
               <ProtectedRoute allowedRole="conductor">
                 <ContractDetails />
               </ProtectedRoute>
-            }
+            } 
           />
           
           {/* Musician Routes */}
