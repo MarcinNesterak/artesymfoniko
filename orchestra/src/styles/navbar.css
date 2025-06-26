@@ -59,9 +59,24 @@
 }
 
 .navbar-logout:hover {
-  background-color: var(--bg-tertiary);
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  background-color: var(--accent-secondary-hover);
+}
+
+.messages-link {
+  position: relative;
+}
+
+.navbar-badge {
+  position: absolute;
+  top: 2px;
+  right: -5px;
+  background-color: var(--danger-color);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 10px;
+  border: 1px solid var(--bg-primary);
 }
 
 /* --- Mobile Menu --- */

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { storage } from '../../services/api';
+import { privateMessagesAPI } from '../../services/messagesAPI';
 import '../../styles/navbar.css';
 
 const Navbar = () => {
@@ -8,11 +9,34 @@ const Navbar = () => {
   const location = useLocation();
   const user = storage.getUser();
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     // Zamknij menu mobilne przy zmianie ścieżki
     setMobileMenuOpen(false);
   }, [location]);
+  
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnread = async () => {
+      try {
+        const conversations = await privateMessagesAPI.getConversations();
+        const total = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
+        setUnreadCount(total);
+      } catch (error) {
+        console.error("Failed to fetch unread messages count:", error);
+      }
+    };
+
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
   
   const handleLogout = () => {
     storage.removeUser();
@@ -24,13 +48,20 @@ const Navbar = () => {
     return null;
   }
   
+  const messagesLink = (
+    <Link to={user.role === 'conductor' ? "/conductor/messages" : "/musician/messages"} className="navbar-item messages-link">
+      Wiadomości
+      {unreadCount > 0 && <span className="unread-badge navbar-badge">{unreadCount}</span>}
+    </Link>
+  );
+
   const conductorLinks = (
             <>
               <Link to="/conductor/dashboard" className="navbar-item">Dashboard</Link>
               <Link to="/conductor/create-event" className="navbar-item">Utwórz Wydarzenie</Link>
               <Link to="/conductor/musicians" className="navbar-item">Muzycy</Link>
               <Link to="/conductor/contracts" className="navbar-item">Umowy</Link>
-              <Link to="/conductor/messages" className="navbar-item">Wiadomości</Link>
+              {messagesLink}
               <Link to="/conductor/archive" className="navbar-item">Archiwum</Link>
             </>
   );
@@ -38,7 +69,7 @@ const Navbar = () => {
   const musicianLinks = (
             <>
               <Link to="/musician/dashboard" className="navbar-item">Moje Wydarzenia</Link>
-              <Link to="/musician/messages" className="navbar-item">Wiadomości</Link>
+              {messagesLink}
               <Link to="/musician/archive" className="navbar-item">Archiwum</Link>
               <Link to="/musician/profile" className="navbar-item">Moje Dane</Link>
             </>
