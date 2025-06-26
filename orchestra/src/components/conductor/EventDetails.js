@@ -171,7 +171,7 @@ const EventDetails = () => {
     try {
       const updateData = {
         title: editData.title,
-        date: editData.date,
+        date: new Date(editData.date).toISOString(),
         description: editData.description,
         schedule: editData.schedule,
         program: editData.program,
