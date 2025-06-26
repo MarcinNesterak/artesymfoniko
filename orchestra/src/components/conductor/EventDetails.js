@@ -11,6 +11,12 @@ const DRESSCODE_DESCRIPTIONS = {
   other: 'inny'
 };
 
+// Funkcja pomocnicza do formatowania daty dla input[type="datetime-local"]
+const formatDateForInput = (date) => {
+  const pad = (num) => num.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -72,9 +78,7 @@ const EventDetails = () => {
 
       setEditData({
         title: eventData.title || "",
-        date: eventData.date
-          ? new Date(eventData.date).toISOString().slice(0, 16)
-          : "",
+        date: eventData.date ? formatDateForInput(new Date(eventData.date)) : "",
         description: eventData.description || "",
         schedule: scheduleText,
         program: eventData.program || "",
