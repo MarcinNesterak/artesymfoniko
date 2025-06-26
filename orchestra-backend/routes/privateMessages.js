@@ -1,9 +1,10 @@
-const express = require('express');
+import express from 'express';
+import auth from '../middleware/auth.js';
+import User from '../models/User.js';
+import PrivateMessage from '../models/PrivateMessage.js';
+import mongoose from 'mongoose';
+
 const router = express.Router();
-const auth = require('../middleware/auth');
-const User = require('../models/User');
-const PrivateMessage = require('../models/PrivateMessage');
-const mongoose = require('mongoose');
 
 // @route   POST /
 // @desc    Wyślij nową wiadomość prywatną
