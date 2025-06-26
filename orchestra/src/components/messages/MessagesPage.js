@@ -64,8 +64,17 @@ const MessagesPage = () => {
           <ChatWindow participantId={selectedConversationId} />
         ) : (
           <div className="no-conversation-selected">
-            <h2>Wybierz konwersację z listy</h2>
-            <p>Aby rozpocząć, wybierz rozmowę z panelu po lewej stronie.</p>
+            {conversations.length > 0 ? (
+              <>
+                <h2>Wybierz konwersację z listy</h2>
+                <p>Aby rozpocząć, wybierz rozmowę z panelu po lewej stronie.</p>
+              </>
+            ) : (
+              <>
+                <h2>Brak konwersacji</h2>
+                <p>Nie masz jeszcze żadnych wiadomości. Możesz rozpocząć rozmowę z muzykiem z widoku szczegółów wydarzenia.</p>
+              </>
+            )}
           </div>
         )}
       </div>

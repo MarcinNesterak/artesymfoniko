@@ -61,18 +61,86 @@ router.post('/', auth, async (req, res) => {
 // @access  Private
 router.get('/conversations', auth, async (req, res) => {
   try {
-    // ---- POCZĄTEK TYMCZASOWEGO TESTU ----
-    // Zamiast skomplikowanego zapytania, zwracamy na sztywno pustą tablicę
-    return res.json([]);
-    // ---- KONIEC TYMCZASOWEGO TESTU ----
-
-    /*
     const userId = req.user.id;
     const conversations = await PrivateMessage.aggregate([
-      // ... (całe skomplikowane zapytanie jest teraz w komentarzu)
+      // 1. Znajdź wszystkie wiadomości, w których bierze udział użytkownik
+      { $match: { $or: [{ senderId: new mongoose.Types.ObjectId(userId) }, { recipientId: new mongoose.Types.ObjectId(userId) }] } },
+      
+      // 2. Sortuj, aby najnowsze wiadomości były pierwsze
+      { $sort: { createdAt: -1 } },
+      
+      // 3. Grupuj po ID konwersacji, aby uzyskać ostatnią wiadomość i dane
+      {
+        $group: {
+          _id: "$conversationId",
+          lastMessage: { $first: "$$ROOT" },
+          unreadCount: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ["$isRead", false] },
+                    { $eq: ["$recipientId", new mongoose.Types.ObjectId(userId)] }
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      
+      // 4. Zastąp korzeń dokumentu ostatnią wiadomością i dodaj licznik nieprzeczytanych
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$lastMessage", { unreadCount: "$unreadCount" }]
+          }
+        }
+      },
+
+      // 5. Pobierz dane rozmówcy (nie samego siebie)
+      {
+        $lookup: {
+          from: 'users',
+          let: { 
+            senderId: '$senderId',
+            recipientId: '$recipientId'
+          },
+          pipeline: [
+            { $match: {
+                $expr: {
+                  $or: [
+                    { $and: [ { $eq: ['$_id', '$$senderId'] }, { $ne: ['$$senderId', new mongoose.Types.ObjectId(userId)] } ] },
+                    { $and: [ { $eq: ['$_id', '$$recipientId'] }, { $ne: ['$$recipientId', new mongoose.Types.ObjectId(userId)] } ] }
+                  ]
+                }
+              } 
+            },
+            { $project: { name: 1, role: 1 } }
+          ],
+          as: 'participant'
+        }
+      },
+      
+      // 6. Uprość strukturę danych uczestnika, nie usuwając konwersacji bez wiadomości
+      {
+        $unwind: {
+          path: '$participant',
+          preserveNullAndEmptyArrays: true // KLUCZOWA POPRAWKA
+        }
+      },
+
+      // 7. Ostateczne sortowanie, aby najnowsze konwersacje były na górze
+      { $sort: { createdAt: -1 } },
     ]);
-    res.json(conversations);
-    */
+    
+    // Dodatkowy filtr, aby usunąć potencjalne puste wyniki po $unwind
+    const filteredConversations = conversations.filter(c => c.participant);
+
+    res.json(filteredConversations);
+
   } catch (error) {
     console.error('Błąd podczas pobierania konwersacji:', error);
     res.status(500).send('Błąd serwera');
