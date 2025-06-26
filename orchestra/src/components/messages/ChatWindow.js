@@ -18,9 +18,9 @@ const ChatWindow = ({ participantId, eventId = null }) => {
     if (!participantId) return;
 
     const fetchMessages = async () => {
+      setLoading(true);
+      setError('');
       try {
-        setLoading(true);
-        setError('');
         const history = await privateMessagesAPI.getConversationHistory(participantId);
         setMessages(history);
         
