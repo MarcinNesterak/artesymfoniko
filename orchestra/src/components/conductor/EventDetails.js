@@ -139,7 +139,7 @@ const EventDetails = () => {
   // Auto-refresh co 5 sekund - jedyne źródło prawdy dla odświeżania czatu
   useEffect(() => {
     // Pierwsze pobranie wiadomości
-    fetchMessages(); 
+    fetchMessages();
     
     // Ustawienie interwału
     const interval = setInterval(fetchMessages, 5000);
@@ -601,8 +601,8 @@ const EventDetails = () => {
       )}
 
       <div className="event-details-content">
-        <div className="event-info-card">
-          <h2>Informacje o wydarzeniu</h2>
+          <div className="event-info-card">
+            <h2>Informacje o wydarzeniu</h2>
           <div className="event-info-grid">
             {/* <div className="info-item">
                 <span className="info-label">Nazwa:</span>
@@ -686,14 +686,14 @@ const EventDetails = () => {
               <strong>Program koncertu:</strong>
               <pre>{event.program}</pre>
             </div>
-          )}
-        </div>
+            )}
+          </div>
 
         {/* Czat Wydarzenia */}
         <div className="chat-card">
-          <h2>💬 Czat Wydarzenia</h2>
-          <div className="chat-messages">
-            {messages.length > 0 ? (
+            <h2>💬 Czat Wydarzenia</h2>
+            <div className="chat-messages">
+              {messages.length > 0 ? (
               messages.map((msg) => (
                 <div
                   key={msg._id}
@@ -701,12 +701,12 @@ const EventDetails = () => {
                     msg.userId._id === user.id ? "my-message" : "other-message"
                   }`}
                 >
-                  <div className="message-header">
+                    <div className="message-header">
                     <strong>{msg.userId.name}</strong>
-                    <span className="message-time">
+                      <span className="message-time">
                       {new Date(msg.createdAt).toLocaleString("pl-PL")}
-                    </span>
-                  </div>
+                      </span>
+                    </div>
                   <p className={`message-content ${msg.isDeleted ? 'deleted-message' : ''}`}>
                     {msg.content}
                   </p>
@@ -721,71 +721,71 @@ const EventDetails = () => {
                   )}
                   {/* Status przeczytania - tylko dla wiadomości dyrygenta */}
                   {msg.readBy && msg.userId._id === user.id && (
-                    <div className="message-read-status">
-                      {(() => {
-                        // Znajdź kto NIE przeczytał
+                      <div className="message-read-status">
+                        {(() => {
+                          // Znajdź kto NIE przeczytał
                         const allParticipants = msg.allParticipants || [];
                         const readByNames = msg.readBy.map(
-                          (read) => read.name
-                        );
-                        const notReadBy = allParticipants
-                          .map((p) => p.name)
-                          .filter((name) => !readByNames.includes(name));
+                            (read) => read.name
+                          );
+                          const notReadBy = allParticipants
+                            .map((p) => p.name)
+                            .filter((name) => !readByNames.includes(name));
 
-                        return (
-                          <small className="read-info">
-                            {notReadBy.length > 0 ? (
-                              <>
-                                ⚠️ Nie przeczytali:{" "}
-                                <span className="not-read-list">
-                                  {notReadBy.join(", ")}
-                                </span>
-                              </>
-                            ) : (
-                              <>
+                          return (
+                            <small className="read-info">
+                              {notReadBy.length > 0 ? (
+                                <>
+                                  ⚠️ Nie przeczytali:{" "}
+                                  <span className="not-read-list">
+                                    {notReadBy.join(", ")}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
                                 ✅ Wszyscy przeczytali ({msg.readCount}/
                                 {msg.participantCount})
-                              </>
-                            )}
-                          </small>
-                        );
-                      })()}
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <p className="no-messages">Brak wiadomości. Napisz pierwszą!</p>
-            )}
-          </div>
-          <form onSubmit={sendMessage} className="chat-form">
-            <div className="chat-input-group">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Napisz wiadomość..."
-                disabled={sendingMessage}
-                maxLength={500}
-                className="chat-input"
-              />
-              <button
-                type="submit"
-                disabled={!newMessage.trim() || sendingMessage}
-                className="chat-send-btn"
-              >
-                {sendingMessage ? "📤" : "➤"}
-              </button>
+                                </>
+                              )}
+                            </small>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="no-messages">Brak wiadomości. Napisz pierwszą!</p>
+              )}
             </div>
-            <div className="chat-counter">{newMessage.length}/500</div>
-          </form>
+            <form onSubmit={sendMessage} className="chat-form">
+              <div className="chat-input-group">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Napisz wiadomość..."
+                  disabled={sendingMessage}
+                  maxLength={500}
+                  className="chat-input"
+                />
+                <button
+                  type="submit"
+                  disabled={!newMessage.trim() || sendingMessage}
+                  className="chat-send-btn"
+                >
+                  {sendingMessage ? "📤" : "➤"}
+                </button>
+              </div>
+              <div className="chat-counter">{newMessage.length}/500</div>
+            </form>
         </div>
-        
-        <div className="musicians-card">
-          <h2>Zaproszeni muzycy</h2>
 
-          {invitations.length > 0 ? (
-            <div className="musicians-list">
+          <div className="musicians-card">
+            <h2>Zaproszeni muzycy</h2>
+
+            {invitations.length > 0 ? (
+              <div className="musicians-list">
               {[...invitations]
                 .sort((a, b) => {
                   const statusA = getParticipationStatus(a.userId._id);
@@ -856,61 +856,61 @@ const EventDetails = () => {
                     </div>
                   );
                 })}
-            </div>
-          ) : (
-            <p>Nie zaproszono jeszcze żadnych muzyków.</p>
-          )}
-
-          {availableMusicians.length > 0 && (
-            <div className="add-musicians-section">
-              <h3>Zaproś więcej muzyków</h3>
-              <div className="musicians-selection">
-                {availableMusicians.map((musician) => (
-                  <label key={musician._id} className="musician-checkbox">
-                    <input
-                      type="checkbox"
-                      value={musician._id}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedMusicians((prev) => [
-                            ...prev,
-                            musician._id,
-                          ]);
-                        } else {
-                          setSelectedMusicians((prev) =>
-                            prev.filter((id) => id !== musician._id)
-                          );
-                        }
-                      }}
-                      checked={selectedMusicians.includes(musician._id)}
-                    />
-                    <span className="musician-label">
-                      {musician.name} (
-                      {musician.instrument || "Instrument nieznany"})
-                    </span>
-                  </label>
-                ))}
               </div>
-              {selectedMusicians.length > 0 && (
-                <div className="invitation-actions">
-                  <button
-                    onClick={sendMultipleInvitations}
-                    className="btn-invite-selected"
-                  >
-                    Zaproś wybranych ({selectedMusicians.length})
-                  </button>
-                  <button
-                    onClick={() => setSelectedMusicians([])}
-                    className="btn-clear-selection"
-                  >
-                    Wyczyść wybór
-                  </button>
+            ) : (
+              <p>Nie zaproszono jeszcze żadnych muzyków.</p>
+            )}
+
+            {availableMusicians.length > 0 && (
+              <div className="add-musicians-section">
+                <h3>Zaproś więcej muzyków</h3>
+                <div className="musicians-selection">
+                  {availableMusicians.map((musician) => (
+                    <label key={musician._id} className="musician-checkbox">
+                      <input
+                        type="checkbox"
+                        value={musician._id}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedMusicians((prev) => [
+                              ...prev,
+                              musician._id,
+                            ]);
+                          } else {
+                            setSelectedMusicians((prev) =>
+                              prev.filter((id) => id !== musician._id)
+                            );
+                          }
+                        }}
+                        checked={selectedMusicians.includes(musician._id)}
+                      />
+                      <span className="musician-label">
+                        {musician.name} (
+                        {musician.instrument || "Instrument nieznany"})
+                      </span>
+                    </label>
+                  ))}
                 </div>
-              )}
-            </div>
-          )}
+                {selectedMusicians.length > 0 && (
+                  <div className="invitation-actions">
+                    <button
+                      onClick={sendMultipleInvitations}
+                      className="btn-invite-selected"
+                    >
+                      Zaproś wybranych ({selectedMusicians.length})
+                    </button>
+                    <button
+                      onClick={() => setSelectedMusicians([])}
+                      className="btn-clear-selection"
+                    >
+                      Wyczyść wybór
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
     </div>
   );
