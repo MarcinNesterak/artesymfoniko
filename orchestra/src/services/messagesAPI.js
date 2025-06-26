@@ -85,10 +85,11 @@ export const privateMessagesAPI = {
   },
 
   // Oznacz wiadomości jako przeczytane
-  markAsRead: async (otherUserId) => {
-    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations/${otherUserId}/read`, {
-        method: 'PUT',
-        headers: getHeaders(true),
+  markAsRead: async (conversationId) => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/read`, {
+      method: "POST",
+      headers: getHeaders(true),
+      body: JSON.stringify({ conversationId }),
     });
     return handleResponse(response);
   },

@@ -68,8 +68,8 @@
 
 .navbar-badge {
   position: absolute;
-  top: 0px;
-  right: -12px;
+  top: 2px;
+  right: -5px;
   background-color: var(--danger-color);
   color: white;
   font-size: 0.7rem;

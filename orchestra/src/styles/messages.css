@@ -144,25 +144,14 @@
 .chat-bubble-wrapper {
   display: flex;
   flex-direction: column;
-  margin-bottom: 12px;
-  max-width: 80%;
 }
 
 .chat-bubble-wrapper.sent {
   align-self: flex-end;
-  align-items: flex-end;
 }
 
 .chat-bubble-wrapper.received {
   align-self: flex-start;
-  align-items: flex-start;
-}
-
-.message-sender-name {
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: var(--text-secondary);
-  margin: 0 12px 4px;
 }
 
 .event-context-tag {
