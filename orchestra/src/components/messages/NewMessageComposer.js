@@ -13,7 +13,7 @@ const NewMessageComposer = ({ onMessageSent }) => {
     const fetchMusicians = async () => {
       try {
         const response = await usersAPI.getMusicians();
-        const musiciansList = response.users || [];
+        const musiciansList = response.musicians || [];
         setMusicians(musiciansList.filter(user => user.role === 'musician' && user.active));
       } catch (err) {
         setError('Nie udało się wczytać listy muzyków.');
