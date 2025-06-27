@@ -115,7 +115,7 @@
 }
 
 .unread-badge {
-  background-color: var(--danger-color);
+  background-color: rgba(249, 104, 104, 0.798);
   color: white;
   font-size: 0.75rem;
   font-weight: bold;
