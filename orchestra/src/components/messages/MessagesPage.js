@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { privateMessagesAPI } from '../../services/messagesAPI';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
+import NewMessageModal from './NewMessageModal';
 import '../../styles/messages.css'; // Ten plik też za chwilę stworzymy
 
 const MessagesPage = () => {
@@ -10,8 +11,22 @@ const MessagesPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const location = useLocation();
+
+  const fetchConversations = useCallback(async () => {
+    try {
+      setLoading(true);
+      const fetchedConversations = await privateMessagesAPI.getConversations();
+      setConversations(fetchedConversations);
+    } catch (err) {
+      setError('Nie udało się załadować konwersacji. Spróbuj odświeżyć stronę.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Sprawdź, czy w URL jest parametr 'with' (przekierowanie z EventDetails)
@@ -20,22 +35,8 @@ const MessagesPage = () => {
     if (preselectId) {
       setSelectedConversationId(preselectId);
     }
-
-    const fetchConversations = async () => {
-      try {
-        setLoading(true);
-        const fetchedConversations = await privateMessagesAPI.getConversations();
-        setConversations(fetchedConversations);
-      } catch (err) {
-        setError('Nie udało się załadować konwersacji. Spróbuj odświeżyć stronę.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchConversations();
-  }, [location.search]);
+  }, [location.search, fetchConversations]);
 
   const handleSelectConversation = (participantId) => {
     setSelectedConversationId(participantId);
@@ -52,7 +53,10 @@ const MessagesPage = () => {
   return (
     <div className="messages-page">
       <div className="conversations-list-panel">
-        <h2>Konwersacje</h2>
+        <div className="conversations-header">
+          <h2>Konwersacje</h2>
+          <button className="new-message-btn" onClick={() => setModalOpen(true)}>Nowa wiadomość</button>
+        </div>
         <ConversationList
           conversations={conversations}
           onSelectConversation={handleSelectConversation}
@@ -78,6 +82,15 @@ const MessagesPage = () => {
           </div>
         )}
       </div>
+
+      {isModalOpen && (
+        <NewMessageModal
+          onClose={() => setModalOpen(false)}
+          onMessageSent={() => {
+            fetchConversations(); // Odśwież listę po wysłaniu
+          }}
+        />
+      )}
     </div>
   );
 };

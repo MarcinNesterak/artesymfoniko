@@ -232,4 +232,60 @@
   font-size: 0.8rem;
   padding: 0 15px 10px;
   text-align: center;
+}
+
+.conversations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.new-message-btn {
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.new-message-btn:hover {
+  background-color: var(--accent-primary-hover);
+}
+
+/* Style dla modala nowej wiadomości */
+.new-message-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.new-message-modal .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-message-modal label {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.new-message-modal select,
+.new-message-modal textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.new-message-modal textarea {
+  resize: vertical;
+  min-height: 120px;
 } 
