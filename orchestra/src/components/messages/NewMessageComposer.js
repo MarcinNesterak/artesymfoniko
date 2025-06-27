@@ -12,8 +12,9 @@ const NewMessageComposer = ({ onMessageSent }) => {
   useEffect(() => {
     const fetchMusicians = async () => {
       try {
-        const allUsers = await usersAPI.getMusicians();
-        setMusicians(allUsers.filter(user => user.role === 'musician' && user.active));
+        const response = await usersAPI.getMusicians();
+        const musiciansList = response.users || [];
+        setMusicians(musiciansList.filter(user => user.role === 'musician' && user.active));
       } catch (err) {
         setError('Nie udało się wczytać listy muzyków.');
         console.error(err);
