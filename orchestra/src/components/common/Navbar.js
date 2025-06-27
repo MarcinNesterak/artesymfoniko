@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { storage } from '../../services/api';
 import { privateMessagesAPI } from '../../services/messagesAPI';
@@ -16,27 +16,36 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location]);
   
-  useEffect(() => {
+  const fetchUnread = useCallback(async () => {
     if (!user) {
       setUnreadCount(0);
       return;
     }
+    try {
+      // Używamy wydajniejszego endpointu
+      const count = await privateMessagesAPI.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error("Failed to fetch unread messages count:", error);
+      setUnreadCount(0);
+    }
+  }, [user]);
 
-    const fetchUnread = async () => {
-      try {
-        const conversations = await privateMessagesAPI.getConversations();
-        const total = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0);
-        setUnreadCount(total);
-      } catch (error) {
-        console.error("Failed to fetch unread messages count:", error);
-      }
-    };
+  useEffect(() => {
+    if (!user) return;
 
     fetchUnread();
-    const interval = setInterval(fetchUnread, 30000); // Poll every 30 seconds
+    // Zachowujemy odpytywanie co 30 sekund
+    const interval = setInterval(fetchUnread, 30000); 
 
-    return () => clearInterval(interval);
-  }, [user]);
+    // Dodajemy nasłuchiwanie na sygnał do natychmiastowego odświeżenia
+    window.addEventListener('unreadCountUpdated', fetchUnread);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('unreadCountUpdated', fetchUnread);
+    };
+  }, [user, fetchUnread]);
   
   const handleLogout = () => {
     storage.removeUser();
@@ -51,7 +60,7 @@ const Navbar = () => {
   const messagesLink = (
     <Link to={user.role === 'conductor' ? "/conductor/messages" : "/musician/messages"} className="navbar-item messages-link">
       Wiadomości
-      {unreadCount > 0 && <span className="unread-badge navbar-badge">{unreadCount}</span>}
+      {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
     </Link>
   );
 
