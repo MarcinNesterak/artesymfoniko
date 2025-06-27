@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { privateMessagesAPI } from '../../services/messagesAPI';
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
+import NewMessageComposer from './NewMessageComposer';
 import '../../styles/messages.css'; // Ten plik też za chwilę stworzymy
 
 const MessagesPage = () => {
@@ -10,36 +11,56 @@ const MessagesPage = () => {
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
+  
   const location = useLocation();
+  const navigate = useNavigate();
+  const isComposing = selectedConversationId === 'new';
+
+  const fetchConversations = useCallback(async () => {
+    try {
+      setLoading(true);
+      const fetchedConversations = await privateMessagesAPI.getConversations();
+      setConversations(fetchedConversations);
+    } catch (err) {
+      setError('Nie udało się załadować konwersacji. Spróbuj odświeżyć stronę.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Sprawdź, czy w URL jest parametr 'with' (przekierowanie z EventDetails)
     const params = new URLSearchParams(location.search);
     const preselectId = params.get('with');
     if (preselectId) {
       setSelectedConversationId(preselectId);
     }
-
-    const fetchConversations = async () => {
-      try {
-        setLoading(true);
-        const fetchedConversations = await privateMessagesAPI.getConversations();
-        setConversations(fetchedConversations);
-      } catch (err) {
-        setError('Nie udało się załadować konwersacji. Spróbuj odświeżyć stronę.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchConversations();
-  }, [location.search]);
+  }, [location.search, fetchConversations]);
+
+  const handleStartNewMessage = () => {
+    setSelectedConversationId('new');
+  };
+
+  const handleMessageSent = (recipientId) => {
+    // Po wysłaniu wiadomości, odświeżamy listę i przechodzimy do nowej konwersacji
+    fetchConversations().then(() => {
+       navigate(`/conductor/messages?with=${recipientId}`);
+       setSelectedConversationId(recipientId);
+    });
+  };
 
   const handleSelectConversation = (participantId) => {
     setSelectedConversationId(participantId);
+    // Usuwamy parametr 'with' z URL, jeśli użytkownik kliknie inną konwersację
+    if (location.search.includes('with=')) {
+        navigate(location.pathname);
+    }
   };
+
+  const displayedConversations = isComposing 
+    ? [{ _id: 'new', participant: { _id: 'new', name: 'Nowa wiadomość' }, content: 'Wybierz odbiorcę...' }, ...conversations] 
+    : conversations;
 
   if (loading) {
     return <div className="loading">Ładowanie wiadomości...</div>;
@@ -52,15 +73,20 @@ const MessagesPage = () => {
   return (
     <div className="messages-page">
       <div className="conversations-list-panel">
-        <h2>Konwersacje</h2>
+        <div className="conversations-header">
+          <h2>Konwersacje</h2>
+          <button className="new-message-btn" onClick={handleStartNewMessage}>Nowa wiadomość</button>
+        </div>
         <ConversationList
-          conversations={conversations}
+          conversations={displayedConversations}
           onSelectConversation={handleSelectConversation}
           selectedConversationId={selectedConversationId}
         />
       </div>
       <div className="chat-window-panel">
-        {selectedConversationId ? (
+        {isComposing ? (
+          <NewMessageComposer onMessageSent={handleMessageSent} />
+        ) : selectedConversationId ? (
           <ChatWindow participantId={selectedConversationId} />
         ) : (
           <div className="no-conversation-selected">
@@ -72,7 +98,7 @@ const MessagesPage = () => {
             ) : (
               <>
                 <h2>Brak konwersacji</h2>
-                <p>Nie masz jeszcze żadnych wiadomości. Możesz rozpocząć rozmowę z muzykiem z widoku szczegółów wydarzenia.</p>
+                <p>Kliknij "Nowa wiadomość", aby rozpocząć rozmowę.</p>
               </>
             )}
           </div>
