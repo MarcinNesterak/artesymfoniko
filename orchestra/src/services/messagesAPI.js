@@ -93,4 +93,12 @@ export const privateMessagesAPI = {
     });
     return handleResponse(response);
   },
+
+  deleteMessage: async (messageId) => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/${messageId}`, {
+      method: 'DELETE',
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
 }; 

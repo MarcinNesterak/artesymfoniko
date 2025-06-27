@@ -62,6 +62,18 @@ const ChatWindow = ({ participantId, eventId = null }) => {
     }
   };
 
+  const handleDeleteMessage = async (messageId) => {
+    if (window.confirm('Czy na pewno chcesz usunąć tę wiadomość?')) {
+      try {
+        await privateMessagesAPI.deleteMessage(messageId);
+        setMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+      } catch (err) {
+        setError('Błąd podczas usuwania wiadomości.');
+        console.error(err);
+      }
+    }
+  };
+
   if (!participantId) {
     // Ten widok jest już w MessagesPage, ale dla pewności
     return <div className="no-conversation-selected">Wybierz konwersację</div>;
@@ -85,6 +97,11 @@ const ChatWindow = ({ participantId, eventId = null }) => {
               <p className="message-text">{msg.content}</p>
               <span className="message-timestamp">{new Date(msg.createdAt).toLocaleTimeString('pl-PL', {hour: '2-digit', minute: '2-digit'})}</span>
             </div>
+            {msg.senderId._id === currentUser.id && (
+              <button onClick={() => handleDeleteMessage(msg._id)} className="delete-message-btn">
+                &times;
+              </button>
+            )}
           </div>
         ))}
         <div ref={messagesEndRef} />

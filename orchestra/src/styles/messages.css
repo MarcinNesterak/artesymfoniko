@@ -191,11 +191,30 @@
 }
 
 .message-timestamp {
-  font-size: 0.75rem;
-  display: block;
-  text-align: right;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
   margin-top: 5px;
-  opacity: 0.7;
+  align-self: flex-end;
+}
+
+.delete-message-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 5px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.chat-bubble-wrapper:hover .delete-message-btn {
+  opacity: 1;
+}
+
+.chat-bubble-wrapper.sent .delete-message-btn {
+  order: -1;
 }
 
 .chat-form {

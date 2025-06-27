@@ -193,4 +193,28 @@ router.put('/conversations/:otherUserId/read', auth, async (req, res) => {
   }
 });
 
+// @route   DELETE /:messageId
+// @desc    Usuń wiadomość
+// @access  Private
+router.delete('/:messageId', auth, async (req, res) => {
+  try {
+    const message = await PrivateMessage.findById(req.params.messageId);
+
+    if (!message) {
+      return res.status(404).json({ msg: 'Wiadomość nie została znaleziona.' });
+    }
+
+    if (message.senderId.toString() !== req.user.id) {
+      return res.status(403).json({ msg: 'Nie masz uprawnień do usunięcia tej wiadomości.' });
+    }
+
+    await message.deleteOne();
+
+    res.json({ msg: 'Wiadomość została usunięta.' });
+  } catch (error) {
+    console.error('Błąd podczas usuwania wiadomości:', error);
+    res.status(500).send('Błąd serwera');
+  }
+});
+
 export default router; 
