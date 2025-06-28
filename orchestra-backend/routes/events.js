@@ -535,12 +535,36 @@ router.post("/:id/invite", requireConductor, async (req, res) => {
 
     await Invitation.insertMany(invitations);
 
-    // Aktualizuj licznik zaproszeń
-    const totalInvitations = await Invitation.countDocuments({
-      eventId: req.params.id,
-    });
+    // Aktualizuj licznik zaproszeń i oznacz jako zmodyfikowane
+    const totalInvitations = await Invitation.countDocuments({ eventId: req.params.id });
     event.invitedCount = totalInvitations;
+    event.lastModified = new Date();
     await event.save();
+
+    // Wyślij powiadomienia e-mail do nowo zaproszonych
+    try {
+      const newlyInvitedUsers = await User.find({ '_id': { $in: newUserIds } }).select('email name');
+      for (const user of newlyInvitedUsers) {
+        await sendEmail({
+          to: user.email,
+          subject: `Zaproszenie do udziału w wydarzeniu: ${event.title}`,
+          html: `
+            <h1>Cześć ${user.name.split(' ')[0]}!</h1>
+            <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${event.title}</strong>.</p>
+            <p>Data: ${new Date(event.date).toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+            <p>Lokalizacja: ${event.location}</p>
+            <p>Aby zobaczyć szczegóły i odpowiedzieć na zaproszenie, zaloguj się do aplikacji.</p>
+            <br>
+            <p>Pozdrawiamy,</p>
+            <p><strong>Artesymfoniko</strong></p>
+          `
+        });
+      }
+      console.log(`Wysłano powiadomienia e-mail do ${newlyInvitedUsers.length} nowych muzyków.`);
+    } catch (emailError) {
+      console.error("Błąd podczas wysyłania e-maili z zaproszeniami (szybkie zapraszanie):", emailError);
+      // Nie przerywamy operacji, zaproszenia w systemie są ważniejsze
+    }
 
     res.json({
       message: `Wysłano ${newUserIds.length} nowych zaproszeń`,
