@@ -38,7 +38,6 @@ app.use(
       "http://localhost:3000",
       "http://localhost:3001",
       "https://artesymfoniko.vercel.app",
-      "https://artesymfoniko-production.up.railway.app",
       /^https:\/\/artesymfoniko-.*\.vercel\.app$/,
       "http://artesymfoniko.pl",
       "https://artesymfoniko.pl",
