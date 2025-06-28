@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
 import { loginLimiter, registerLimiter } from '../middleware/rateLimiter.js';
-import { sendEmail } from '../utils/email.js';
+import sendEmail from '../utils/email.js';
 
 const router = express.Router();
 
