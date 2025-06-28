@@ -84,14 +84,23 @@ export const privateMessagesAPI = {
     return handleResponse(response);
   },
 
-  // Oznacz wiadomości jako przeczytane
-  markAsRead: async (conversationId) => {
-    const response = await fetch(`${API_BASE_URL}/api/private-messages/read`, {
-      method: "POST",
+  // Oznacz wiadomości jako przeczytane - POPRAWIONA WERSJA
+  markAsRead: async (otherUserId) => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations/${otherUserId}/read`, {
+      method: 'PUT', // Właściwa metoda
       headers: getHeaders(true),
-      body: JSON.stringify({ conversationId }),
     });
     return handleResponse(response);
+  },
+
+  // DODANO BRAKUJĄCĄ FUNKCJĘ
+  getUnreadCount: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/unread-count`, {
+        method: 'GET',
+        headers: getHeaders(true),
+    });
+    const data = await handleResponse(response);
+    return data ? data.count : 0;
   },
 
   deleteMessage: async (messageId) => {
