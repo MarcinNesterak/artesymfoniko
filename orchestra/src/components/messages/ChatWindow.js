@@ -87,24 +87,25 @@ const ChatWindow = ({ participantId, eventId = null }) => {
   return (
     <div className="chat-window">
       <div className="chat-messages-container">
-        {messages.map(msg => (
-          <div key={msg._id} className={`chat-bubble-wrapper ${msg.senderId._id === currentUser.id ? 'sent' : 'received'}`}>
-            {msg.eventId && (
-              <div className="event-context-tag">
-                Dotyczy wydarzenia: <strong>{msg.eventId.title}</strong>
+        {messages.map(msg => {
+          // Ujednolicenie sprawdzania ID nadawcy
+          const isSentByCurrentUser = msg.senderId?._id === currentUser.id || msg.senderId === currentUser.id;
+          
+          return (
+            <div key={msg._id} className={`chat-bubble-wrapper ${isSentByCurrentUser ? 'sent' : 'received'}`}>
+              {/* Usunięto informację o wydarzeniu, która wróciła do kodu */}
+              <div className={`chat-bubble ${isSentByCurrentUser ? 'sent' : 'received'}`}>
+                <p className="message-text">{msg.content}</p>
+                <span className="message-timestamp">{new Date(msg.createdAt).toLocaleTimeString('pl-PL', {hour: '2-digit', minute: '2-digit'})}</span>
               </div>
-            )}
-            <div className={`chat-bubble ${msg.senderId._id === currentUser.id ? 'sent' : 'received'}`}>
-              <p className="message-text">{msg.content}</p>
-              <span className="message-timestamp">{new Date(msg.createdAt).toLocaleTimeString('pl-PL', {hour: '2-digit', minute: '2-digit'})}</span>
+              {isSentByCurrentUser && (
+                <button onClick={() => handleDeleteMessage(msg._id)} className="delete-message-btn">
+                  &times;
+                </button>
+              )}
             </div>
-            {msg.senderId._id === currentUser.id && (
-              <button onClick={() => handleDeleteMessage(msg._id)} className="delete-message-btn">
-                &times;
-              </button>
-            )}
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSendMessage} className="chat-form">
