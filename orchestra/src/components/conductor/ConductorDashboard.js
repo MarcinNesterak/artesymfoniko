@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { eventsAPI } from "../../services/api";
 import EventCard from "../common/EventCard";
 import "../../styles/dashboard.css";
@@ -11,16 +11,20 @@ const ConductorDashboard = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     // Sprawdź, czy nawigacja przekazała komunikat o sukcesie
-    if (location.state && location.state.successMessage) {
+    if (location.state?.successMessage) {
       setSuccessMessage(location.state.successMessage);
       // Wyczyść stan, aby komunikat nie pojawiał się ponownie po odświeżeniu
-      window.history.replaceState({}, document.title)
+      navigate(location.pathname, { replace: true, state: {} });
     }
-    fetchEvents();
-  }, [location.state]);
+  }, [location.state, navigate, location.pathname]);
 
   const fetchEvents = async () => {
     try {
