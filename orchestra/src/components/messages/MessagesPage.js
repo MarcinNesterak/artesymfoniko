@@ -44,7 +44,7 @@ const MessagesPage = () => {
       if (readConversationParticipantId) {
         setConversations(prev =>
           prev.map(conv =>
-            conv.participant._id === readConversationParticipantId
+            String(conv.participant._id) === String(readConversationParticipantId)
               ? { ...conv, unreadCount: 0 }
               : conv
           )
