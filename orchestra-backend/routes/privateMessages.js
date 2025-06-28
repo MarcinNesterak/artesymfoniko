@@ -193,6 +193,22 @@ router.put('/conversations/:otherUserId/read', auth, async (req, res) => {
   }
 });
 
+// @route   GET /unread-count
+// @desc    Pobierz liczbę wszystkich nieprzeczytanych wiadomości
+// @access  Private
+router.get('/unread-count', auth, async (req, res) => {
+  try {
+    const count = await PrivateMessage.countDocuments({
+      recipientId: req.user.id,
+      isRead: false,
+    });
+    res.json({ count });
+  } catch (error) {
+    console.error('Błąd podczas pobierania liczby nieprzeczytanych wiadomości:', error);
+    res.status(500).send('Błąd serwera');
+  }
+});
+
 // @route   DELETE /:messageId
 // @desc    Usuń wiadomość
 // @access  Private
