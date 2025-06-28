@@ -26,7 +26,7 @@ const ChatWindow = ({ participantId, eventId = null }) => {
         
         // Oznacz wiadomości jako przeczytane i wyślij sygnał do odświeżenia licznika
         await privateMessagesAPI.markAsRead(participantId);
-        window.dispatchEvent(new CustomEvent('unreadCountUpdated'));
+        window.dispatchEvent(new CustomEvent('unreadCountUpdated', { detail: { conversationWith: participantId } }));
       } catch (err) {
         setError('Nie udało się załadować wiadomości.');
         console.error(err);

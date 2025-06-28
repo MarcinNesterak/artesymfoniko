@@ -38,6 +38,26 @@ const MessagesPage = () => {
     fetchConversations();
   }, [location.search, fetchConversations]);
 
+  useEffect(() => {
+    const handleUnreadUpdate = (event) => {
+      const readConversationParticipantId = event.detail?.conversationWith;
+      if (readConversationParticipantId) {
+        setConversations(prev =>
+          prev.map(conv =>
+            conv.participant._id === readConversationParticipantId
+              ? { ...conv, unreadCount: 0 }
+              : conv
+          )
+        );
+      }
+    };
+
+    window.addEventListener('unreadCountUpdated', handleUnreadUpdate);
+    return () => {
+      window.removeEventListener('unreadCountUpdated', handleUnreadUpdate);
+    };
+  }, []);
+
   const handleStartNewMessage = () => {
     setSelectedConversationId('new');
   };
