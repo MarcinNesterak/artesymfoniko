@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { eventsAPI } from "../../services/api";
 import EventCard from "../common/EventCard";
 import "../../styles/dashboard.css";
@@ -12,6 +12,10 @@ const ConductorDashboard = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const handleCloseSuccessMessage = useCallback(() => {
+    setSuccessMessage("");
+  }, []);
 
   useEffect(() => {
     fetchEvents();
@@ -98,7 +102,7 @@ const ConductorDashboard = () => {
           <p>Nie masz aktualnych wydarzeń. Utwórz swoje pierwsze wydarzenie!</p>
         )}
       </div>
-      <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
+      <SuccessMessage message={successMessage} onClose={handleCloseSuccessMessage} />
     </div>
   );
 };
