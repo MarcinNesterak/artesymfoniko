@@ -12,6 +12,7 @@ import Message from "../models/Message.js";
 import MessageRead from "../models/MessageRead.js";
 import { apiLimiter } from '../middleware/rateLimiter.js';
 import { body, validationResult } from "express-validator";
+import sendEmail from "../utils/email.js";
 
 const router = express.Router();
 
@@ -268,25 +269,39 @@ router.post(
         location,
       });
 
-      await newEvent.save();
+      const savedEvent = await newEvent.save();
 
-      // Utwórz zaproszenia, jeśli podano muzyków
+      // Utwórz zaproszenia dla wybranych muzyków
       if (inviteUserIds && inviteUserIds.length > 0) {
-        const invitations = inviteUserIds.map((userId) => ({
-          eventId: newEvent._id,
-          userId: userId,
-          status: "pending",
+        const invitations = inviteUserIds.map(userId => ({
+          eventId: savedEvent._id,
+          userId: userId
         }));
         await Invitation.insertMany(invitations);
-        newEvent.invitedCount = inviteUserIds.length;
-        await newEvent.save();
+        
+        // Wyślij powiadomienia e-mail do zaproszonych muzyków
+        const invitedUsers = await User.find({ '_id': { $in: inviteUserIds } }).select('email name');
+        for (const user of invitedUsers) {
+          await sendEmail({
+            to: user.email,
+            subject: `Zaproszenie do udziału w wydarzeniu: ${title}`,
+            html: `
+              <h1>Cześć ${user.name.split(' ')[0]}!</h1>
+              <p>Zostałeś/aś zaproszony/a do udziału w nowym wydarzeniu: <strong>${title}</strong>.</p>
+              <p>Data: ${new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+              <p>Lokalizacja: ${location}</p>
+              <p>Aby zobaczyć szczegóły i odpowiedzieć na zaproszenie, zaloguj się do aplikacji.</p>
+              <br>
+              <p>Pozdrawiamy,</p>
+              <p><strong>Artesymfoniko</strong></p>
+            `
+          });
+        }
       }
 
-      const populatedEvent = await Event.findById(newEvent._id).populate("conductorId", "name email");
-
       res.status(201).json({
-        message: "Wydarzenie zostało utworzone",
-        event: populatedEvent,
+        message: 'Wydarzenie zostało utworzone, a zaproszenia wysłane.',
+        event: savedEvent
       });
     } catch (error) {
       console.error("Create event error:", error);
@@ -332,8 +347,12 @@ router.put(
           .json({ message: "Brak uprawnień do edycji tego wydarzenia." });
       }
 
+      // 1. Pobierz aktualne zaproszenia PRZED modyfikacją
+      const originalInvitations = await Invitation.find({ eventId: event._id });
+      const originalInvitedUserIds = originalInvitations.map(inv => inv.userId.toString());
+
       // Aktualizuj pola, które zostały przesłane w ciele żądania
-      const { title, date, description, schedule, program, location, dresscode } = req.body;
+      const { title, date, description, schedule, program, location, dresscode, inviteUserIds } = req.body;
       if (title) event.title = title;
       if (date) event.date = date;
       if (description) event.description = description;
@@ -344,6 +363,57 @@ router.put(
       
       // Oznacz jako zmodyfikowane
       event.lastModified = new Date();
+
+      // 2. Logika obsługi zaproszeń (jeśli inviteUserIds jest przekazane)
+      if (inviteUserIds && Array.isArray(inviteUserIds)) {
+        const newInvitedUserIds = inviteUserIds.map(id => id.toString());
+
+        // 2a. Znajdź usuniętych muzyków
+        const removedUserIds = originalInvitedUserIds.filter(
+          id => !newInvitedUserIds.includes(id)
+        );
+        if (removedUserIds.length > 0) {
+          // Usuń ich zaproszenia i potwierdzenia uczestnictwa
+          await Invitation.deleteMany({ eventId: event._id, userId: { $in: removedUserIds } });
+          await Participation.deleteMany({ eventId: event._id, userId: { $in: removedUserIds } });
+          console.log(`Usunięto zaproszenia dla ${removedUserIds.length} muzyków.`);
+        }
+
+        // 2b. Znajdź nowo dodanych muzyków
+        const addedUserIds = newInvitedUserIds.filter(
+          id => !originalInvitedUserIds.includes(id)
+        );
+
+        if (addedUserIds.length > 0) {
+          // Utwórz dla nich nowe zaproszenia
+          const newInvitations = addedUserIds.map(userId => ({
+            eventId: event._id,
+            userId: userId,
+          }));
+          await Invitation.insertMany(newInvitations);
+          console.log(`Dodano ${addedUserIds.length} nowych zaproszeń.`);
+
+          // 2c. Wyślij powiadomienia email do nowo zaproszonych
+          const newlyInvitedUsers = await User.find({ '_id': { $in: addedUserIds } }).select('email name');
+          for (const user of newlyInvitedUsers) {
+            await sendEmail({
+              to: user.email,
+              subject: `Nowe zaproszenie do wydarzenia: ${event.title}`,
+              html: `
+                <h1>Cześć ${user.name.split(' ')[0]}!</h1>
+                <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${event.title}</strong>.</p>
+                <p>Data: ${new Date(event.date).toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                <p>Lokalizacja: ${location || event.location}</p>
+                <p>Wydarzenie zostało zaktualizowane. Zaloguj się do aplikacji, aby zobaczyć szczegóły i potwierdzić swój udział.</p>
+                <br>
+                <p>Pozdrawiamy,</p>
+                <p><strong>Artesymfoniko</strong></p>
+              `
+            });
+          }
+           console.log(`Wysłano powiadomienia e-mail do ${newlyInvitedUsers.length} nowych muzyków.`);
+        }
+      }
 
       const updatedEvent = await event.save();
 

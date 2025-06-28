@@ -1,35 +1,48 @@
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Konfiguracja transportera email
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: process.env.SMTP_SECURE === 'true',
+  host: process.env.EMAIL_HOST,
+  port: 587, // Standardowy port dla SMTP z TLS
+  secure: false, // true dla portu 465, false dla innych portów
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, // Hasło do aplikacji wygenerowane w Google
+  },
+  tls: {
+    ciphers:'SSLv3'
   }
 });
 
-// Funkcja do wysyłania emaili
-export const sendEmail = async ({ to, subject, text, html }) => {
+/**
+ * Wysyła e-mail.
+ * @param {object} options - Opcje maila.
+ * @param {string} options.to - Adres e-mail odbiorcy.
+ * @param {string} options.subject - Temat maila.
+ * @param {string} options.html - Treść maila w formacie HTML.
+ */
+const sendEmail = async (options) => {
   try {
     const mailOptions = {
-      from: `"Orkiestra" <${process.env.SMTP_FROM}>`,
-      to,
-      subject,
-      text,
-      html
+      from: `"Artesymfoniko" <${process.env.EMAIL_USER}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent:', info.messageId);
+    console.log('Wiadomość wysłana: %s', info.messageId);
     return info;
   } catch (error) {
-    console.error('Error sending email:', error);
-    throw error;
+    console.error('Błąd podczas wysyłania e-maila:', error);
+    // Nie rzucamy błędu dalej, aby nie przerywać głównych operacji (np. tworzenia wydarzenia)
   }
 };
+
+export default sendEmail;
 
 // Funkcja do wysyłania emaila weryfikacyjnego
 export const sendVerificationEmail = async (user) => {

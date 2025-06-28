@@ -781,3 +781,43 @@
 .chat-modal .chat-window {
   border-radius: 0 0 8px 8px;
 }
+
+.musician-list-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.musician-list-actions .react-select-container {
+  flex-grow: 1;
+}
+
+/* Style dla listy muzyków w modalu edycji */
+.musician-checkbox-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.musician-checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.musician-checkbox-item input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.musician-checkbox-item label {
+  font-weight: normal;
+}
+
+/* Modal do edycji */
+.edit-modal-overlay {
+  position: fixed;
+}

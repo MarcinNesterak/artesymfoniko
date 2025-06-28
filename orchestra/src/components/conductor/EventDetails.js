@@ -34,6 +34,7 @@ const EventDetails = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [selectedMusicians, setSelectedMusicians] = useState([]);
+  const [editInvitedUserIds, setEditInvitedUserIds] = useState([]);
   const [editData, setEditData] = useState({
     title: "",
     date: "",
@@ -92,6 +93,9 @@ const EventDetails = () => {
       // Pobierz wszystkich muzyków dla selecta
       const musiciansResponse = await usersAPI.getMusicians();
       setAllMusicians(musiciansResponse.musicians || []);
+
+      // Ustaw początkową listę zaproszonych do edycji
+      setEditInvitedUserIds(eventResponse.invitations.map(inv => inv.userId._id));
     } catch (error) {
       console.error("Error fetching event data:", error);
       setError(
@@ -180,6 +184,7 @@ const EventDetails = () => {
         program: editData.program,
         location: editData.location,
         dresscode: editData.dresscode,
+        inviteUserIds: editInvitedUserIds,
       };
 
       await eventsAPI.updateEvent(id, updateData);
@@ -388,6 +393,16 @@ const EventDetails = () => {
     setSelectedParticipant(null);
   };
 
+  const handleInvitedMusicianChange = (musicianId) => {
+    setEditInvitedUserIds(prevIds => {
+      if (prevIds.includes(musicianId)) {
+        return prevIds.filter(id => id !== musicianId);
+      } else {
+        return [...prevIds, musicianId];
+      }
+    });
+  };
+
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
   }
@@ -588,6 +603,26 @@ const EventDetails = () => {
                     <img src="/img/other.png" alt="other" />
                     <span>{DRESSCODE_DESCRIPTIONS['other']}</span>
                   </div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Zaproszeni muzycy</label>
+                <div className="musician-checkbox-list">
+                  {allMusicians.map(musician => (
+                    <div key={musician._id} className="musician-checkbox-item">
+                      <input
+                        type="checkbox"
+                        id={`edit-musician-${musician._id}`}
+                        checked={editInvitedUserIds.includes(musician._id)}
+                        onChange={() => handleInvitedMusicianChange(musician._id)}
+                        disabled={editLoading}
+                      />
+                      <label htmlFor={`edit-musician-${musician._id}`}>
+                        {musician.name} ({musician.instrument})
+                      </label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
