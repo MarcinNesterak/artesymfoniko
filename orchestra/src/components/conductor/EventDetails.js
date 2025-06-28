@@ -184,10 +184,9 @@ const EventDetails = () => {
 
       await eventsAPI.updateEvent(id, updateData);
 
-      // Po udanej edycji, przekieruj na dashboard z informacją o sukcesie
-      navigate("/conductor/dashboard", { 
-        state: { successMessage: "Wydarzenie zostało zaktualizowane pomyślnie!" } 
-      });
+      // Po udanej edycji, przekieruj na dashboard z informacją o sukcesie w parametrze URL
+      const successMessage = "Wydarzenie zostało zaktualizowane pomyślnie!";
+      navigate(`/conductor/dashboard?successMessage=${encodeURIComponent(successMessage)}`);
 
     } catch (error) {
       console.error("Error updating event:", error);

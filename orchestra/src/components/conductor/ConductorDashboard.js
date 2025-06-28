@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { eventsAPI } from "../../services/api";
 import EventCard from "../common/EventCard";
 import "../../styles/dashboard.css";
@@ -10,7 +10,7 @@ const ConductorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,13 +18,15 @@ const ConductorDashboard = () => {
   }, []);
 
   useEffect(() => {
-    // Sprawdź, czy nawigacja przekazała komunikat o sukcesie
-    if (location.state?.successMessage) {
-      setSuccessMessage(location.state.successMessage);
-      // Wyczyść stan, aby komunikat nie pojawiał się ponownie po odświeżeniu
-      navigate(location.pathname, { replace: true, state: {} });
+    // Efekt do obsługi komunikatu o sukcesie z parametrów URL
+    const message = searchParams.get('successMessage');
+    if (message) {
+      setSuccessMessage(message);
+      // Wyczyść parametr z URL, aby komunikat nie pojawiał się ponownie
+      searchParams.delete('successMessage');
+      setSearchParams(searchParams, { replace: true });
     }
-  }, [location.state, navigate, location.pathname]);
+  }, [searchParams, setSearchParams]);
 
   const fetchEvents = async () => {
     try {
