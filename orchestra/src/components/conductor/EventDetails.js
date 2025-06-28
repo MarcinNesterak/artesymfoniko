@@ -240,7 +240,6 @@ const EventDetails = () => {
       }
 
       await eventsAPI.inviteMusicians(id, [musicianId]);
-      setSuccessMessage("Zaproszenie zostało wysłane.");
 
       // Odśwież dane wydarzenia
       fetchEventData();
@@ -307,7 +306,6 @@ const EventDetails = () => {
     try {
       // Wywołaj endpoint do odwołania zaproszenia
       await eventsAPI.cancelInvitation(id, invitationId);
-      setSuccessMessage("Zaproszenie zostało odwołane.");
 
       // Odśwież dane wydarzenia
       fetchEventData();
@@ -329,7 +327,6 @@ const EventDetails = () => {
     try {
       // Wywołaj endpoint do usunięcia uczestnika
       await eventsAPI.removeParticipant(id, participantId);
-      setSuccessMessage("Uczestnik został usunięty z wydarzenia.");
 
       // Odśwież dane wydarzenia
       fetchEventData();
