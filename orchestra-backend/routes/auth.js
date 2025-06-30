@@ -3,13 +3,12 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
 import { loginLimiter, registerLimiter } from '../middleware/rateLimiter.js';
-import sendEmail from '../utils/email.js';
 
 const router = express.Router();
 
 // Funkcja generująca JWT token
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
 // POST /api/auth/login
