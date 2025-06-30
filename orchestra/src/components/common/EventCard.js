@@ -9,7 +9,7 @@ const EventCard = ({ event, linkTo, showDeleteButton = false, onDelete, isContra
 
   // Zdefiniuj docelowy URL na podstawie widoku
   const targetUrl = isContractView
-    ? `/conductor/event/${event._id}/contracts`
+    ? `/conductor/events/${event._id}/contracts`
     : linkTo;
 
   // Format date - obsługa MongoDB date format
