@@ -39,6 +39,24 @@ const participationSchema = new mongoose.Schema({
     type: Number,
     min: 1,
     max: 5
+  },
+  
+  // Pola związane z umową
+  fee: {
+    type: Number,
+    default: 0
+  },
+  
+  contractStatus: {
+    type: String,
+    enum: ['pending', 'ready'],
+    default: 'pending'
+  },
+  
+  contractId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Contract',
+    default: null
   }
 }, {
   timestamps: true

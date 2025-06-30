@@ -1,8 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../../styles/eventCard.css";
 
-const EventCard = ({ event, linkTo, showDeleteButton = false, onDelete }) => {
+const EventCard = ({ event, linkTo, showDeleteButton = false, onDelete, isContractView }) => {
+  const userJson = localStorage.getItem("user");
+  const user = userJson ? JSON.parse(userJson) : null;
+  const navigate = useNavigate();
+
+  // Zdefiniuj docelowy URL na podstawie widoku
+  const targetUrl = isContractView
+    ? `/conductor/events/${event._id}?view=contracts`
+    : linkTo;
+
   // Format date - obsługa MongoDB date format
   const formatDate = (dateString) => {
     const options = {
@@ -15,9 +24,16 @@ const EventCard = ({ event, linkTo, showDeleteButton = false, onDelete }) => {
     return new Date(dateString).toLocaleDateString("pl-PL", options);
   };
 
+  const handleCardClick = (e) => {
+    // Zapobiegaj nawigacji, jeśli kliknięto w przycisk usuwania
+    if (e.target.closest('.event-card-delete-button')) {
+      return;
+    }
+    navigate(targetUrl);
+  };
+
   const handleDeleteClick = (e) => {
-    e.preventDefault(); // Zapobiega nawigacji po kliknięciu delete
-    e.stopPropagation();
+    e.stopPropagation(); // Zapobiegaj propagacji kliknięcia do kontenera karty
 
     if (onDelete) {
       onDelete(event);
@@ -26,7 +42,7 @@ const EventCard = ({ event, linkTo, showDeleteButton = false, onDelete }) => {
 
   return (
     <div className="event-card-wrapper">
-      <Link to={linkTo} className="event-card-link">
+      <Link to={targetUrl} className="event-card-link" onClick={handleCardClick}>
         <div className="event-card">
           <div className="event-card-header">
             <div className="event-title-with-notifications">

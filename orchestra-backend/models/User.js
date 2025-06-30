@@ -71,6 +71,14 @@ const userSchema = new mongoose.Schema(
           default: "Polska",
         },
       },
+      pesel: {
+        type: String,
+        trim: true,
+      },
+      bankAccountNumber: {
+        type: String,
+        trim: true,
+      },
     },
 
     active: {
