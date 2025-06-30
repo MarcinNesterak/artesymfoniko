@@ -25,7 +25,6 @@ router.post('/login', loginLimiter, async (req, res) => {
     
     // Znajdź użytkownika po email
     const user = await User.findOne({ email: email.toLowerCase() });
-    console.log("DEBUG: user found:", user);
     
     if (!user) {
       return res.status(401).json({
@@ -44,7 +43,6 @@ router.post('/login', loginLimiter, async (req, res) => {
     
     // Sprawdź hasło
     const isMatch = await user.comparePassword(password);
-    console.log("DEBUG: password match:", isMatch);
     
     if (!isMatch) {
       return res.status(401).json({
