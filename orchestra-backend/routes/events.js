@@ -16,6 +16,18 @@ import sendEmail from "../utils/email.js";
 
 const router = express.Router();
 
+// Helper do formatowania daty w polskiej strefie czasowej
+const formatEventDate = (date) => {
+  if (!date) return { eventDate: '', eventTime: '' };
+  const d = new Date(date);
+  const dateOptions = { timeZone: 'Europe/Warsaw', day: '2-digit', month: 'long', year: 'numeric' };
+  const timeOptions = { timeZone: 'Europe/Warsaw', hour: '2-digit', minute: '2-digit', hour12: false };
+  return {
+    eventDate: d.toLocaleDateString('pl-PL', dateOptions),
+    eventTime: d.toLocaleTimeString('pl-PL', timeOptions),
+  };
+};
+
 // Automatyczne archiwizowanie wydarzeń
 const autoArchiveEvents = async () => {
   try {
@@ -282,13 +294,14 @@ router.post(
         // Wyślij powiadomienia e-mail do zaproszonych muzyków
         const invitedUsers = await User.find({ '_id': { $in: inviteUserIds } }).select('email name');
         for (const user of invitedUsers) {
+          const { eventDate, eventTime } = formatEventDate(date);
           await sendEmail({
             to: user.email,
             subject: `Zaproszenie do udziału w wydarzeniu: ${title}`,
             html: `
               <h1>Cześć ${user.name.split(' ')[0]}!</h1>
               <p>Zostałeś/aś zaproszony/a do udziału w nowym wydarzeniu: <strong>${title}</strong>.</p>
-              <p>Data: ${new Date(date).toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+              <p>Data: ${eventDate} o godzinie ${eventTime}</p>
               <p>Lokalizacja: ${location}</p>
               <p>Aby zobaczyć szczegóły i odpowiedzieć na zaproszenie, zaloguj się do aplikacji.</p>
               <br>
@@ -396,13 +409,14 @@ router.put(
           // 2c. Wyślij powiadomienia email do nowo zaproszonych
           const newlyInvitedUsers = await User.find({ '_id': { $in: addedUserIds } }).select('email name');
           for (const user of newlyInvitedUsers) {
+            const { eventDate, eventTime } = formatEventDate(event.date);
             await sendEmail({
               to: user.email,
               subject: `Nowe zaproszenie do wydarzenia: ${event.title}`,
               html: `
                 <h1>Cześć ${user.name.split(' ')[0]}!</h1>
                 <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${event.title}</strong>.</p>
-                <p>Data: ${new Date(event.date).toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                <p>Data: ${eventDate} o godzinie ${eventTime}</p>
                 <p>Lokalizacja: ${location || event.location}</p>
                 <p>Wydarzenie zostało zaktualizowane. Zaloguj się do aplikacji, aby zobaczyć szczegóły i potwierdzić swój udział.</p>
                 <br>
@@ -545,13 +559,14 @@ router.post("/:id/invite", requireConductor, async (req, res) => {
     try {
       const newlyInvitedUsers = await User.find({ '_id': { $in: newUserIds } }).select('email name');
       for (const user of newlyInvitedUsers) {
+        const { eventDate, eventTime } = formatEventDate(event.date);
         await sendEmail({
           to: user.email,
           subject: `Zaproszenie do udziału w wydarzeniu: ${event.title}`,
           html: `
             <h1>Cześć ${user.name.split(' ')[0]}!</h1>
             <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${event.title}</strong>.</p>
-            <p>Data: ${new Date(event.date).toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+            <p>Data: ${eventDate} o godzinie ${eventTime}</p>
             <p>Lokalizacja: ${event.location}</p>
             <p>Aby zobaczyć szczegóły i odpowiedzieć na zaproszenie, zaloguj się do aplikacji.</p>
             <br>
