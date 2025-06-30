@@ -190,7 +190,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Utwórz wydarzenie
+  // Utwórz wydarzenie (tylko dyrygent)
   createEvent: async (eventData) => {
     const response = await fetch(`${API_BASE_URL}/api/events`, {
       method: "POST",
@@ -200,7 +200,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Aktualizuj wydarzenie
+  // Aktualizuj wydarzenie (tylko dyrygent-właściciel)
   updateEvent: async (id, eventData) => {
     const response = await fetch(`${API_BASE_URL}/api/events/${id}`, {
       method: "PUT",
@@ -210,7 +210,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Usuń wydarzenie
+  // Usuń wydarzenie (tylko dyrygent-właściciel)
   deleteEvent: async (id) => {
     const response = await fetch(`${API_BASE_URL}/api/events/${id}`, {
       method: "DELETE",
@@ -219,7 +219,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Zaproś muzyków
+  // Zaproś muzyków do wydarzenia (tylko dyrygent-właściciel)
   inviteMusicians: async (eventId, userIds) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/invite`,
@@ -232,7 +232,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Odwołaj zaproszenie
+  // Odwołaj zaproszenie (tylko dyrygent-właściciel)
   cancelInvitation: async (eventId, invitationId) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/invitations/${invitationId}`,
@@ -244,7 +244,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Usuń uczestnika
+  // Usuń uczestnika z wydarzenia (tylko dyrygent-właściciel)
   removeParticipant: async (eventId, participantId) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/participants/${participantId}`,
@@ -256,7 +256,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Odpowiedz na zaproszenie
+  // Odpowiedz na zaproszenie (muzyk)
   updateParticipationStatus: async (eventId, status) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/respond`,
@@ -269,7 +269,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Pobierz wiadomości
+  // Pobierz wiadomości dla wydarzenia
   getEventMessages: async (eventId) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/messages`,
@@ -281,7 +281,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Wyślij wiadomość
+  // Wyślij wiadomość w wydarzeniu
   sendEventMessage: async (eventId, content) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/messages`,
@@ -294,7 +294,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Usuń wiadomość
+  // Usuń wiadomość (tylko autor)
   deleteEventMessage: async (eventId, messageId) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/messages/${messageId}`,
@@ -306,7 +306,7 @@ export const eventsAPI = {
     return handleResponse(response);
   },
 
-  // Oznacz jako przeczytane
+  // Oznacz wiadomości jako przeczytane
   markMessagesAsRead: async (eventId, messageIds) => {
     const response = await fetch(
       `${API_BASE_URL}/api/events/${eventId}/messages/mark-read`,
@@ -330,6 +330,15 @@ export const eventsAPI = {
     );
     return handleResponse(response);
   },
+
+  // Zarchiwizuj wydarzenie (tylko dyrygent-właściciel)
+  archiveEvent: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/api/events/${id}/archive`, {
+      method: 'PATCH',
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
 };
 
 // Private Messages API
@@ -337,7 +346,7 @@ export const privateMessagesAPI = {
   // Pobierz listę konwersacji
   getConversations: async () => {
     const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations`, {
-      method: 'GET',
+      method: "GET",
       headers: getHeaders(true),
     });
     return handleResponse(response);
@@ -346,27 +355,32 @@ export const privateMessagesAPI = {
   // Pobierz historię konkretnej konwersacji
   getConversationHistory: async (otherUserId) => {
     const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations/${otherUserId}`, {
-      method: 'GET',
+      method: "GET",
       headers: getHeaders(true),
     });
     return handleResponse(response);
   },
 
-  // Wyślij wiadomość prywatną
-  sendPrivateMessage: async ({ recipientId, eventId, content }) => {
+  // Wyślij wiadomość
+  sendMessage: async (recipientId, content, eventId = null) => {
+    const body = { recipientId, content };
+    if (eventId) {
+      body.eventId = eventId;
+    }
     const response = await fetch(`${API_BASE_URL}/api/private-messages`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(true),
-      body: JSON.stringify({ recipientId, eventId, content }),
+      body: JSON.stringify(body),
     });
     return handleResponse(response);
   },
-
-  // Oznacz wiadomości w konwersacji jako przeczytane
-  markConversationAsRead: async (otherUserId) => {
-    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations/${otherUserId}/read`, {
-      method: 'PUT',
-      headers: getHeaders(true),
+  
+  // Oznacz wiadomości jako przeczytane
+  markAsRead: async (conversationId) => {
+    const response = await fetch(`${API_BASE_URL}/api/private-messages/read`, {
+        method: 'POST',
+        headers: getHeaders(true),
+        body: JSON.stringify({ conversationId }),
     });
     return handleResponse(response);
   },

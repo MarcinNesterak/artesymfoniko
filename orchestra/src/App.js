@@ -10,6 +10,7 @@ import ManageMusicians from './components/conductor/ManageMusicians';
 import Agreements from './components/conductor/Agreements';
 import ContractDetails from './components/conductor/ContractDetails';
 import ContractMusicianList from './components/conductor/ContractMusicianList';
+import ContractGenerator from './components/conductor/ContractGenerator';
 import MusicianDashboard from './components/musician/MusicianDashboard';
 import EventParticipation from './components/musician/EventParticipation';
 import MusicianEventDetails from './components/musician/EventDetails';
@@ -103,6 +104,14 @@ function App() {
             element={
               <ProtectedRoute allowedRole="conductor">
                 <ContractDetails />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/conductor/event/:eventId/contract/:participationId/generate"
+            element={
+              <ProtectedRoute allowedRole="conductor">
+                <ContractGenerator />
               </ProtectedRoute>
             } 
           />

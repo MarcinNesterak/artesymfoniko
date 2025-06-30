@@ -3,6 +3,7 @@ import Event from "../models/Event.js";
 import User from "../models/User.js";
 import Invitation from "../models/Invitation.js";
 import Participation from "../models/Participation.js";
+import Contract from '../models/Contract.js';
 import {
   authenticate,
   requireConductor,
@@ -1176,5 +1177,128 @@ router.delete(
     }
   }
 );
+
+// PATCH /api/participations/:id - zaktualizuj uczestnictwo (np. wynagrodzenie)
+router.patch(
+  "/participations/:id",
+  requireConductor,
+  async (req, res) => {
+    try {
+      const { fee } = req.body;
+      const participationId = req.params.id;
+
+      // Walidacja
+      if (fee === undefined || typeof fee !== 'number' || fee < 0) {
+        return res.status(400).json({ message: "Nieprawidłowa wartość wynagrodzenia (fee)." });
+      }
+
+      const participation = await Participation.findById(participationId);
+      if (!participation) {
+        return res.status(404).json({ message: "Uczestnictwo nie zostało znalezione." });
+      }
+      
+      // Sprawdź, czy dyrygent ma prawo edytować to uczestnictwo (czy jest dyrygentem wydarzenia)
+      const event = await Event.findById(participation.eventId);
+      if (!event || event.conductorId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: "Brak uprawnień do edycji tego uczestnictwa." });
+      }
+
+      // Aktualizuj i zapisz
+      participation.fee = fee;
+      await participation.save();
+
+      res.json({
+        message: "Uczestnictwo zostało zaktualizowane.",
+        participation,
+      });
+
+    } catch (error) {
+      console.error("Error updating participation:", error);
+      res.status(500).json({ message: "Błąd serwera podczas aktualizacji uczestnictwa." });
+    }
+  }
+);
+
+// POST /api/events/contracts - Stwórz nową umowę
+router.post('/contracts', requireConductor, async (req, res) => {
+  try {
+    const conductorId = req.user._id;
+    const contractData = req.body;
+
+    // Walidacja podstawowych danych
+    const { eventId, participationId } = contractData;
+    if (!eventId || !participationId) {
+      return res.status(400).json({ message: 'Brak ID wydarzenia lub uczestnictwa.' });
+    }
+
+    // Sprawdzenie, czy dyrygent ma uprawnienia do tego wydarzenia
+    const event = await Event.findById(eventId);
+    if (!event || event.conductorId.toString() !== conductorId.toString()) {
+      return res.status(403).json({ message: 'Brak uprawnień do zarządzania umowami dla tego wydarzenia.' });
+    }
+
+    // Sprawdzenie, czy dla tego uczestnictwa nie istnieje już umowa
+    const existingContract = await Contract.findOne({ participationId });
+    if (existingContract) {
+      return res.status(409).json({ message: 'Umowa dla tego uczestnika już istnieje. Możesz ją edytować.' });
+    }
+    
+    // Stworzenie nowej umowy
+    const newContract = new Contract({
+      ...contractData,
+      conductorId, // Ustawienie ID dyrygenta, który tworzy umowę
+    });
+
+    const savedContract = await newContract.save();
+
+    // Aktualizacja statusu w dokumencie Participation
+    await Participation.findByIdAndUpdate(participationId, {
+      contractStatus: 'ready',
+      contractId: savedContract._id,
+    });
+
+    res.status(201).json({
+      message: 'Umowa została pomyślnie utworzona.',
+      contract: savedContract,
+    });
+
+  } catch (error) {
+    console.error('Błąd podczas tworzenia umowy:', error);
+    res.status(500).json({ message: 'Wystąpił błąd serwera podczas tworzenia umowy.' });
+  }
+});
+
+// GET /api/events/contracts/:id - Pobierz konkretną umowę
+router.get('/contracts/:id', requireUser, async (req, res) => {
+    try {
+        const contract = await Contract.findById(req.params.id)
+            .populate('eventId', 'title date')
+            .populate('conductorId', 'name')
+            .populate({
+                path: 'participationId',
+                populate: {
+                    path: 'userId',
+                    select: 'name'
+                }
+            });
+
+        if (!contract) {
+            return res.status(404).json({ message: 'Umowa nie została znaleziona.' });
+        }
+
+        const isConductor = req.user.role === 'conductor' && contract.conductorId._id.toString() === req.user._id.toString();
+        const isMusician = req.user.role === 'musician' && contract.participationId.userId._id.toString() === req.user._id.toString();
+
+        if (!isConductor && !isMusician) {
+            return res.status(403).json({ message: 'Brak uprawnień do wyświetlenia tej umowy.' });
+        }
+
+        res.json(contract);
+
+    } catch (error) {
+        console.error('Błąd podczas pobierania umowy:', error);
+        res.status(500).json({ message: 'Wystąpił błąd serwera.' });
+    }
+});
 
 export default router;

@@ -1,0 +1,50 @@
+.contract-generator .form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.contract-generator .form-section {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #eee;
+}
+
+.contract-generator .form-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.contract-generator .form-section p {
+    margin: 0.5rem 0;
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.contract-generator .form-section p strong {
+    color: #000;
+}
+
+.contract-generator .net-amount {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.contract-generator .sticky-error {
+    position: sticky;
+    top: 60px; /* Wysokość navbara */
+    z-index: 1000;
+} 

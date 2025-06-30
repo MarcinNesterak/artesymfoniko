@@ -2,93 +2,90 @@
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-family: 'Times New Roman', Times, serif;
+  background-color: #f9f9f9;
 }
 
-.contract-header {
+.contract-paper {
+  background-color: #fff;
+  padding: 2rem;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+.contract-actions {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.contract-title {
   text-align: center;
-  border-bottom: 2px solid #333;
-  padding-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
   margin-bottom: 2rem;
 }
 
-.contract-header h1 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+.contract-date-place {
+  text-align: right;
+  margin-bottom: 2rem;
 }
 
-.participants-section h2 {
-  font-size: 1.5rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
+.party-section {
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.contract-body p {
   margin-bottom: 1rem;
+  line-height: 1.6;
+  text-align: justify;
 }
 
-.participants-list {
-  list-style: decimal;
-  padding-left: 2rem;
-}
-
-.participant-item {
+.signature-section {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px dashed #ddd;
-}
-
-.participant-item:last-child {
-  border-bottom: none;
-}
-
-.participant-name {
-  font-weight: bold;
-}
-
-.contract-footer {
+  margin-top: 4rem;
   text-align: center;
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #333;
 }
 
-.btn-print {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 5px;
-  cursor: pointer;
+.invoice-hr {
+  border: 0;
+  border-top: 1px dashed #ccc;
+  margin: 3rem 0;
+}
+
+.invoice-title {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.invoice-details p {
   font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.invoice-details .net-amount {
   font-weight: bold;
-  transition: background-color 0.3s ease;
+  font-size: 1.1rem;
+  margin-top: 1rem;
 }
 
-.btn-print:hover {
-  background-color: #0056b3;
-}
-
+/* Style do druku */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  .contract-details-container, .contract-details-container * {
-    visibility: visible;
-  }
-  .contract-details-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+  body, .contract-details-container {
+    background-color: #fff;
     margin: 0;
     padding: 0;
-    border: none;
     box-shadow: none;
   }
-  .btn-print {
-    display: none;
+
+  .no-print, .navbar, .contract-actions {
+    display: none !important;
+  }
+
+  .contract-paper {
+    border: none;
+    box-shadow: none;
+    padding: 0;
   }
 } 
