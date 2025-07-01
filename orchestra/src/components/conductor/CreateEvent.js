@@ -23,7 +23,13 @@ const CreateEvent = () => {
     const fetchMusicians = async () => {
       try {
         const response = await usersAPI.getMusicians();
-        setAvailableMusicians(response.musicians || []);
+        // Sort musicians alphabetically by last name
+        const sortedMusicians = (response.musicians || []).sort((a, b) => {
+          const lastNameA = a.name.split(' ').pop().toLowerCase();
+          const lastNameB = b.name.split(' ').pop().toLowerCase();
+          return lastNameA.localeCompare(lastNameB, 'pl', { sensitivity: 'base' });
+        });
+        setAvailableMusicians(sortedMusicians);
       } catch (error) {
         console.error('Error fetching musicians:', error);
         setError('Nie udało się pobrać listy muzyków');
