@@ -51,6 +51,14 @@ const EventDetails = () => {
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [showDresscodeOptions, setShowDresscodeOptions] = useState(false);
 
+  const getMusicianDisplayName = (musician) => {
+    if (!musician || !musician.name) return '';
+    const nameParts = musician.name.split(' ');
+    const lastName = nameParts.pop() || '';
+    const firstName = nameParts.join(' ');
+    return `${lastName} ${firstName}`.trim();
+  };
+
   useEffect(() => {
     fetchEventData();
   }, [id]);
@@ -73,7 +81,15 @@ const EventDetails = () => {
       const eventResponse = await eventsAPI.getEvent(id);
       setEvent(eventResponse.event);
       setInvitations(eventResponse.invitations || []);
-      setParticipations(eventResponse.participations || []);
+      
+      const sortedParticipations = (eventResponse.participations || []).sort((a, b) => {
+        const nameA = a.userId?.name || '';
+        const nameB = b.userId?.name || '';
+        const lastNameA = nameA.split(' ').pop() || '';
+        const lastNameB = nameB.split(' ').pop() || '';
+        return lastNameA.localeCompare(lastNameB, 'pl', { sensitivity: 'base' });
+      });
+      setParticipations(sortedParticipations);
 
       // Ustaw dane do edycji
       const eventData = eventResponse.event;
@@ -429,6 +445,8 @@ const EventDetails = () => {
   );
 
   const dresscodeInfo = getDresscodeInfo();
+
+  const confirmedParticipants = participations.filter(p => p.status === 'confirmed');
 
   return (
     <div className="event-details">

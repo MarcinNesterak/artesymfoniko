@@ -196,6 +196,14 @@ const EventDetails = () => {
     }
   };
 
+  const getMusicianDisplayName = (musician) => {
+    if (!musician || !musician.name) return '';
+    const nameParts = musician.name.split(' ');
+    const lastName = nameParts.pop() || '';
+    const firstName = nameParts.join(' ');
+    return `${lastName} ${firstName}`.trim();
+  };
+
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
   }
@@ -239,6 +247,14 @@ const EventDetails = () => {
   };
 
   const dresscodeInfo = getDresscodeInfo();
+
+  const sortedParticipants = [...participants].sort((a, b) => {
+    const nameA = a.userId?.name || '';
+    const nameB = b.userId?.name || '';
+    const lastNameA = nameA.split(' ').pop() || '';
+    const lastNameB = nameB.split(' ').pop() || '';
+    return lastNameA.localeCompare(lastNameB, 'pl', { sensitivity: 'base' });
+  });
 
   return (
     <div className="event-details">
@@ -387,7 +403,7 @@ const EventDetails = () => {
 
             {participants.length > 0 ? (
               <div className="musicians-list">
-                {participants.map((participant) => {
+                {sortedParticipants.map((participant) => {
                   const musician = participant.userId;
                   if (!musician) return null;
 
@@ -395,7 +411,7 @@ const EventDetails = () => {
                     <div key={participant._id} className="musician-item">
                       <div className="musician-info">
                         <div className="musician-name">
-                          {musician.name}
+                          {getMusicianDisplayName(musician)}
                           {musician._id === user.id && " (Ty)"}
                         </div>
                         <div className="musician-instrument">
