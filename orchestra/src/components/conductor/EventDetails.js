@@ -663,7 +663,7 @@ const EventDetails = () => {
               )}
               <div className="info-item">
                 <span className="info-label">Dyrygent:</span>
-                <p>{event.conductor.firstName} {event.conductor.lastName}</p>
+                <p>{event.conductor && `${event.conductor.firstName} ${event.conductor.lastName}`}</p>
               </div>
           </div>
           {event.description && (
