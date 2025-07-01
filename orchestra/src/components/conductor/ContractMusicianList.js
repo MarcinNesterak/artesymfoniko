@@ -41,6 +41,7 @@ const ContractMusicianList = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [savingFee, setSavingFee] = useState(null);
+  const [bulkFee, setBulkFee] = useState('');
 
   const fetchEventData = useCallback(async () => {
     try {
@@ -97,6 +98,19 @@ const ContractMusicianList = () => {
     }
   };
 
+  const handleSetBulkFee = () => {
+    if (bulkFee === '' || isNaN(parseFloat(bulkFee))) {
+      setError('Proszę wprowadzić poprawną kwotę hurtową.');
+      return;
+    }
+    const newFees = { ...fees };
+    participants.forEach(p => {
+      newFees[p._id] = bulkFee;
+    });
+    setFees(newFees);
+    setError('');
+  };
+
   if (loading) return <div className="loading">Ładowanie...</div>;
   if (error) return <div className="error-message">{error}</div>;
 
@@ -107,6 +121,17 @@ const ContractMusicianList = () => {
       <h2>{event?.title}</h2>
       
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage('')} />
+
+      <div className="bulk-fee-section">
+        <input 
+          type="number"
+          value={bulkFee}
+          onChange={(e) => setBulkFee(e.target.value)}
+          placeholder="Wpisz ogólną kwotę"
+          className="fee-input"
+        />
+        <button onClick={handleSetBulkFee} className="button-secondary">Ustaw wszystkim</button>
+      </div>
 
       <div className="musicians-list">
         {participants.length > 0 ? (

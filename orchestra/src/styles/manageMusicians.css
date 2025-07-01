@@ -334,15 +334,64 @@
   background-color: var(--accent-primary);
 }
 
-.password-changed {
-  color: var(--text-secondary);
-  font-family: 'Courier New', monospace;
-  padding: 6px 10px;
-  background-color: var(--bg-tertiary);
-  border-radius: 4px;
-  display: inline-block;
-}
-
 .btn-reset-password {
   align-self: flex-start;
+}
+
+.password-changed {
+  color: var(--success);
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-align: right;
+  margin-top: 5px;
+}
+
+/* === Style dla ContractMusicianList === */
+
+.manage-musicians-container .back-button {
+  margin-bottom: 1.5rem;
+}
+
+.manage-musicians-container .bulk-fee-section {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.manage-musicians-container .musicians-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.manage-musicians-container .musician-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.manage-musicians-container .musician-info {
+  font-weight: 500;
+}
+
+.manage-musicians-container .fee-management {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.manage-musicians-container .fee-input {
+  width: 120px;
 }
