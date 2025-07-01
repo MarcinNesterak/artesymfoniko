@@ -312,7 +312,7 @@ const ManageMusicians = () => {
         ) : musicians.length > 0 ? (
           <div className="musicians-table">
             <div className="table-header">
-              <div>Imię i Nazwisko</div>
+              <div>Nazwisko i imię</div>
               <div>Email</div>
               <div>Instrument</div>
               <div>Status</div>
@@ -322,7 +322,7 @@ const ManageMusicians = () => {
             
             {musicians.map(musician => (
               <div key={musician._id} className={`table-row ${!musician.active ? 'inactive' : ''}`} data-label="">
-                <div className="musician-name" data-label="Imię i Nazwisko">
+                <div className="musician-name" data-label="Nazwisko i imię">
                   {getMusicianDisplayName(musician)}
                   {musician.isTemporaryPassword && (
                     <span className="temp-password-badge">Hasło tymczasowe</span>
