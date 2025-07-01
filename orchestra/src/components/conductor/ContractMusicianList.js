@@ -50,16 +50,18 @@ const ContractMusicianList = () => {
   const [showBulkGenerateForm, setShowBulkGenerateForm] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [conductorData, setConductorData] = useState({
-    nazwa: 'Artysymfoniko Marcin Nesterak',
-    adres: 'ul. Malborska 90/16, 30-624 Kraków',
-    nip: '6793104153',
-    regon: '363388630',
-    reprezentant: 'Marcin Nesterak',
+    zamawiajacy: 'MIECZYSŁAW SMYDA AGENCJA ARTYSTYCZNA VIOLIN & CLASSIC',
+    siedziba: 'Powroźnik 123',
+    kodPocztowy: '33-370',
+    poczta: 'Muszyna',
+    nip: '734-145-41-48',
+    regon: '492698947',
+    reprezentant: 'Mieczysław Smyda'
   });
 
   const calculateFinancials = useCallback((brutto) => {
     const wynagrodzenieBrutto = parseFloat(brutto) || 0;
-    const kosztyUzyskaniaPrzychodu = wynagrodzenieBrutto * 0.20;
+    const kosztyUzyskaniaPrzychodu = wynagrodzenieBrutto * 0.50;
     const podstawaOpodatkowania = Math.round(wynagrodzenieBrutto - kosztyUzyskaniaPrzychodu);
     const zaliczkaNaPodatek = Math.round(podstawaOpodatkowania * 0.12);
     const wynagrodzenieNetto = wynagrodzenieBrutto - zaliczkaNaPodatek;
@@ -67,7 +69,7 @@ const ContractMusicianList = () => {
         wynagrodzenieBrutto,
         kosztyUzyskaniaPrzychodu: kosztyUzyskaniaPrzychodu.toFixed(2),
         podstawaOpodatkowania,
-        zaliczkaNaPodatek,
+        zaliczkaNaPodatek: zaliczkaNaPodatek.toFixed(2),
         wynagrodzenieNetto: wynagrodzenieNetto.toFixed(2),
     };
   }, []);
@@ -163,8 +165,8 @@ const ContractMusicianList = () => {
             eventId,
             participationId: p._id,
             zamawiajacy: {
-                nazwa: conductorData.nazwa,
-                adres: conductorData.adres,
+                nazwa: conductorData.zamawiajacy,
+                adres: `${conductorData.siedziba}, ${conductorData.kodPocztowy} ${conductorData.poczta}`,
                 nip: conductorData.nip,
                 regon: conductorData.regon,
                 reprezentant: conductorData.reprezentant,
@@ -233,9 +235,11 @@ const ContractMusicianList = () => {
             <h3>Dane Zamawiającego do umów</h3>
             <p>Poniższe dane zostaną użyte we wszystkich generowanych umowach. Możesz je edytować.</p>
             <div className="form-grid">
-                <input type="text" name="nazwa" value={conductorData.nazwa} onChange={handleConductorDataChange} placeholder="Nazwa firmy/Zamawiający" />
+                <input type="text" name="zamawiajacy" value={conductorData.zamawiajacy} onChange={handleConductorDataChange} placeholder="Zamawiający" />
                 <input type="text" name="reprezentant" value={conductorData.reprezentant} onChange={handleConductorDataChange} placeholder="Reprezentant" />
-                <input type="text" name="adres" value={conductorData.adres} onChange={handleConductorDataChange} placeholder="Adres" />
+                <input type="text" name="siedziba" value={conductorData.siedziba} onChange={handleConductorDataChange} placeholder="Siedziba (ulica, numer)" />
+                <input type="text" name="kodPocztowy" value={conductorData.kodPocztowy} onChange={handleConductorDataChange} placeholder="Kod pocztowy" />
+                <input type="text" name="poczta" value={conductorData.poczta} onChange={handleConductorDataChange} placeholder="Poczta" />
                 <input type="text" name="nip" value={conductorData.nip} onChange={handleConductorDataChange} placeholder="NIP" />
                 <input type="text" name="regon" value={conductorData.regon} onChange={handleConductorDataChange} placeholder="REGON" />
             </div>
