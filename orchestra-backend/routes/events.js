@@ -305,6 +305,9 @@ router.post(
               <p>Data: ${eventDate} o godzinie ${eventTime}</p>
               <p>Lokalizacja: ${location}</p>
               <p>Aby zobaczyć szczegóły i odpowiedzieć na zaproszenie, zaloguj się do aplikacji.</p>
+              <a href="https://www.artesymfoniko.pl">www.artesymfoniko.pl</a>
+              login: ${user.email}
+              <p> Jeśli logujesz się poraz pierwszy, to Twoje hasło to: haslo123</p>
               <br>
               <p>Pozdrawiamy,</p>
               <p><strong>Artesymfoniko</strong></p>
