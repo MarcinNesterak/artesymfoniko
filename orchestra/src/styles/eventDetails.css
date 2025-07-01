@@ -587,6 +587,7 @@
 .dresscode-column {
   display: flex;
   flex-direction: column;
+  width: 50%;
   align-items: center;
   gap: 8px;
   text-align: center;
@@ -611,6 +612,11 @@
   object-fit: cover;
   border-radius: 4px;
   max-width: 100%;
+}
+
+.dresscode-display{
+display: flex;
+flex-direction:row
 }
 
 .dresscode-details {
