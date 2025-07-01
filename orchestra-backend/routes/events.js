@@ -248,8 +248,11 @@ router.post(
       .escape(),
     body("dresscode")
       .optional()
-      .isIn(['', 'frak', 'black', 'casual', 'other'])
-      .withMessage("Nieprawidłowa wartość dresscode."),
+      .trim()
+      .escape(),
+    body("inviteUserIds")
+      .isArray()
+      .withMessage("Lista muzyków musi być tablicą."),
   ],
   async (req, res) => {
     // Sprawdzenie wyników walidacji
