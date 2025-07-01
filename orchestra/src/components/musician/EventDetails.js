@@ -297,31 +297,34 @@ const EventDetails = () => {
               </div> */}
               <div className="info-item">
                 <span className="info-label">Data:</span>
-                <span className="info-value">{new Date(event.date).toLocaleDateString('pl-PL', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}</span>
+                <span className="info-value">{formatDate(event.date)}</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Miejsce:</span>
                 <span className="info-value">{event.location}</span>
               </div>
               {dresscodeInfo && (
-                <div className="info-item">
+                <div className="info-item dresscode-info-item">
                   <span className="info-label">Dresscode:</span>
-                  <div className="dresscode-info">
-                    <div className="dresscode-grid">
-                      <div className="dresscode-column">
-                        <div className="dresscode-image-container">
-                          <img src={dresscodeInfo.image} alt={dresscodeInfo.description} />
-                        </div>
-                        <div className="dresscode-details">
-                          <span className="dresscode-label">{dresscodeInfo.description}</span>
-                        </div>
+                  <div className="dresscode-container">
+                    <div className="dresscode-column">
+                      <div className="dresscode-image-container">
+                        <img src={dresscodeInfo.image} alt={dresscodeInfo.description} />
+                      </div>
+                      <div className="dresscode-details">
+                        <span className="dresscode-label">Panowie</span>
+                        <p className="dresscode-description">
+                          {dresscodeInfo.description}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="dresscode-column">
+                      <div className="dresscode-image-container">
+                        <img src="/img/principessa.png" alt="Principessa" />
+                      </div>
+                      <div className="dresscode-details">
+                        <span className="dresscode-label">Panie</span>
+                        <p className="dresscode-description">principessa</p>
                       </div>
                     </div>
                   </div>
