@@ -41,13 +41,14 @@ const EventDetails = () => {
     schedule: "",
     program: "",
     location: "",
-    dresscode: 'frak',
+    dresscode: "",
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [calendarAdded, setCalendarAdded] = useState(false);
   const [isChatModalOpen, setChatModalOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [showDresscodeOptions, setShowDresscodeOptions] = useState(false);
 
   useEffect(() => {
     fetchEventData();
@@ -86,7 +87,7 @@ const EventDetails = () => {
         schedule: scheduleText,
         program: eventData.program || "",
         location: eventData.location || "",
-        dresscode: eventData.dresscode || 'frak',
+        dresscode: eventData.dresscode || "",
       });
 
       // Pobierz wszystkich muzyków dla selecta
@@ -384,6 +385,12 @@ const EventDetails = () => {
     setSelectedParticipant(null);
   };
 
+  const handleOpenEditModal = () => {
+    // Upewnij się, że stan opcji stroju jest zsynchronizowany z danymi wydarzenia
+    setShowDresscodeOptions(!!editData.dresscode);
+    setShowEditModal(true);
+  };
+
   if (loading) {
     return <div className="loading">Ładowanie szczegółów wydarzenia...</div>;
   }
@@ -427,7 +434,7 @@ const EventDetails = () => {
             </div>
           )}
           <button
-            onClick={() => setShowEditModal(true)}
+            onClick={handleOpenEditModal}
             className="btn-edit"
             disabled={loading}
           >
@@ -567,24 +574,47 @@ const EventDetails = () => {
 
               <div className="form-group">
                 <label>Dresscode (ubiór panów):</label>
-                <div className="dresscode-options">
-                  <div className={`dresscode-option ${editData.dresscode === 'frak' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'frak' }))}>
-                    <img src="/img/frak.png" alt="frak" />
-                    <span>{DRESSCODE_DESCRIPTIONS['frak']}</span>
-                  </div>
-                  <div className={`dresscode-option ${editData.dresscode === 'black' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'black' }))}>
-                    <img src="/img/black.png" alt="black" />
-                    <span>{DRESSCODE_DESCRIPTIONS['black']}</span>
-                  </div>
-                  <div className={`dresscode-option ${editData.dresscode === 'casual' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'casual' }))}>
-                    <img src="/img/casual.png" alt="casual" />
-                    <span>{DRESSCODE_DESCRIPTIONS['casual']}</span>
-                  </div>
-                  <div className={`dresscode-option ${editData.dresscode === 'other' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'other' }))}>
-                    <img src="/img/other.png" alt="other" />
-                    <span>{DRESSCODE_DESCRIPTIONS['other']}</span>
-                  </div>
-                </div>
+                {!showDresscodeOptions ? (
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => setShowDresscodeOptions(true)}
+                  >
+                    Dodaj strój (opcjonalnie)
+                  </button>
+                ) : (
+                  <>
+                    <div className="dresscode-options">
+                      <div className={`dresscode-option ${editData.dresscode === 'frak' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'frak' }))}>
+                        <img src="/img/frak.png" alt="frak" />
+                        <span>{DRESSCODE_DESCRIPTIONS['frak']}</span>
+                      </div>
+                      <div className={`dresscode-option ${editData.dresscode === 'black' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'black' }))}>
+                        <img src="/img/black.png" alt="black" />
+                        <span>{DRESSCODE_DESCRIPTIONS['black']}</span>
+                      </div>
+                      <div className={`dresscode-option ${editData.dresscode === 'casual' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'casual' }))}>
+                        <img src="/img/casual.png" alt="casual" />
+                        <span>{DRESSCODE_DESCRIPTIONS['casual']}</span>
+                      </div>
+                      <div className={`dresscode-option ${editData.dresscode === 'other' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'other' }))}>
+                        <img src="/img/other.png" alt="other" />
+                        <span>{DRESSCODE_DESCRIPTIONS['other']}</span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-link"
+                      style={{ marginTop: '10px', cursor: 'pointer' }}
+                      onClick={() => {
+                        setShowDresscodeOptions(false);
+                        setEditData(prev => ({ ...prev, dresscode: '' }));
+                      }}
+                    >
+                      Usuń strój
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="form-actions">
