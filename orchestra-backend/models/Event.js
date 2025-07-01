@@ -34,7 +34,6 @@ const eventSchema = new mongoose.Schema(
 
     dresscode: {
       type: String,
-      enum: ['frak', 'black', 'casual', 'other', ''],
       default: ''
     },
 
