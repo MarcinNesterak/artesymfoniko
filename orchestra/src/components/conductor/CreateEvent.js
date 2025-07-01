@@ -17,6 +17,7 @@ const CreateEvent = () => {
   const [dresscode, setDresscode] = useState('');
   const [location, setLocation] = useState('');
   const navigate = useNavigate();
+  const [showDresscodeOptions, setShowDresscodeOptions] = useState(false);
   
   // Fetch available musicians
   useEffect(() => {
@@ -169,7 +170,9 @@ const CreateEvent = () => {
         </div>
         
         <div className="form-group">
-          <label>Dresscode:</label>
+      <label>Dresscode:</label>
+      {showDresscodeOptions ? (
+        <>
           <div className="dresscode-options">
             <div className={`dresscode-option ${dresscode === 'frak' ? 'selected' : ''}`} onClick={() => setDresscode('frak')}>
               <img src="/img/frak.png" alt="frak" />
@@ -188,7 +191,16 @@ const CreateEvent = () => {
               <span>inne</span>
             </div>
           </div>
-        </div>
+          <button type="button" onClick={() => { setShowDresscodeOptions(false); setDresscode(''); }} className="button-secondary-small">
+            Anuluj wybór stroju
+          </button>
+        </>
+      ) : (
+        <button type="button" onClick={() => setShowDresscodeOptions(true)} className="button-secondary">
+          Dodaj strój (opcjonalnie)
+        </button>
+      )}
+    </div>
         
         <div className="form-group">
           <label htmlFor="location">Miejsce*</label>
