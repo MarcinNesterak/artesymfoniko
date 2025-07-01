@@ -166,6 +166,19 @@ export const usersAPI = {
   },
 };
 
+// Participations API
+export const participationsAPI = {
+  // Aktualizuj uczestnictwo (np. wynagrodzenie)
+  updateParticipation: async (id, data) => {
+    const response = await fetch(`${API_BASE_URL}/api/events/participations/${id}`, {
+      method: "PATCH",
+      headers: getHeaders(true),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+};
+
 // Events API
 export const eventsAPI = {
   // Pobierz wydarzenia
