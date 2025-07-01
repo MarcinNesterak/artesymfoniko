@@ -285,36 +285,38 @@ const EventDetails = () => {
                 <span className="info-label">Miejsce:</span>
                 <span className="info-value">{event.location}</span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Dresscode:</span>
-                <div className="dresscode-info">
-                  <div className="dresscode-grid">
-                    <div className="dresscode-column">
-                      <div className="dresscode-image-container">
-                        <img src={`/img/${event.dresscode || 'frak'}.png`} alt={event.dresscode || 'frak'} />
+              {event.dresscode && (
+                <div className="info-item">
+                  <span className="info-label">Dresscode:</span>
+                  <div className="dresscode-info">
+                    <div className="dresscode-grid">
+                      <div className="dresscode-column">
+                        <div className="dresscode-image-container">
+                          <img src={`/img/${event.dresscode || 'frak'}.png`} alt={event.dresscode || 'frak'} />
+                        </div>
+                        <div className="dresscode-details">
+                          <span className="dresscode-label">Panowie</span>
+                          <p className="dresscode-description">
+                            {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
+                            {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
+                            {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
+                            {event.dresscode === 'other' && 'inny'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="dresscode-details">
-                        <span className="dresscode-label">Panowie</span>
-                        <p className="dresscode-description">
-                          {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
-                          {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
-                          {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
-                          {event.dresscode === 'other' && 'inny'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="dresscode-column">
-                      <div className="dresscode-image-container">
-                        <img src="/img/principessa.png" alt="Principessa" />
-                      </div>
-                      <div className="dresscode-details">
-                        <span className="dresscode-label">Panie</span>
-                        <p className="dresscode-description">principessa</p>
+                      <div className="dresscode-column">
+                        <div className="dresscode-image-container">
+                          <img src="/img/principessa.png" alt="Principessa" />
+                        </div>
+                        <div className="dresscode-details">
+                          <span className="dresscode-label">Panie</span>
+                          <p className="dresscode-description">principessa</p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
               {/* <div className="info-item">
                 <span className="info-label">Status:</span>
                 <span className={`info-value status-${event.status}`}>
