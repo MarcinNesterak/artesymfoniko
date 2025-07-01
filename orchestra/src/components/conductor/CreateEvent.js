@@ -86,6 +86,12 @@ const CreateEvent = () => {
     }
   };
   
+  const getMusicianDisplayName = (musician) => {
+    const lastName = musician.name.split(' ').pop() || '';
+    const firstName = musician.name.split(' ').slice(0, -1).join(' ') || '';
+    return `${lastName} ${firstName}`.trim();
+  };
+  
   // Get today's date in YYYY-MM-DD format for min date attribute
   const today = new Date().toISOString().split('T')[0];
   
@@ -243,7 +249,7 @@ const CreateEvent = () => {
                       onChange={() => handleToggleMusician(musician._id)}
                       disabled={loading}
                     />
-                    <span className="musician-name">{musician.name}</span>
+                    <span className="musician-name">{getMusicianDisplayName(musician)}</span>
                     <span className="musician-instrument">({musician.instrument || 'Instrument nieznany'})</span>
                   </label>
                 </div>
