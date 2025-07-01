@@ -291,10 +291,6 @@ const EventDetails = () => {
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
             <div className="event-info-grid">
-              {/* <div className="info-item">
-                <span className="info-label">Nazwa:</span>
-                <span className="info-value">{event.name}</span>
-              </div> */}
               <div className="info-item">
                 <span className="info-label">Data:</span>
                 <span className="info-value">{formatDate(event.date)}</span>
@@ -303,42 +299,34 @@ const EventDetails = () => {
                 <span className="info-label">Miejsce:</span>
                 <span className="info-value">{event.location}</span>
               </div>
-              {dresscodeInfo && (
-                <div className="info-item dresscode-info-item">
-                  <span className="info-label">Dresscode:</span>
-                  <div className="dresscode-container">
-                    <div className="dresscode-column">
-                      <div className="dresscode-image-container">
-                        <img src={dresscodeInfo.image} alt={dresscodeInfo.description} />
-                      </div>
-                      <div className="dresscode-details">
-                        <span className="dresscode-label">Panowie</span>
-                        <p className="dresscode-description">
-                          {dresscodeInfo.description}
-                        </p>
-                      </div>
+            </div>
+            {dresscodeInfo && (
+              <div className="event-info-section" style={{ marginTop: '16px' }}>
+                <h3>Dresscode</h3>
+                <div className="dresscode-display">
+                  <div className="dresscode-column">
+                    <div className="dresscode-image-container">
+                      <img src={dresscodeInfo.image} alt={dresscodeInfo.description} />
                     </div>
-                    <div className="dresscode-column">
-                      <div className="dresscode-image-container">
-                        <img src="/img/principessa.png" alt="Principessa" />
-                      </div>
-                      <div className="dresscode-details">
-                        <span className="dresscode-label">Panie</span>
-                        <p className="dresscode-description">principessa</p>
-                      </div>
+                    <div className="dresscode-details">
+                      <span className="dresscode-label">Panowie</span>
+                      <p className="dresscode-description">
+                        {dresscodeInfo.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="dresscode-column">
+                    <div className="dresscode-image-container">
+                      <img src="/img/principessa.png" alt="Principessa" />
+                    </div>
+                    <div className="dresscode-details">
+                      <span className="dresscode-label">Panie</span>
+                      <p className="dresscode-description">principessa</p>
                     </div>
                   </div>
                 </div>
-              )}
-              {/* <div className="info-item">
-                <span className="info-label">Status:</span>
-                <span className={`info-value status-${event.status}`}>
-                  {event.status === 'upcoming' ? 'Nadchodzące' : 
-                   event.status === 'completed' ? 'Zakończone' : 
-                   event.status === 'cancelled' ? 'Anulowane' : 'Nieznany'}
-                </span>
-              </div> */}
-            </div>
+              </div>
+            )}
             {event.description && (
               <div className="event-extra-info">
                 <strong>Opis:</strong>
