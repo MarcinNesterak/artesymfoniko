@@ -33,7 +33,12 @@ const ManageMusicians = () => {
       setError('');
       
       const response = await usersAPI.getMusicians();
-      setMusicians(response.musicians || []);
+      const sortedMusicians = (response.musicians || []).sort((a, b) => {
+        const lastNameA = a.personalData?.lastName || a.name.split(' ').pop() || '';
+        const lastNameB = b.personalData?.lastName || b.name.split(' ').pop() || '';
+        return lastNameA.localeCompare(lastNameB, 'pl', { sensitivity: 'base' });
+      });
+      setMusicians(sortedMusicians);
     } catch (error) {
       console.error('Error fetching musicians:', error);
       setError('Nie udało się pobrać listy muzyków. Spróbuj odświeżyć stronę.');
@@ -176,7 +181,11 @@ const ManageMusicians = () => {
     }
   };
   
-  
+  const getMusicianDisplayName = (musician) => {
+    const lastName = musician.personalData?.lastName || musician.name.split(' ').pop() || '';
+    const firstName = musician.personalData?.firstName || musician.name.split(' ').slice(0, -1).join(' ') || '';
+    return `${lastName} ${firstName}`.trim();
+  };
   
   return (
     <div className="manage-musicians">
@@ -314,7 +323,7 @@ const ManageMusicians = () => {
             {musicians.map(musician => (
               <div key={musician._id} className={`table-row ${!musician.active ? 'inactive' : ''}`} data-label="">
                 <div className="musician-name" data-label="Imię i Nazwisko">
-                  {musician.name}
+                  {getMusicianDisplayName(musician)}
                   {musician.isTemporaryPassword && (
                     <span className="temp-password-badge">Hasło tymczasowe</span>
                   )}
