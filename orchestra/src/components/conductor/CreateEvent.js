@@ -15,6 +15,7 @@ const CreateEvent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dresscode, setDresscode] = useState('');
+  const [customDresscode, setCustomDresscode] = useState('');
   const [location, setLocation] = useState('');
   const navigate = useNavigate();
   const [showDresscodeOptions, setShowDresscodeOptions] = useState(false);
@@ -71,7 +72,7 @@ const CreateEvent = () => {
         schedule,
         program,
         inviteUserIds: selectedMusicians,
-        dresscode,
+        dresscode: dresscode === 'other' ? customDresscode : dresscode,
         location
       };
       
@@ -191,7 +192,20 @@ const CreateEvent = () => {
               <span>inne</span>
             </div>
           </div>
-          <button type="button" onClick={() => { setShowDresscodeOptions(false); setDresscode(''); }} className="button-secondary-small">
+          {dresscode === 'other' && (
+            <div className="form-group" style={{ marginTop: '10px' }}>
+              <label htmlFor="custom-dresscode">Wpisz własny strój:</label>
+              <input
+                type="text"
+                id="custom-dresscode"
+                value={customDresscode}
+                onChange={(e) => setCustomDresscode(e.target.value)}
+                placeholder="Np. strój galowy"
+                className="custom-dresscode-input"
+              />
+            </div>
+          )}
+          <button type="button" onClick={() => { setShowDresscodeOptions(false); setDresscode(''); setCustomDresscode(''); }} className="button-secondary-small">
             Anuluj wybór stroju
           </button>
         </>

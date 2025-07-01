@@ -43,6 +43,7 @@ const EventDetails = () => {
     location: "",
     dresscode: "",
   });
+  const [customDresscode, setCustomDresscode] = useState('');
   const [successMessage, setSuccessMessage] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [calendarAdded, setCalendarAdded] = useState(false);
@@ -79,6 +80,9 @@ const EventDetails = () => {
       const scheduleText = Array.isArray(eventData.schedule)
         ? eventData.schedule.map(item => `${item.time} - ${item.activity}`).join('\\n')
         : eventData.schedule || "";
+      
+      const initialDresscode = eventData.dresscode || "";
+      const isStandardDresscode = ['frak', 'black', 'casual', ''].includes(initialDresscode);
 
       setEditData({
         title: eventData.title || "",
@@ -87,8 +91,14 @@ const EventDetails = () => {
         schedule: scheduleText,
         program: eventData.program || "",
         location: eventData.location || "",
-        dresscode: eventData.dresscode || "",
+        dresscode: isStandardDresscode ? initialDresscode : 'other',
       });
+
+      if (!isStandardDresscode) {
+        setCustomDresscode(initialDresscode);
+      } else {
+        setCustomDresscode('');
+      }
 
       // Pobierz wszystkich muzyków dla selecta
       const musiciansResponse = await usersAPI.getMusicians();
@@ -180,7 +190,7 @@ const EventDetails = () => {
         schedule: editData.schedule,
         program: editData.program,
         location: editData.location,
-        dresscode: editData.dresscode,
+        dresscode: editData.dresscode === 'other' ? customDresscode : editData.dresscode,
       };
 
       await eventsAPI.updateEvent(id, updateData);
@@ -226,6 +236,16 @@ const EventDetails = () => {
       setError("Wystąpił błąd podczas usuwania wydarzenia. Spróbuj ponownie.");
       setLoading(false);
     }
+  };
+
+  const getDresscodeInfo = () => {
+    if (!event || !event.dresscode) return null;
+    const { dresscode } = event;
+    const isStandard = DRESSCODE_DESCRIPTIONS[dresscode];
+    return {
+      image: isStandard ? `/img/${dresscode}.png` : '/img/other.png',
+      description: isStandard || dresscode,
+    };
   };
 
   const sendInvitation = async (musicianId) => {
@@ -407,6 +427,8 @@ const EventDetails = () => {
   const availableMusicians = allMusicians.filter(
     (m) => !invitedMusicianIds.includes(m._id)
   );
+
+  const dresscodeInfo = getDresscodeInfo();
 
   return (
     <div className="event-details">
@@ -599,19 +621,23 @@ const EventDetails = () => {
                       </div>
                       <div className={`dresscode-option ${editData.dresscode === 'other' ? 'selected' : ''}`} onClick={() => setEditData(prev => ({ ...prev, dresscode: 'other' }))}>
                         <img src="/img/other.png" alt="other" />
-                        <span>{DRESSCODE_DESCRIPTIONS['other']}</span>
+                        <span>inne</span>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      className="btn-link"
-                      style={{ marginTop: '10px', cursor: 'pointer' }}
-                      onClick={() => {
-                        setShowDresscodeOptions(false);
-                        setEditData(prev => ({ ...prev, dresscode: '' }));
-                      }}
-                    >
-                      Usuń strój
+                    {editData.dresscode === 'other' && (
+                      <div className="form-group" style={{ marginTop: '10px' }}>
+                        <label htmlFor="custom-dresscode-edit">Wpisz własny strój:</label>
+                        <input
+                          type="text"
+                          id="custom-dresscode-edit"
+                          value={customDresscode}
+                          onChange={(e) => setCustomDresscode(e.target.value)}
+                          placeholder="Np. strój galowy"
+                        />
+                      </div>
+                    )}
+                    <button type="button" onClick={() => { setShowDresscodeOptions(false); setEditData(prev => ({ ...prev, dresscode: '' })); setCustomDresscode(''); }} className="button-secondary-small">
+                      Anuluj wybór stroju
                     </button>
                   </>
                 )}
@@ -662,19 +688,19 @@ const EventDetails = () => {
                 <span className="info-label">Miejsce:</span>
                 <span className="info-value">{event.location}</span>
               </div>
-              {event.dresscode && (
+              {dresscodeInfo && (
                 <div className="info-item">
                   <span className="info-label">Dresscode:</span>
                   <div className="dresscode-info">
                     <div className="dresscode-grid">
                       <div className="dresscode-column">
                         <div className="dresscode-image-container">
-                          <img src={`/img/${event.dresscode}.png`} alt={event.dresscode} />
+                          <img src={dresscodeInfo.image} alt={dresscodeInfo.description} />
                         </div>
                         <div className="dresscode-details">
                           <span className="dresscode-label">Panowie</span>
                           <p className="dresscode-description">
-                            {DRESSCODE_DESCRIPTIONS[event.dresscode]}
+                            {dresscodeInfo.description}
                           </p>
                         </div>
                       </div>

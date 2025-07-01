@@ -4,6 +4,19 @@ import { eventsAPI } from "../../services/api";
 import "../../styles/eventDetails.css";
 import SuccessMessage from '../common/SuccessMessage';
 
+const DRESSCODE_DESCRIPTIONS = {
+  frak: 'frak, biała koszula, biała muszka',
+  black: 'czarna marynarka, czarna koszula',
+  casual: 'biała koszula, czarna marynarka',
+};
+
+const DRESSCODE_IMAGES = {
+  frak: '/img/frak.png',
+  black: '/img/black.png',
+  casual: '/img/casual.png',
+  other: '/img/other.png',
+};
+
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -215,6 +228,18 @@ const EventDetails = () => {
     );
   }
 
+  const getDresscodeInfo = () => {
+    if (!event || !event.dresscode) return null;
+    const { dresscode } = event;
+    const isStandard = DRESSCODE_DESCRIPTIONS[dresscode];
+    return {
+      image: isStandard ? DRESSCODE_IMAGES[dresscode] : DRESSCODE_IMAGES.other,
+      description: isStandard || dresscode,
+    };
+  };
+
+  const dresscodeInfo = getDresscodeInfo();
+
   return (
     <div className="event-details">
       <div className="event-details-header">
@@ -285,32 +310,17 @@ const EventDetails = () => {
                 <span className="info-label">Miejsce:</span>
                 <span className="info-value">{event.location}</span>
               </div>
-              {event.dresscode && (
+              {dresscodeInfo && (
                 <div className="info-item">
                   <span className="info-label">Dresscode:</span>
                   <div className="dresscode-info">
                     <div className="dresscode-grid">
                       <div className="dresscode-column">
                         <div className="dresscode-image-container">
-                          <img src={`/img/${event.dresscode || 'frak'}.png`} alt={event.dresscode || 'frak'} />
+                          <img src={dresscodeInfo.image} alt={dresscodeInfo.description} />
                         </div>
                         <div className="dresscode-details">
-                          <span className="dresscode-label">Panowie</span>
-                          <p className="dresscode-description">
-                            {event.dresscode === 'frak' && 'biała koszula, biała muszka, frak'}
-                            {event.dresscode === 'black' && 'czarna koszula, czarna marynarka'}
-                            {event.dresscode === 'casual' && 'czarna koszula, biała marynarka'}
-                            {event.dresscode === 'other' && 'inny'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="dresscode-column">
-                        <div className="dresscode-image-container">
-                          <img src="/img/principessa.png" alt="Principessa" />
-                        </div>
-                        <div className="dresscode-details">
-                          <span className="dresscode-label">Panie</span>
-                          <p className="dresscode-description">principessa</p>
+                          <span className="dresscode-label">{dresscodeInfo.description}</span>
                         </div>
                       </div>
                     </div>
