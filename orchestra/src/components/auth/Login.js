@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, storage } from '../../services/api';
 import '../../styles/auth.css';
@@ -9,6 +9,17 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const user = storage.getUser();
+    if (user && user.token) {
+      if (user.role === 'conductor') {
+        navigate('/conductor/dashboard');
+      } else {
+        navigate('/musician/dashboard');
+      }
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
