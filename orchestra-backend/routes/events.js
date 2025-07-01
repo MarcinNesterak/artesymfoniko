@@ -248,7 +248,7 @@ router.post(
       .escape(),
     body("dresscode")
       .optional()
-      .isIn(['frak', 'black', 'casual', 'other'])
+      .isIn(['', 'frak', 'black', 'casual', 'other'])
       .withMessage("Nieprawidłowa wartość dresscode."),
   ],
   async (req, res) => {
@@ -342,7 +342,7 @@ router.put(
     body("description").optional().trim().escape(),
     body("schedule").optional().trim().escape(),
     body("program").optional().trim().escape(),
-    body("dresscode").optional().isIn(['frak', 'black', 'casual', 'other']).withMessage("Nieprawidłowa wartość dresscode."),
+    body("dresscode").optional().isIn(['', 'frak', 'black', 'casual', 'other']).withMessage("Nieprawidłowa wartość dresscode."),
   ],
   async (req, res) => {
     const errors = validationResult(req);
