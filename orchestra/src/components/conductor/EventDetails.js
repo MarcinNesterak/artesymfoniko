@@ -5,6 +5,13 @@ import ChatWindow from "../messages/ChatWindow";
 import "../../styles/eventDetails.css";
 import SuccessMessage from '../common/SuccessMessage';
 
+const INSTRUMENT_ORDER = [
+  'skrzypce', 'altówka', 'wiolonczela', 'kontrabas', 
+  'flet', 'obój', 'klarnet', 'fagot', 'saksofon', 
+  'waltornia', 'trąbka', 'puzon', 'tuba', 
+  'fortepian', 'akordeon', 'gitara', 'perkusja'
+];
+
 const DRESSCODE_DESCRIPTIONS = {
   frak: 'frak, biała koszula, biała muszka',
   black: 'czarna marynarka, czarna koszula',
@@ -871,14 +878,37 @@ const EventDetails = () => {
                 .sort((a, b) => {
                   const statusA = getParticipationStatus(a.userId._id);
                   const statusB = getParticipationStatus(b.userId._id);
-                  // Zaakceptowani na górze
-                  if (statusA === "Zaakceptowano" && statusB !== "Zaakceptowano") return -1;
-                  if (statusA !== "Zaakceptowano" && statusB === "Zaakceptowano") return 1;
-                  // Oczekujący przed odrzuconymi
-                  if (statusA === "Oczekująca" && statusB === "Odrzucono") return -1;
-                  if (statusA === "Odrzucono" && statusB === "Oczekująca") return 1;
-                  // Potem alfabetycznie
-                  return a.userId.name.localeCompare(b.userId.name, 'pl');
+
+                  // Sortowanie po statusie (Zaakceptowano > Oczekująca > Odrzucono)
+                  const statusOrder = { "Zaakceptowano": 1, "Oczekująca": 2, "Odrzucono": 3 };
+                  const orderA = statusOrder[statusA] || 4;
+                  const orderB = statusOrder[statusB] || 4;
+                  
+                  if (orderA !== orderB) {
+                    return orderA - orderB;
+                  }
+                  
+                  // Jeśli statusy są takie same, sortuj po instrumentach
+                  const musicianA = a.userId;
+                  const musicianB = b.userId;
+                  
+                  const instrumentA = musicianA.instrument?.toLowerCase() || '';
+                  const instrumentB = musicianB.instrument?.toLowerCase() || '';
+                  
+                  const indexA = INSTRUMENT_ORDER.indexOf(instrumentA);
+                  const indexB = INSTRUMENT_ORDER.indexOf(instrumentB);
+                  
+                  const effectiveIndexA = indexA === -1 ? Infinity : indexA;
+                  const effectiveIndexB = indexB === -1 ? Infinity : indexB;
+                  
+                  if (effectiveIndexA !== effectiveIndexB) {
+                    return effectiveIndexA - effectiveIndexB;
+                  }
+
+                  // Jeśli instrumenty też są takie same, sortuj po nazwisku
+                  const lastNameA = getMusicianDisplayName(musicianA).split(' ')[0] || '';
+                  const lastNameB = getMusicianDisplayName(musicianB).split(' ')[0] || '';
+                  return lastNameA.localeCompare(lastNameB, 'pl', { sensitivity: 'base' });
                 })
                 .map((invitation) => {
                   const musician = invitation.userId;
