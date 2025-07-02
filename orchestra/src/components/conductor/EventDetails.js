@@ -899,7 +899,7 @@ const EventDetails = () => {
                   return (
                     <div key={invitation._id} className="musician-item">
                       <div className="musician-info">
-                        <div className="musician-name">{musician.name}</div>
+                        <div className="musician-name">{getMusicianDisplayName(musician)}</div>
                         <div className="musician-instrument">
                           {musician.instrument || "Instrument nieznany"}
                         </div>
@@ -911,7 +911,7 @@ const EventDetails = () => {
                         {status === "Oczekująca" && (
                           <button
                             onClick={() =>
-                              cancelInvitation(invitation._id, musician.name)
+                              cancelInvitation(invitation._id, getMusicianDisplayName(musician))
                             }
                             className="btn-cancel-invitation"
                             title="Odwołaj zaproszenie"
@@ -924,7 +924,7 @@ const EventDetails = () => {
                             onClick={() =>
                               removeParticipant(
                                 participation._id,
-                                musician.name
+                                getMusicianDisplayName(musician)
                               )
                             }
                             className="btn-remove-participant"
@@ -937,7 +937,7 @@ const EventDetails = () => {
                           <button
                             onClick={() => openChatModal(musician)}
                             className="btn-private-message"
-                            title={`Wiadomość do ${musician.name}`}
+                            title={`Wiadomość do ${getMusicianDisplayName(musician)}`}
                           >
                             💬
                           </button>
@@ -960,6 +960,7 @@ const EventDetails = () => {
                       <input
                         type="checkbox"
                         value={musician._id}
+                        checked={selectedMusicians.includes(musician._id)}
                         onChange={(e) => {
                           if (e.target.checked) {
                             setSelectedMusicians((prev) => [
@@ -972,11 +973,9 @@ const EventDetails = () => {
                             );
                           }
                         }}
-                        checked={selectedMusicians.includes(musician._id)}
                       />
                       <span className="musician-label">
-                        {musician.name} (
-                        {musician.instrument || "Instrument nieznany"})
+                        {getMusicianDisplayName(musician)} ({musician.instrument || "Instrument nieznany"})
                       </span>
                     </label>
                   ))}
@@ -1008,7 +1007,7 @@ const EventDetails = () => {
         <div className="modal-overlay" onClick={closeChatModal}>
           <div className="modal-content chat-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Wiadomość do: {selectedParticipant.name}</h2>
+              <h2>Wiadomość do: {getMusicianDisplayName(selectedParticipant)}</h2>
               <button className="modal-close" onClick={closeChatModal}>
                 ×
               </button>
