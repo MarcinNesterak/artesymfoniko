@@ -130,7 +130,30 @@ const ContractGenerator = () => {
         <div className="contract-generator-container">
             <div className="form-section">
                 <h2>Edytor Umowy</h2>
-                {/* Inputs for editable fields */}
+                <div className="form-group">
+                    <label htmlFor="nazwa">Nazwa Zamawiającego:</label>
+                    <input type="text" id="nazwa" name="nazwa" value={contractData.zamawiajacy.nazwa} onChange={(e) => handleNestedChange('zamawiajacy', e)} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="adres">Adres Zamawiającego:</label>
+                    <input type="text" id="adres" name="adres" value={contractData.zamawiajacy.adres} onChange={(e) => handleNestedChange('zamawiajacy', e)} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="nip">NIP:</label>
+                    <input type="text" id="nip" name="nip" value={contractData.zamawiajacy.nip} onChange={(e) => handleNestedChange('zamawiajacy', e)} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="regon">REGON:</label>
+                    <input type="text" id="regon" name="regon" value={contractData.zamawiajacy.regon} onChange={(e) => handleNestedChange('zamawiajacy', e)} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="reprezentant">Reprezentant:</label>
+                    <input type="text" id="reprezentant" name="reprezentant" value={contractData.zamawiajacy.reprezentant} onChange={(e) => handleNestedChange('zamawiajacy', e)} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="wynagrodzenieBrutto">Wynagrodzenie Brutto (PLN):</label>
+                    <input type="number" step="0.01" id="wynagrodzenieBrutto" name="wynagrodzenieBrutto" value={contractData.wynagrodzenieBrutto} onChange={handleInputChange} />
+                </div>
                 <button onClick={handleSaveContract}>Zapisz umowę</button>
                 <button onClick={() => window.print()}>Drukuj / Zapisz PDF</button>
                 <button onClick={() => navigate(-1)}>Anuluj</button>
