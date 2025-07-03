@@ -40,12 +40,10 @@ const ContractMusicianList = () => {
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [participants, setParticipants] = useState([]);
-  const [fees, setFees] = useState({});
   const [loading, setLoading] = useState(true);
   const [errorMessages, setErrorMessages] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
-  const [savingFee, setSavingFee] = useState(null);
-  const [bulkFee, setBulkFee] = useState('');
+  const [selectedParticipants, setSelectedParticipants] = useState(new Set());
   
   const [showBulkGenerateForm, setShowBulkGenerateForm] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -82,11 +80,6 @@ const ContractMusicianList = () => {
       const confirmedParticipants = eventResponse.participations.filter(p => p.status === 'confirmed');
       setEvent(eventResponse.event);
       setParticipants(confirmedParticipants);
-      const initialFees = confirmedParticipants.reduce((acc, p) => {
-        acc[p._id] = p.fee || '';
-        return acc;
-      }, {});
-      setFees(initialFees);
     } catch (err) {
       setErrorMessages(['Nie udało się załadować danych wydarzenia.']);
       console.error(err);
@@ -99,41 +92,16 @@ const ContractMusicianList = () => {
     fetchEventData();
   }, [fetchEventData]);
 
-  const handleFeeChange = (participationId, value) => {
-    setFees(prev => ({ ...prev, [participationId]: value }));
-  };
-
-  const handleSaveFee = async (participationId) => {
-    const feeValue = fees[participationId];
-    if (feeValue === undefined || feeValue === '' || isNaN(parseFloat(feeValue))) {
-      setErrorMessages(['Proszę wprowadzić poprawną kwotę.']);
-      return;
-    }
-    setSavingFee(participationId);
-    setErrorMessages([]);
-    setSuccessMessage('');
-    try {
-      await updateParticipationFee(participationId, parseFloat(feeValue));
-      setSuccessMessage('Wynagrodzenie zostało zapisane.');
-      fetchEventData(); 
-    } catch (err) {
-      setErrorMessages([err.message || 'Nie udało się zapisać wynagrodzenia.']);
-    } finally {
-      setSavingFee(null);
-    }
-  };
-  
-  const handleSetBulkFee = () => {
-    if (bulkFee === '' || isNaN(parseFloat(bulkFee))) {
-      setErrorMessages(['Proszę wprowadzić poprawną kwotę hurtową.']);
-      return;
-    }
-    const newFees = { ...fees };
-    participants.forEach(p => {
-      newFees[p._id] = bulkFee;
+  const handleSelectionChange = (participationId) => {
+    setSelectedParticipants(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(participationId)) {
+        newSet.delete(participationId);
+      } else {
+        newSet.add(participationId);
+      }
+      return newSet;
     });
-    setFees(newFees);
-    setErrorMessages([]);
   };
 
   const handleConductorDataChange = (e) => {
@@ -142,10 +110,10 @@ const ContractMusicianList = () => {
   };
 
   const handleGenerateAllContracts = async () => {
-    const participantsToProcess = participants.filter(p => (p.contractStatus === 'pending' || !p.contractStatus) && fees[p._id] > 0);
+    const participantsToProcess = participants.filter(p => selectedParticipants.has(p._id) && (p.contractStatus === 'pending' || !p.contractStatus));
     
     if (participantsToProcess.length === 0) {
-        setErrorMessages(["Brak muzyków, dla których można wygenerować nowe umowy (sprawdź czy kwoty są ustawione i czy umowy już nie istnieją)."]);
+        setErrorMessages(["Wybierz przynajmniej jednego muzyka, który nie ma jeszcze gotowej umowy."]);
         return;
     }
 
@@ -177,7 +145,7 @@ const ContractMusicianList = () => {
             return Promise.reject(new Error(`Brakujące dane dla ${musician.name}: ${missingFields.join(', ')}.`));
         }
 
-        const financials = calculateFinancials(fees[p._id]);
+        const financials = calculateFinancials(p.fee);
 
         const contractData = {
             eventId,
@@ -243,23 +211,49 @@ const ContractMusicianList = () => {
       
       <SuccessMessage message={successMessage} onClose={() => setSuccessMessage('')} />
 
-      <div className="bulk-fee-section">
-        <input 
-          type="number"
-          value={bulkFee}
-          onChange={(e) => setBulkFee(e.target.value)}
-          placeholder="Wpisz ogólną kwotę"
-          className="fee-input"
-        />
-        <button onClick={handleSetBulkFee} className="button-secondary">Ustaw wszystkim</button>
-        <button 
-            onClick={() => setShowBulkGenerateForm(!showBulkGenerateForm)} 
-            className="button-primary"
-        >
-            {showBulkGenerateForm ? 'Anuluj' : 'Generuj wszystkie umowy'}
+      {errorMessages.length > 0 && (
+        <div className="error-message">
+            <h4>Wystąpiły błędy:</h4>
+            <ul>
+                {errorMessages.map((msg, index) => <li key={index}>{msg}</li>)}
+            </ul>
+            <button onClick={() => setErrorMessages([])} className="button-secondary">Ukryj błędy</button>
+        </div>
+      )}
+
+      {participants.length > 0 && (
+        <div className="musician-list">
+          {participants.map((p) => (
+            <div key={p._id} className="musician-card">
+              <div className="musician-info">
+                <input
+                  type="checkbox"
+                  className="musician-checkbox"
+                  checked={selectedParticipants.has(p._id)}
+                  onChange={() => handleSelectionChange(p._id)}
+                  id={`musician-${p._id}`}
+                  disabled={p.contractStatus === 'completed'}
+                />
+                <label htmlFor={`musician-${p._id}`}>
+                  <strong>{p.userId.name}</strong> ({p.userId.instrument})
+                  <span className={`contract-status ${p.contractStatus || 'pending'}`}>
+                    {p.contractStatus === 'completed' ? 'Umowa gotowa' : 'Brak umowy'}
+                  </span>
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <hr />
+
+      <div className="contract-actions">
+        <button onClick={() => setShowBulkGenerateForm(!showBulkGenerateForm)} className="button-primary">
+          {showBulkGenerateForm ? 'Anuluj' : 'Generuj wszystkie umowy'}
         </button>
       </div>
-      
+
       {showBulkGenerateForm && (
         <div className="bulk-generate-form">
             <h3>Dane Zamawiającego do umów</h3>
@@ -299,55 +293,6 @@ const ContractMusicianList = () => {
             </button>
         </div>
       )}
-
-      <div className="musicians-list">
-        {participants.length > 0 ? (
-          participants.map(p => (
-            <div key={p._id} className="musician-card">
-              <div className="musician-info">
-                <strong>{p.userId.name}</strong> ({p.userId.instrument})
-              </div>
-              <div className="fee-management">
-                <input
-                  type="number"
-                  value={fees[p._id]}
-                  onChange={(e) => handleFeeChange(p._id, e.target.value)}
-                  placeholder="Kwota brutto"
-                  className="fee-input"
-                  min="0"
-                  disabled={savingFee === p._id}
-                />
-                <button
-                  onClick={() => handleSaveFee(p._id)}
-                  disabled={savingFee === p._id}
-                  className="button-primary"
-                >
-                  {savingFee === p._id ? 'Zapisywanie...' : 'Zapisz kwotę'}
-                </button>
-                
-                {p.contractStatus === 'ready' && p.contractId ? (
-                  <button 
-                    onClick={() => navigate(`/conductor/events/${p.eventId}/contracts/${p.contractId}`)}
-                    className="button-success"
-                  >
-                    Zobacz umowę
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => navigate(`/conductor/event/${eventId}/contract/${p._id}/generate`)}
-                    className="button-secondary"
-                    disabled={!p.fee || p.fee === 0}
-                  >
-                    Generuj umowę
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>Brak potwierdzonych uczestników w tym wydarzeniu.</p>
-        )}
-      </div>
     </div>
   );
 };
