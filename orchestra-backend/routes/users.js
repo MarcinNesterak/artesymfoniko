@@ -257,25 +257,34 @@ router.delete('/:id', requireConductor, async (req, res) => {
   }
 });
 
-// PATCH /api/users/profile - aktualizuj własny profil (muzyk)
+// PATCH /api/users/profile - aktualizuj własny profil (zalogowany użytkownik)
 router.patch('/profile', authenticate, async (req, res) => {
   try {
-    const { firstName, lastName, phone, address } = req.body;
-    
+    const { firstName, lastName, phone, address, pesel, bankAccountNumber } = req.body;
+
     const user = await User.findById(req.user._id);
-    
-    // Aktualizuj name jeśli zmieniono imię lub nazwisko
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: 'Użytkownik nie został znaleziony'
+      });
+    }
+
+    // Aktualizuj dane
     if (firstName || lastName) {
-      const newFirstName = firstName || user.personalData?.firstName || '';
-      const newLastName = lastName || user.personalData?.lastName || '';
+      const newFirstName = firstName || user.personalData.firstName;
+      const newLastName = lastName || user.personalData.lastName;
       user.name = `${newFirstName} ${newLastName}`.trim();
     }
     
     // Aktualizuj personalData
     if (!user.personalData) user.personalData = {};
-    if (firstName !== undefined) user.personalData.firstName = firstName;
-    if (lastName !== undefined) user.personalData.lastName = lastName;
+    if (firstName) user.personalData.firstName = firstName;
+    if (lastName) user.personalData.lastName = lastName;
     if (phone !== undefined) user.personalData.phone = phone;
+    if (pesel !== undefined) user.personalData.pesel = pesel;
+    if (bankAccountNumber !== undefined) user.personalData.bankAccountNumber = bankAccountNumber;
     
     if (address) {
       if (!user.personalData.address) user.personalData.address = {};
@@ -284,20 +293,17 @@ router.patch('/profile', authenticate, async (req, res) => {
       if (address.postalCode !== undefined) user.personalData.address.postalCode = address.postalCode;
       if (address.country !== undefined) user.personalData.address.country = address.country;
     }
-    
+
     await user.save();
     
+    // Zwróć zaktualizowane dane użytkownika
+    const updatedUser = await User.findById(req.user._id).select('-password');
+
     res.json({
-      message: 'Profil został zaktualizowany',
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        instrument: user.instrument,
-        personalData: user.personalData
-      }
+      message: 'Dane profilu zostały zaktualizowane',
+      user: updatedUser
     });
+
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({

@@ -8,7 +8,7 @@ const addressSchema = new mongoose.Schema({
     city: { type: String, get: decrypt, set: encrypt },
     postalCode: { type: String, get: decrypt, set: encrypt },
     country: { type: String, default: "Polska" },
-}, { _id: false });
+}, { _id: false, toJSON: { getters: true }, toObject: { getters: true } });
 
 const personalDataSchema = new mongoose.Schema({
   firstName: { type: String, trim: true },
@@ -17,7 +17,7 @@ const personalDataSchema = new mongoose.Schema({
   address: addressSchema,
   pesel: { type: String, trim: true, get: decrypt, set: encrypt },
   bankAccountNumber: { type: String, trim: true, get: decrypt, set: encrypt },
-}, { _id: false });
+}, { _id: false, toJSON: { getters: true }, toObject: { getters: true } });
 
 const userSchema = new mongoose.Schema(
   {
