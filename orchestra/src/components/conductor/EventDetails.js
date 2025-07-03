@@ -910,11 +910,21 @@ const EventDetails = () => {
                   const lastNameB = getMusicianDisplayName(musicianB).split(' ')[0] || '';
                   return lastNameA.localeCompare(lastNameB, 'pl', { sensitivity: 'base' });
                 })
-                .map((invitation) => {
+                .map((invitation, index) => {
                   const musician = invitation.userId;
                   if (!musician) return null;
-
+                  
                   const status = getParticipationStatus(musician._id);
+                  const isConfirmed = status === "Zaakceptowano";
+                  
+                  // Logika numerowania tylko dla potwierdzonych
+                  const confirmedIndex = isConfirmed ? 
+                    [...invitations]
+                      .slice(0, index + 1)
+                      .filter(inv => getParticipationStatus(inv.userId._id) === "Zaakceptowano")
+                      .length
+                    : null;
+
                   const participation = participations.find(
                     (p) => p.userId._id === musician._id
                   );
@@ -929,7 +939,10 @@ const EventDetails = () => {
                   return (
                     <div key={invitation._id} className="musician-item">
                       <div className="musician-info">
-                        <div className="musician-name">{getMusicianDisplayName(musician)}</div>
+                        <div className="musician-name">
+                          {isConfirmed && <span className="musician-number">{confirmedIndex}. </span>}
+                          {getMusicianDisplayName(musician)}
+                        </div>
                         <div className="musician-instrument">
                           {musician.instrument || "Instrument nieznany"}
                         </div>
