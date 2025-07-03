@@ -60,7 +60,7 @@ router.get('/:id', apiLimiter, requireConductor, async (req, res) => {
 // PUT /api/users/:id - aktualizuj dane muzyka (tylko dyrygent)
 router.put('/:id', apiLimiter, requireConductor, async (req, res) => {
   try {
-    const { email, firstName, lastName, instrument, phone, address } = req.body;
+    const { email, firstName, lastName, instrument, phone, address, pesel, bankAccountNumber } = req.body;
     
     const musician = await User.findOne({ 
       _id: req.params.id, 
@@ -101,6 +101,8 @@ router.put('/:id', apiLimiter, requireConductor, async (req, res) => {
     if (firstName) musician.personalData.firstName = firstName;
     if (lastName) musician.personalData.lastName = lastName;
     if (phone !== undefined) musician.personalData.phone = phone;
+    if (pesel !== undefined) musician.personalData.pesel = pesel;
+    if (bankAccountNumber !== undefined) musician.personalData.bankAccountNumber = bankAccountNumber;
     
     if (address) {
       if (!musician.personalData.address) musician.personalData.address = {};

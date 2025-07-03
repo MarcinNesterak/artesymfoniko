@@ -1,6 +1,23 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { encrypt, decrypt } from '../utils/encryption.js';
+
+const addressSchema = new mongoose.Schema({
+    street: { type: String, get: decrypt, set: encrypt },
+    city: { type: String, get: decrypt, set: encrypt },
+    postalCode: { type: String, get: decrypt, set: encrypt },
+    country: { type: String, default: "Polska" },
+}, { _id: false });
+
+const personalDataSchema = new mongoose.Schema({
+  firstName: { type: String, trim: true },
+  lastName: { type: String, trim: true },
+  phone: { type: String, trim: true, get: decrypt, set: encrypt },
+  address: addressSchema,
+  pesel: { type: String, trim: true, get: decrypt, set: encrypt },
+  bankAccountNumber: { type: String, trim: true, get: decrypt, set: encrypt },
+}, { _id: false });
 
 const userSchema = new mongoose.Schema(
   {
@@ -49,37 +66,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    personalData: {
-      firstName: {
-        type: String,
-        trim: true,
-      },
-      lastName: {
-        type: String,
-        trim: true,
-      },
-      phone: {
-        type: String,
-        trim: true,
-      },
-      address: {
-        street: String,
-        city: String,
-        postalCode: String,
-        country: {
-          type: String,
-          default: "Polska",
-        },
-      },
-      pesel: {
-        type: String,
-        trim: true,
-      },
-      bankAccountNumber: {
-        type: String,
-        trim: true,
-      },
-    },
+    personalData: personalDataSchema,
 
     active: {
       type: Boolean,
@@ -126,15 +113,19 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: {
-      transform: function (doc, ret) {
-        delete ret.password;
-        delete ret.emailVerificationToken;
-        delete ret.emailVerificationExpires;
-        delete ret.passwordResetToken;
-        delete ret.passwordResetExpires;
-        return ret;
-      },
+        getters: true,
+        transform: function (doc, ret) {
+            delete ret.password;
+            delete ret.emailVerificationToken;
+            delete ret.emailVerificationExpires;
+            delete ret.passwordResetToken;
+            delete ret.passwordResetExpires;
+            return ret;
+        }
     },
+    toObject: {
+        getters: true
+    }
   }
 );
 
