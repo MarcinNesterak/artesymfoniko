@@ -42,7 +42,7 @@ const ContractMusicianList = () => {
   const [participants, setParticipants] = useState([]);
   const [fees, setFees] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [errorMessages, setErrorMessages] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [savingFee, setSavingFee] = useState(null);
   const [bulkFee, setBulkFee] = useState('');
@@ -77,7 +77,7 @@ const ContractMusicianList = () => {
   const fetchEventData = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
+      setErrorMessages([]);
       const eventResponse = await eventsAPI.getEvent(eventId);
       const confirmedParticipants = eventResponse.participations.filter(p => p.status === 'confirmed');
       setEvent(eventResponse.event);
@@ -88,7 +88,7 @@ const ContractMusicianList = () => {
       }, {});
       setFees(initialFees);
     } catch (err) {
-      setError('Nie udało się załadować danych wydarzenia.');
+      setErrorMessages(['Nie udało się załadować danych wydarzenia.']);
       console.error(err);
     } finally {
       setLoading(false);
@@ -106,18 +106,18 @@ const ContractMusicianList = () => {
   const handleSaveFee = async (participationId) => {
     const feeValue = fees[participationId];
     if (feeValue === undefined || feeValue === '' || isNaN(parseFloat(feeValue))) {
-      setError('Proszę wprowadzić poprawną kwotę.');
+      setErrorMessages(['Proszę wprowadzić poprawną kwotę.']);
       return;
     }
     setSavingFee(participationId);
-    setError('');
+    setErrorMessages([]);
     setSuccessMessage('');
     try {
       await updateParticipationFee(participationId, parseFloat(feeValue));
       setSuccessMessage('Wynagrodzenie zostało zapisane.');
       fetchEventData(); 
     } catch (err) {
-      setError(err.message || 'Nie udało się zapisać wynagrodzenia.');
+      setErrorMessages([err.message || 'Nie udało się zapisać wynagrodzenia.']);
     } finally {
       setSavingFee(null);
     }
@@ -125,7 +125,7 @@ const ContractMusicianList = () => {
   
   const handleSetBulkFee = () => {
     if (bulkFee === '' || isNaN(parseFloat(bulkFee))) {
-      setError('Proszę wprowadzić poprawną kwotę hurtową.');
+      setErrorMessages(['Proszę wprowadzić poprawną kwotę hurtową.']);
       return;
     }
     const newFees = { ...fees };
@@ -133,7 +133,7 @@ const ContractMusicianList = () => {
       newFees[p._id] = bulkFee;
     });
     setFees(newFees);
-    setError('');
+    setErrorMessages([]);
   };
 
   const handleConductorDataChange = (e) => {
@@ -145,7 +145,7 @@ const ContractMusicianList = () => {
     const participantsToProcess = participants.filter(p => (p.contractStatus === 'pending' || !p.contractStatus) && fees[p._id] > 0);
     
     if (participantsToProcess.length === 0) {
-        setError("Brak muzyków, dla których można wygenerować nowe umowy (sprawdź czy kwoty są ustawione i czy umowy już nie istnieją).");
+        setErrorMessages(["Brak muzyków, dla których można wygenerować nowe umowy (sprawdź czy kwoty są ustawione i czy umowy już nie istnieją)."]);
         return;
     }
 
@@ -154,11 +154,29 @@ const ContractMusicianList = () => {
     }
 
     setIsGenerating(true);
-    setError('');
+    setErrorMessages([]);
     setSuccessMessage('');
 
     const promises = participantsToProcess.map(async (p) => {
         const musicianDetails = await usersAPI.getMusician(p.userId._id);
+        
+        if (!musicianDetails?.user) {
+            return Promise.reject(new Error(`Nie udało się pobrać danych dla muzyka o ID uczestnictwa: ${p._id}`));
+        }
+        const musician = musicianDetails.user;
+
+        const personalData = musician.personalData || {};
+        const address = personalData.address || {};
+        const missingFields = [];
+        if (!musician.name) missingFields.push('imię i nazwisko');
+        if (!address.street || !address.postalCode || !address.city) missingFields.push('pełny adres');
+        if (!personalData.pesel) missingFields.push('PESEL');
+        if (!personalData.bankAccountNumber) missingFields.push('numer konta');
+
+        if (missingFields.length > 0) {
+            return Promise.reject(new Error(`Brakujące dane dla ${musician.name}: ${missingFields.join(', ')}.`));
+        }
+
         const financials = calculateFinancials(fees[p._id]);
 
         const contractData = {
@@ -172,16 +190,16 @@ const ContractMusicianList = () => {
                 reprezentant: conductorData.reprezentant,
             },
             wykonawca: {
-                imieNazwisko: musicianDetails.user.name,
-                adres: musicianDetails.user.personalData?.address ? `${musicianDetails.user.personalData.address.street}, ${musicianDetails.user.personalData.address.postalCode} ${musicianDetails.user.personalData.address.city}` : '',
-                pesel: musicianDetails.user.personalData?.pesel || '',
-                numerKonta: musicianDetails.user.personalData?.bankAccountNumber || '',
+                imieNazwisko: musician.name,
+                adres: musician.personalData?.address ? `${musician.personalData.address.street}, ${musician.personalData.address.postalCode} ${musician.personalData.address.city}` : '',
+                pesel: musician.personalData?.pesel || '',
+                numerKonta: musician.personalData?.bankAccountNumber || '',
             },
-            numerUmowy: `UOD/${event.title.replace(/\s+/g, '-')}/${p.userId.name.replace(/\s+/g, '_')}/${new Date().getFullYear()}`,
+            numerUmowy: `UOD/${event.title.replace(/\s+/g, '-')}/${musician.name.replace(/\s+/g, '_')}/${new Date().getFullYear()}`,
             miejsceZawarcia: 'Kraków',
             dataZawarcia: new Date().toISOString().split('T')[0],
             dataWykonaniaDziela: new Date(event.date).toISOString().split('T')[0],
-            przedmiotUmowy: `Wykonanie partii ${p.userId.instrument} podczas koncertu "${event.title}"`,
+            przedmiotUmowy: `Wykonanie partii ${musician.instrument} podczas koncertu "${event.title}"`,
             ...financials,
         };
         return createContract(contractData);
@@ -189,12 +207,14 @@ const ContractMusicianList = () => {
 
     const results = await Promise.allSettled(promises);
     const successful = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const failedPromises = results.filter(r => r.status === 'rejected');
 
-    setSuccessMessage(`Operacja zakończona. Pomyślnie utworzono: ${successful}. Nie udało się: ${failed}.`);
-    if(failed > 0) {
-        setError(`Niektóre umowy nie mogły zostać utworzone. Sprawdź konsolę lub dane muzyków.`);
-        console.error("Błędy przy generowaniu umów:", results.filter(r => r.status === 'rejected').map(r => r.reason));
+    setSuccessMessage(`Operacja zakończona. Pomyślnie utworzono: ${successful}.`);
+    
+    if (failedPromises.length > 0) {
+        const newErrorMessages = failedPromises.map(p => p.reason.message);
+        setErrorMessages(newErrorMessages);
+        console.error("Błędy przy generowaniu umów:", failedPromises.map(p => p.reason));
     }
 
     setIsGenerating(false);
@@ -203,7 +223,17 @@ const ContractMusicianList = () => {
   };
 
   if (loading) return <div className="loading">Ładowanie...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  if (errorMessages.length > 0) return (
+      <div className="container">
+          <div className="error-message">
+              <h4>Wystąpiły błędy:</h4>
+              <ul>
+                  {errorMessages.map((msg, index) => <li key={index}>{msg}</li>)}
+              </ul>
+              <button onClick={() => setErrorMessages([])} className="button-secondary">Ukryj błędy</button>
+          </div>
+      </div>
+  );
 
   return (
     <div className="container manage-musicians-container">
