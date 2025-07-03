@@ -222,10 +222,11 @@ const ContractMusicianList = () => {
       )}
 
       <div className="contract-actions">
-        <button onClick={() => setShowBulkGenerateForm(!showBulkGenerateForm)} className="button-primary">
-          {showBulkGenerateForm ? 'Anuluj' : 'Generuj wszystkie umowy'}
-        </button>
-        {showBulkGenerateForm && (
+        {!showBulkGenerateForm ? (
+          <button onClick={() => setShowBulkGenerateForm(true)} className="button-primary">
+            Generuj wszystkie umowy
+          </button>
+        ) : (
           <div className="bulk-generate-form">
               <h3>Dane Zamawiającego do umów</h3>
               <p>Poniższe dane zostaną użyte we wszystkich generowanych umowach. Możesz je edytować.</p>
@@ -259,9 +260,14 @@ const ContractMusicianList = () => {
                       <input type="text" id="conductor-regon" name="regon" value={conductorData.regon} onChange={handleConductorDataChange} placeholder="REGON" />
                   </div>
               </div>
-              <button onClick={handleGenerateAllContracts} className="button-success" disabled={isGenerating}>
-                  {isGenerating ? 'Generowanie...' : `Potwierdź i generuj umowy`}
-              </button>
+              <div className="form-actions-group">
+                <button onClick={handleGenerateAllContracts} className="button-success" disabled={isGenerating}>
+                    {isGenerating ? 'Generowanie...' : `Potwierdź i generuj umowy`}
+                </button>
+                <button onClick={() => setShowBulkGenerateForm(false)} className="button-secondary">
+                  Anuluj
+                </button>
+              </div>
           </div>
         )}
       </div>
