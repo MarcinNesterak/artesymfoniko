@@ -26,7 +26,9 @@ const MyProfile = () => {
     street: '',
     city: '',
     postalCode: '',
-    country: 'Polska'
+    country: 'Polska',
+    pesel: '',
+    bankAccountNumber: ''
   });
   const [profileLoading, setProfileLoading] = useState(false);
   
@@ -55,7 +57,9 @@ const MyProfile = () => {
         street: userData.personalData?.address?.street || '',
         city: userData.personalData?.address?.city || '',
         postalCode: userData.personalData?.address?.postalCode || '',
-        country: userData.personalData?.address?.country || 'Polska'
+        country: userData.personalData?.address?.country || 'Polska',
+        pesel: userData.personalData?.pesel || '',
+        bankAccountNumber: userData.personalData?.bankAccountNumber || ''
       });
       
       // Show password form if user has temporary password
@@ -153,7 +157,9 @@ const MyProfile = () => {
           city: profileData.city,
           postalCode: profileData.postalCode,
           country: profileData.country
-        }
+        },
+        pesel: profileData.pesel,
+        bankAccountNumber: profileData.bankAccountNumber
       };
       
       const response = await usersAPI.updateProfile(updatedData);
@@ -370,6 +376,32 @@ const MyProfile = () => {
               onChange={handleProfileChange}
               disabled={profileLoading}
             />
+          </div>
+          
+          <h3>Dane do umowy</h3>
+          <div className="form-group">
+              <label htmlFor="pesel">PESEL</label>
+              <input
+                  type="text"
+                  id="pesel"
+                  name="pesel"
+                  value={profileData.pesel}
+                  onChange={handleProfileChange}
+                  disabled={profileLoading}
+                  placeholder="PESEL"
+              />
+          </div>
+          <div className="form-group">
+              <label htmlFor="bankAccountNumber">Numer konta bankowego</label>
+              <input
+                  type="text"
+                  id="bankAccountNumber"
+                  name="bankAccountNumber"
+                  value={profileData.bankAccountNumber}
+                  onChange={handleProfileChange}
+                  disabled={profileLoading}
+                  placeholder="Numer konta bankowego (26 cyfr)"
+              />
           </div>
           
           <div className="form-actions">
