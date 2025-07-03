@@ -221,6 +221,53 @@ const ContractMusicianList = () => {
         </div>
       )}
 
+      <div className="contract-actions">
+        <button onClick={() => setShowBulkGenerateForm(!showBulkGenerateForm)} className="button-primary">
+          {showBulkGenerateForm ? 'Anuluj' : 'Generuj wszystkie umowy'}
+        </button>
+        {showBulkGenerateForm && (
+          <div className="bulk-generate-form">
+              <h3>Dane Zamawiającego do umów</h3>
+              <p>Poniższe dane zostaną użyte we wszystkich generowanych umowach. Możesz je edytować.</p>
+              <div className="form-grid">
+                  <div className="form-group">
+                      <label htmlFor="conductor-zamawiajacy">Zamawiający</label>
+                      <input type="text" id="conductor-zamawiajacy" name="zamawiajacy" value={conductorData.zamawiajacy} onChange={handleConductorDataChange} placeholder="Zamawiający" />
+                  </div>
+                  <div className="form-group">
+                      <label htmlFor="conductor-reprezentant">Reprezentant</label>
+                      <input type="text" id="conductor-reprezentant" name="reprezentant" value={conductorData.reprezentant} onChange={handleConductorDataChange} placeholder="Reprezentant" />
+                  </div>
+                  <div className="form-group">
+                      <label htmlFor="conductor-siedziba">Siedziba (ulica, numer)</label>
+                      <input type="text" id="conductor-siedziba" name="siedziba" value={conductorData.siedziba} onChange={handleConductorDataChange} placeholder="Siedziba (ulica, numer)" />
+                  </div>
+                  <div className="form-group">
+                      <label htmlFor="conductor-kod">Kod pocztowy</label>
+                      <input type="text" id="conductor-kod" name="kodPocztowy" value={conductorData.kodPocztowy} onChange={handleConductorDataChange} placeholder="Kod pocztowy" />
+                  </div>
+                  <div className="form-group">
+                      <label htmlFor="conductor-poczta">Poczta</label>
+                      <input type="text" id="conductor-poczta" name="poczta" value={conductorData.poczta} onChange={handleConductorDataChange} placeholder="Poczta" />
+                  </div>
+                  <div className="form-group">
+                      <label htmlFor="conductor-nip">NIP</label>
+                      <input type="text" id="conductor-nip" name="nip" value={conductorData.nip} onChange={handleConductorDataChange} placeholder="NIP" />
+                  </div>
+                  <div className="form-group">
+                      <label htmlFor="conductor-regon">REGON</label>
+                      <input type="text" id="conductor-regon" name="regon" value={conductorData.regon} onChange={handleConductorDataChange} placeholder="REGON" />
+                  </div>
+              </div>
+              <button onClick={handleGenerateAllContracts} className="button-success" disabled={isGenerating}>
+                  {isGenerating ? 'Generowanie...' : `Potwierdź i generuj umowy`}
+              </button>
+          </div>
+        )}
+      </div>
+
+      <hr />
+
       {participants.length > 0 && (
         <div className="musician-list">
           {participants.map((p) => (
@@ -246,53 +293,6 @@ const ContractMusicianList = () => {
         </div>
       )}
 
-      <hr />
-
-      <div className="contract-actions">
-        <button onClick={() => setShowBulkGenerateForm(!showBulkGenerateForm)} className="button-primary">
-          {showBulkGenerateForm ? 'Anuluj' : 'Generuj wszystkie umowy'}
-        </button>
-      </div>
-
-      {showBulkGenerateForm && (
-        <div className="bulk-generate-form">
-            <h3>Dane Zamawiającego do umów</h3>
-            <p>Poniższe dane zostaną użyte we wszystkich generowanych umowach. Możesz je edytować.</p>
-            <div className="form-grid">
-                <div className="form-group">
-                    <label htmlFor="conductor-zamawiajacy">Zamawiający</label>
-                    <input type="text" id="conductor-zamawiajacy" name="zamawiajacy" value={conductorData.zamawiajacy} onChange={handleConductorDataChange} placeholder="Zamawiający" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="conductor-reprezentant">Reprezentant</label>
-                    <input type="text" id="conductor-reprezentant" name="reprezentant" value={conductorData.reprezentant} onChange={handleConductorDataChange} placeholder="Reprezentant" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="conductor-siedziba">Siedziba (ulica, numer)</label>
-                    <input type="text" id="conductor-siedziba" name="siedziba" value={conductorData.siedziba} onChange={handleConductorDataChange} placeholder="Siedziba (ulica, numer)" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="conductor-kod">Kod pocztowy</label>
-                    <input type="text" id="conductor-kod" name="kodPocztowy" value={conductorData.kodPocztowy} onChange={handleConductorDataChange} placeholder="Kod pocztowy" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="conductor-poczta">Poczta</label>
-                    <input type="text" id="conductor-poczta" name="poczta" value={conductorData.poczta} onChange={handleConductorDataChange} placeholder="Poczta" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="conductor-nip">NIP</label>
-                    <input type="text" id="conductor-nip" name="nip" value={conductorData.nip} onChange={handleConductorDataChange} placeholder="NIP" />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="conductor-regon">REGON</label>
-                    <input type="text" id="conductor-regon" name="regon" value={conductorData.regon} onChange={handleConductorDataChange} placeholder="REGON" />
-                </div>
-            </div>
-            <button onClick={handleGenerateAllContracts} className="button-success" disabled={isGenerating}>
-                {isGenerating ? 'Generowanie...' : `Potwierdź i generuj umowy`}
-            </button>
-        </div>
-      )}
     </div>
   );
 };
