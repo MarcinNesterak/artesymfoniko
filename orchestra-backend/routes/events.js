@@ -1343,19 +1343,19 @@ router.post("/contracts", requireConductor, async (req, res) => {
         .json({ message: "Brak uprawnień do tworzenia umowy dla tego wydarzenia." });
     }
     
-    // Krok 1: Stwórz nową umowę
+    // Krok 1: Jeśli istnieje stara umowa, usuń ją.
+    if (participation.contractId) {
+      await Contract.findByIdAndDelete(participation.contractId);
+    }
+    
+    // Krok 2: Stwórz i zapisz nową umowę.
     const newContract = new Contract({
       ...contractData,
       conductorId,
     });
-    const savedContract = await newContract.save(); // Jeśli tu wystąpi błąd walidacji, reszta się nie wykona
+    const savedContract = await newContract.save();
 
-    // Krok 2: Jeśli nowa umowa została pomyślnie utworzona, usuń starą (jeśli istniała)
-    if (participation.contractId) {
-      await Contract.findByIdAndDelete(participation.contractId);
-    }
-
-    // Krok 3: Zaktualizuj uczestnictwo o nową umowę
+    // Krok 3: Zaktualizuj uczestnictwo, przypisując nową umowę.
     participation.contractStatus = "ready";
     participation.contractId = savedContract._id;
     await participation.save();
