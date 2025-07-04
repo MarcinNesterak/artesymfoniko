@@ -79,17 +79,18 @@ const ContractMusicianList = () => {
   const calculateFinancials = useCallback((brutto) => {
     const wynagrodzenieBrutto = parseFloat(brutto) || 0;
     const kosztyUzyskaniaPrzychodu = wynagrodzenieBrutto * 0.5;
-    const podstawaOpodatkowania = Math.round(
-      wynagrodzenieBrutto - kosztyUzyskaniaPrzychodu
-    );
-    const zaliczkaNaPodatek = Math.round(podstawaOpodatkowania * 0.12);
+    const podstawaOpodatkowania = wynagrodzenieBrutto - kosztyUzyskaniaPrzychodu;
+    const zaliczkaNaPodatek = podstawaOpodatkowania * 0.12;
     const wynagrodzenieNetto = wynagrodzenieBrutto - zaliczkaNaPodatek;
+
+    const roundToTwo = (num) => parseFloat(num.toFixed(2));
+
     return {
-      wynagrodzenieBrutto,
-      kosztyUzyskaniaPrzychodu: parseFloat(kosztyUzyskaniaPrzychodu.toFixed(2)),
-      podstawaOpodatkowania,
-      zaliczkaNaPodatek: parseFloat(zaliczkaNaPodatek.toFixed(2)),
-      wynagrodzenieNetto: parseFloat(wynagrodzenieNetto.toFixed(2)),
+      wynagrodzenieBrutto: roundToTwo(wynagrodzenieBrutto),
+      kosztyUzyskaniaPrzychodu: roundToTwo(kosztyUzyskaniaPrzychodu),
+      podstawaOpodatkowania: roundToTwo(podstawaOpodatkowania),
+      zaliczkaNaPodatek: roundToTwo(zaliczkaNaPodatek),
+      wynagrodzenieNetto: roundToTwo(wynagrodzenieNetto),
     };
   }, []);
 
