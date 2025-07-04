@@ -158,12 +158,6 @@ const MyProfile = () => {
     setError("");
     setSuccess("");
 
-    if (!privacyAccepted) {
-      setError("Musisz zaakceptować politykę prywatności, aby zapisać zmiany.");
-      setProfileLoading(false);
-      return;
-    }
-
     try {
       const updatedProfileData = {
         personalData: profileData,
@@ -454,7 +448,7 @@ const MyProfile = () => {
           <div className="form-actions">
             <button
               type="submit"
-              disabled={profileLoading || (!userData.privacyPolicyAccepted && !privacyAccepted)}
+              disabled={profileLoading}
               className="btn-primary"
             >
               {profileLoading ? "Zapisywanie..." : "Zapisz Zmiany w Profilu"}

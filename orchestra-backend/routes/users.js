@@ -57,7 +57,19 @@ router.patch("/me/profile", authenticate, async (req, res) => {
 
     // Aktualizuj dane osobowe
     if (personalData) {
-      user.personalData = { ...user.personalData, ...personalData };
+      // Przypisujemy pola pojedynczo, aby Mongoose prawidłowo obsłużył gettery/settery (szyfrowanie)
+      Object.keys(personalData).forEach(key => {
+        if (key === 'address') {
+          if (!user.personalData.address) {
+            user.personalData.address = {};
+          }
+          Object.keys(personalData.address).forEach(addressKey => {
+            user.personalData.address[addressKey] = personalData.address[addressKey];
+          });
+        } else {
+          user.personalData[key] = personalData[key];
+        }
+      });
     }
 
     // Aktualizuj status zgody na politykę prywatności
