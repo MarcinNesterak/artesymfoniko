@@ -76,7 +76,7 @@
 
 .contract-preview {
   font-family: 'Times New Roman', Times, serif;
-  color: #333;
+  color: #000;
   line-height: 1.2;
 }
 
@@ -118,6 +118,10 @@
 .contract-preview li {
   margin-bottom: 0.5rem;
   text-align: left;
+}
+
+.contract-preview p.align-right {
+  text-align: right;
 }
 
 .signatures {

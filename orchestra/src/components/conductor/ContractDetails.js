@@ -68,12 +68,13 @@ const ContractDetails = () => {
       <div className="contract-preview">
         {/* --- UMOWA O DZIEŁO --- */}
         <div className="page-break">
-          <h1>Umowa o dzieło nr {numerUmowy}</h1>
-          <p>
+          
+          <p className="align-right">
             <strong>
               {miejsceZawarcia}, {formatDate(dataZawarcia)}
             </strong>
           </p>
+          <h1>Umowa o dzieło nr {numerUmowy}</h1>
           <p>Zawarta w dniu {formatDate(dataZawarcia)} pomiędzy:</p>
           <p>
             <strong>{zamawiajacy.nazwa}</strong>, z siedzibą przy{" "}
