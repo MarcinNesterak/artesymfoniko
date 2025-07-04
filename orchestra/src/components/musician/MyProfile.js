@@ -163,8 +163,12 @@ const MyProfile = () => {
         personalData: profileData,
         privacyPolicyAccepted: privacyAccepted,
       };
+      
+      console.log("Krok 1 (Frontend): Próba wysłania danych:", updatedProfileData);
       const response = await usersAPI.updateProfile(updatedProfileData);
-      setSuccess("Profil został zaktualizowany pomyślnie.");
+      
+      let successMessage = "Profil został zaktualizowany pomyślnie.";
+      setSuccess(successMessage);
       setUserData(response.user);
     } catch (error) {
       setError(error.message || 'Nie udało się zaktualizować profilu.');
