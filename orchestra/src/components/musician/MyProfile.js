@@ -443,9 +443,9 @@ const MyProfile = () => {
               />
               <span>
                 Wyrażam zgodę na przetwarzanie moich danych osobowych zgodnie z{" "}
-                <a href="/polityka-prywatnosci" target="_blank" rel="noopener noreferrer">
+                <Link to="/polityka-prywatnosci" target="_blank" rel="noopener noreferrer">
                   Polityką Prywatności
-                </a>
+                </Link>
                 .
               </span>
             </label>
