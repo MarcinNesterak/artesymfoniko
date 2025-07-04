@@ -173,7 +173,7 @@
   .musicians-table {
     overflow-x: auto;
   }
-  
+
   .table-header,
   .table-row {
     min-width: 800px;
@@ -187,25 +187,25 @@
     gap: 15px;
     align-items: stretch;
   }
-  
+
   .manage-musicians-header h1 {
     text-align: center;
   }
-  
+
   .header-actions {
     justify-content: center;
   }
-  
+
   /* Konwertuj tabelę na karty na mobilnych */
   .musicians-table {
     display: block;
     overflow-x: visible;
   }
-  
+
   .table-header {
     display: none;
   }
-  
+
   .table-row {
     display: block;
     background-color: var(--card-bg);
@@ -215,7 +215,7 @@
     margin-bottom: 15px;
     min-width: auto;
   }
-  
+
   .table-row > div {
     display: flex;
     justify-content: space-between;
@@ -223,14 +223,14 @@
     padding: 8px 0;
     border-bottom: 1px solid var(--border-color);
   }
-  
+
   .table-row > div:last-child {
     border-bottom: none;
     margin-top: 10px;
     justify-content: center;
     gap: 10px;
   }
-  
+
   .table-row > div:before {
     content: attr(data-label);
     font-weight: 600;
@@ -238,18 +238,18 @@
     margin-right: 10px;
     min-width: 100px;
   }
-  
+
   .musician-actions {
     flex-wrap: wrap;
     justify-content: center !important;
   }
-  
+
   .temp-password-display {
     flex-direction: column;
     align-items: flex-end;
     max-width: 200px;
   }
-  
+
   .password-text {
     word-break: break-all;
     text-align: right;
@@ -260,36 +260,36 @@
   .add-musician-form {
     padding: 20px 15px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: 0;
   }
-  
+
   .form-actions {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .btn-edit,
   .btn-reset-password,
   .btn-toggle {
     padding: 8px 12px;
     font-size: 0.8rem;
   }
-  
+
   .musician-actions {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .temp-password-display {
     max-width: 100%;
   }
 }
 
 .musician-password {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
 }
 
 .temp-password-display {
@@ -302,7 +302,7 @@
 }
 
 .password-text {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   background-color: transparent;
   border: none;
   color: var(--text-primary);

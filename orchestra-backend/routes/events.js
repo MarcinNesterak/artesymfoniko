@@ -3,7 +3,7 @@ import Event from "../models/Event.js";
 import User from "../models/User.js";
 import Invitation from "../models/Invitation.js";
 import Participation from "../models/Participation.js";
-import Contract from '../models/Contract.js';
+import Contract from "../models/Contract.js";
 import {
   authenticate,
   requireConductor,
@@ -11,7 +11,7 @@ import {
 } from "../middleware/auth.js";
 import Message from "../models/Message.js";
 import MessageRead from "../models/MessageRead.js";
-import { apiLimiter } from '../middleware/rateLimiter.js';
+import { apiLimiter } from "../middleware/rateLimiter.js";
 import { body, validationResult } from "express-validator";
 import sendEmail from "../utils/email.js";
 
@@ -19,13 +19,23 @@ const router = express.Router();
 
 // Helper do formatowania daty w polskiej strefie czasowej
 const formatEventDate = (date) => {
-  if (!date) return { eventDate: '', eventTime: '' };
+  if (!date) return { eventDate: "", eventTime: "" };
   const d = new Date(date);
-  const dateOptions = { timeZone: 'Europe/Warsaw', day: '2-digit', month: 'long', year: 'numeric' };
-  const timeOptions = { timeZone: 'Europe/Warsaw', hour: '2-digit', minute: '2-digit', hour12: false };
+  const dateOptions = {
+    timeZone: "Europe/Warsaw",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  };
+  const timeOptions = {
+    timeZone: "Europe/Warsaw",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  };
   return {
-    eventDate: d.toLocaleDateString('pl-PL', dateOptions),
-    eventTime: d.toLocaleTimeString('pl-PL', timeOptions),
+    eventDate: d.toLocaleDateString("pl-PL", dateOptions),
+    eventTime: d.toLocaleTimeString("pl-PL", timeOptions),
   };
 };
 
@@ -242,14 +252,8 @@ router.post(
       .trim()
       .escape()
       .withMessage("Lokalizacja jest wymagana."),
-    body("description")
-      .optional()
-      .trim()
-      .escape(),
-    body("dresscode")
-      .optional()
-      .trim()
-      .escape(),
+    body("description").optional().trim().escape(),
+    body("dresscode").optional().trim().escape(),
     body("inviteUserIds")
       .isArray()
       .withMessage("Lista muzyków musi być tablicą."),
@@ -263,8 +267,17 @@ router.post(
 
     try {
       await autoArchiveEvents();
-      
-      const { title, date, description, schedule, program, inviteUserIds, location, dresscode } = req.body;
+
+      const {
+        title,
+        date,
+        description,
+        schedule,
+        program,
+        inviteUserIds,
+        location,
+        dresscode,
+      } = req.body;
 
       // Walidacja, czy data jest w przyszłości
       if (new Date(date) <= new Date()) {
@@ -289,21 +302,23 @@ router.post(
 
       // Utwórz zaproszenia dla wybranych muzyków
       if (inviteUserIds && inviteUserIds.length > 0) {
-        const invitations = inviteUserIds.map(userId => ({
+        const invitations = inviteUserIds.map((userId) => ({
           eventId: savedEvent._id,
-          userId: userId
+          userId: userId,
         }));
         await Invitation.insertMany(invitations);
-        
+
         // Wyślij powiadomienia e-mail do zaproszonych muzyków
-        const invitedUsers = await User.find({ '_id': { $in: inviteUserIds } }).select('email name');
+        const invitedUsers = await User.find({
+          _id: { $in: inviteUserIds },
+        }).select("email name");
         for (const user of invitedUsers) {
           const { eventDate, eventTime } = formatEventDate(date);
           await sendEmail({
             to: user.email,
             subject: `Zaproszenie do udziału w wydarzeniu: ${title}`,
             html: `
-              <h1>Cześć ${user.name.split(' ')[0]}!</h1>
+              <h1>Cześć ${user.name.split(" ")[0]}!</h1>
               <p>Zostałeś/aś zaproszony/a do udziału w nowym wydarzeniu: <strong>${title}</strong>.</p>
               <p>Data: ${eventDate} o godzinie ${eventTime}</p>
               <p>Lokalizacja: ${location}</p>
@@ -314,14 +329,14 @@ router.post(
               <br>
               <p>Pozdrawiamy,</p>
               <p><strong>Artesymfoniko</strong></p>
-            `
+            `,
           });
         }
       }
 
       res.status(201).json({
-        message: 'Wydarzenie zostało utworzone, a zaproszenia wysłane.',
-        event: savedEvent
+        message: "Wydarzenie zostało utworzone, a zaproszenia wysłane.",
+        event: savedEvent,
       });
     } catch (error) {
       console.error("Create event error:", error);
@@ -339,13 +354,30 @@ router.put(
   requireConductor,
   [
     // Walidacja, podobna do tworzenia
-    body("title").optional().notEmpty().trim().escape().withMessage("Tytuł nie może być pusty."),
-    body("date").optional().isISO8601().toDate().withMessage("Nieprawidłowy format daty."),
-    body("location").optional().notEmpty().trim().escape().withMessage("Lokalizacja nie może być pusta."),
+    body("title")
+      .optional()
+      .notEmpty()
+      .trim()
+      .escape()
+      .withMessage("Tytuł nie może być pusty."),
+    body("date")
+      .optional()
+      .isISO8601()
+      .toDate()
+      .withMessage("Nieprawidłowy format daty."),
+    body("location")
+      .optional()
+      .notEmpty()
+      .trim()
+      .escape()
+      .withMessage("Lokalizacja nie może być pusta."),
     body("description").optional().trim().escape(),
     body("schedule").optional().trim().escape(),
     body("program").optional().trim().escape(),
-    body("dresscode").optional().isIn(['', 'frak', 'black', 'casual', 'other']).withMessage("Nieprawidłowa wartość dresscode."),
+    body("dresscode")
+      .optional()
+      .isIn(["", "frak", "black", "casual", "other"])
+      .withMessage("Nieprawidłowa wartość dresscode."),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -369,10 +401,21 @@ router.put(
 
       // 1. Pobierz aktualne zaproszenia PRZED modyfikacją
       const originalInvitations = await Invitation.find({ eventId: event._id });
-      const originalInvitedUserIds = originalInvitations.map(inv => inv.userId.toString());
+      const originalInvitedUserIds = originalInvitations.map((inv) =>
+        inv.userId.toString()
+      );
 
       // Aktualizuj pola, które zostały przesłane w ciele żądania
-      const { title, date, description, schedule, program, location, dresscode, inviteUserIds } = req.body;
+      const {
+        title,
+        date,
+        description,
+        schedule,
+        program,
+        location,
+        dresscode,
+        inviteUserIds,
+      } = req.body;
       if (title) event.title = title;
       if (date) event.date = date;
       if (description) event.description = description;
@@ -380,33 +423,41 @@ router.put(
       if (program) event.program = program;
       if (location) event.location = location;
       if (dresscode) event.dresscode = dresscode;
-      
+
       // Oznacz jako zmodyfikowane
       event.lastModified = new Date();
 
       // 2. Logika obsługi zaproszeń (jeśli inviteUserIds jest przekazane)
       if (inviteUserIds && Array.isArray(inviteUserIds)) {
-        const newInvitedUserIds = inviteUserIds.map(id => id.toString());
+        const newInvitedUserIds = inviteUserIds.map((id) => id.toString());
 
         // 2a. Znajdź usuniętych muzyków
         const removedUserIds = originalInvitedUserIds.filter(
-          id => !newInvitedUserIds.includes(id)
+          (id) => !newInvitedUserIds.includes(id)
         );
         if (removedUserIds.length > 0) {
           // Usuń ich zaproszenia i potwierdzenia uczestnictwa
-          await Invitation.deleteMany({ eventId: event._id, userId: { $in: removedUserIds } });
-          await Participation.deleteMany({ eventId: event._id, userId: { $in: removedUserIds } });
-          console.log(`Usunięto zaproszenia dla ${removedUserIds.length} muzyków.`);
+          await Invitation.deleteMany({
+            eventId: event._id,
+            userId: { $in: removedUserIds },
+          });
+          await Participation.deleteMany({
+            eventId: event._id,
+            userId: { $in: removedUserIds },
+          });
+          console.log(
+            `Usunięto zaproszenia dla ${removedUserIds.length} muzyków.`
+          );
         }
 
         // 2b. Znajdź nowo dodanych muzyków
         const addedUserIds = newInvitedUserIds.filter(
-          id => !originalInvitedUserIds.includes(id)
+          (id) => !originalInvitedUserIds.includes(id)
         );
 
         if (addedUserIds.length > 0) {
           // Utwórz dla nich nowe zaproszenia
-          const newInvitations = addedUserIds.map(userId => ({
+          const newInvitations = addedUserIds.map((userId) => ({
             eventId: event._id,
             userId: userId,
           }));
@@ -414,25 +465,31 @@ router.put(
           console.log(`Dodano ${addedUserIds.length} nowych zaproszeń.`);
 
           // 2c. Wyślij powiadomienia email do nowo zaproszonych
-          const newlyInvitedUsers = await User.find({ '_id': { $in: addedUserIds } }).select('email name');
+          const newlyInvitedUsers = await User.find({
+            _id: { $in: addedUserIds },
+          }).select("email name");
           for (const user of newlyInvitedUsers) {
             const { eventDate, eventTime } = formatEventDate(event.date);
             await sendEmail({
               to: user.email,
               subject: `Nowe zaproszenie do wydarzenia: ${event.title}`,
               html: `
-                <h1>Cześć ${user.name.split(' ')[0]}!</h1>
-                <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${event.title}</strong>.</p>
+                <h1>Cześć ${user.name.split(" ")[0]}!</h1>
+                <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${
+                  event.title
+                }</strong>.</p>
                 <p>Data: ${eventDate} o godzinie ${eventTime}</p>
                 <p>Lokalizacja: ${location || event.location}</p>
                 <p>Wydarzenie zostało zaktualizowane. Zaloguj się do aplikacji, aby zobaczyć szczegóły i potwierdzić swój udział.</p>
                 <br>
                 <p>Pozdrawiamy,</p>
                 <p><strong>Artesymfoniko</strong></p>
-              `
+              `,
             });
           }
-           console.log(`Wysłano powiadomienia e-mail do ${newlyInvitedUsers.length} nowych muzyków.`);
+          console.log(
+            `Wysłano powiadomienia e-mail do ${newlyInvitedUsers.length} nowych muzyków.`
+          );
         }
       }
 
@@ -557,34 +614,45 @@ router.post("/:id/invite", requireConductor, async (req, res) => {
     await Invitation.insertMany(invitations);
 
     // Aktualizuj licznik zaproszeń i oznacz jako zmodyfikowane
-    const totalInvitations = await Invitation.countDocuments({ eventId: req.params.id });
+    const totalInvitations = await Invitation.countDocuments({
+      eventId: req.params.id,
+    });
     event.invitedCount = totalInvitations;
     event.lastModified = new Date();
     await event.save();
 
     // Wyślij powiadomienia e-mail do nowo zaproszonych
     try {
-      const newlyInvitedUsers = await User.find({ '_id': { $in: newUserIds } }).select('email name');
+      const newlyInvitedUsers = await User.find({
+        _id: { $in: newUserIds },
+      }).select("email name");
       for (const user of newlyInvitedUsers) {
         const { eventDate, eventTime } = formatEventDate(event.date);
         await sendEmail({
           to: user.email,
           subject: `Zaproszenie do udziału w wydarzeniu: ${event.title}`,
           html: `
-            <h1>Cześć ${user.name.split(' ')[0]}!</h1>
-            <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${event.title}</strong>.</p>
+            <h1>Cześć ${user.name.split(" ")[0]}!</h1>
+            <p>Zostałeś/aś zaproszony/a do udziału w wydarzeniu: <strong>${
+              event.title
+            }</strong>.</p>
             <p>Data: ${eventDate} o godzinie ${eventTime}</p>
             <p>Lokalizacja: ${event.location}</p>
             <p>Aby zobaczyć szczegóły i odpowiedzieć na zaproszenie, zaloguj się do aplikacji.</p>
             <br>
             <p>Pozdrawiamy,</p>
             <p><strong>Artesymfoniko</strong></p>
-          `
+          `,
         });
       }
-      console.log(`Wysłano powiadomienia e-mail do ${newlyInvitedUsers.length} nowych muzyków.`);
+      console.log(
+        `Wysłano powiadomienia e-mail do ${newlyInvitedUsers.length} nowych muzyków.`
+      );
     } catch (emailError) {
-      console.error("Błąd podczas wysyłania e-maili z zaproszeniami (szybkie zapraszanie):", emailError);
+      console.error(
+        "Błąd podczas wysyłania e-maili z zaproszeniami (szybkie zapraszanie):",
+        emailError
+      );
       // Nie przerywamy operacji, zaproszenia w systemie są ważniejsze
     }
 
@@ -707,11 +775,15 @@ router.delete(
 
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).json({ message: "Wydarzenie nie zostało znalezione" });
+        return res
+          .status(404)
+          .json({ message: "Wydarzenie nie zostało znalezione" });
       }
 
       if (!event.conductorId.equals(req.user._id)) {
-        return res.status(403).json({ message: "Możesz modyfikować tylko swoje wydarzenia" });
+        return res
+          .status(403)
+          .json({ message: "Możesz modyfikować tylko swoje wydarzenia" });
       }
 
       // Znajdź zaproszenie, upewniając się, że należy do tego wydarzenia
@@ -721,7 +793,11 @@ router.delete(
       });
 
       if (!invitation) {
-        return res.status(404).json({ message: "Zaproszenie nie zostało znalezione w tym wydarzeniu" });
+        return res
+          .status(404)
+          .json({
+            message: "Zaproszenie nie zostało znalezione w tym wydarzeniu",
+          });
       }
 
       // Usuń je
@@ -758,11 +834,15 @@ router.delete(
 
       const event = await Event.findById(eventId);
       if (!event) {
-        return res.status(404).json({ message: "Wydarzenie nie zostało znalezione" });
+        return res
+          .status(404)
+          .json({ message: "Wydarzenie nie zostało znalezione" });
       }
 
       if (!event.conductorId.equals(req.user._id)) {
-        return res.status(403).json({ message: "Możesz modyfikować tylko swoje wydarzenia" });
+        return res
+          .status(403)
+          .json({ message: "Możesz modyfikować tylko swoje wydarzenia" });
       }
 
       // Znajdź uczestnictwo, upewniając się, że należy do tego wydarzenia
@@ -772,19 +852,23 @@ router.delete(
       });
 
       if (!participation) {
-        return res.status(404).json({ message: "Uczestnictwo nie zostało znalezione w tym wydarzeniu" });
+        return res
+          .status(404)
+          .json({
+            message: "Uczestnictwo nie zostało znalezione w tym wydarzeniu",
+          });
       }
-      
-      const wasConfirmed = participation.status === 'confirmed';
+
+      const wasConfirmed = participation.status === "confirmed";
 
       // Usuń je
       await participation.deleteOne();
-      
+
       // Jeśli usunięto potwierdzonego uczestnika, zaktualizuj licznik
       if (wasConfirmed) {
         const confirmedCount = await Participation.countDocuments({
-            eventId,
-            status: "confirmed",
+          eventId,
+          status: "confirmed",
         });
         event.confirmedCount = confirmedCount;
         await event.save();
@@ -853,7 +937,7 @@ router.get("/:id/messages", requireUser, async (req, res) => {
           return {
             ...message.toObject(),
             readBy: reads
-              .filter(read => read.userId)
+              .filter((read) => read.userId)
               .map((read) => ({
                 userId: read.userId._id,
                 name: read.userId.name,
@@ -923,7 +1007,8 @@ router.post("/:id/messages", requireUser, async (req, res) => {
     if (!event) {
       return res.status(404).json({
         error: "Not Found",
-        message: "Wydarzenie, do którego próbujesz wysłać wiadomość, nie istnieje.",
+        message:
+          "Wydarzenie, do którego próbujesz wysłać wiadomość, nie istnieje.",
       });
     }
 
@@ -1163,12 +1248,16 @@ router.delete(
       const message = await Message.findById(messageId);
 
       if (!message) {
-        return res.status(404).json({ message: "Wiadomość nie została znaleziona." });
+        return res
+          .status(404)
+          .json({ message: "Wiadomość nie została znaleziona." });
       }
 
       // Sprawdź, czy użytkownik jest autorem wiadomości
       if (message.userId.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: "Nie masz uprawnień do usunięcia tej wiadomości." });
+        return res
+          .status(403)
+          .json({ message: "Nie masz uprawnień do usunięcia tej wiadomości." });
       }
 
       // "Miękkie" usunięcie
@@ -1179,54 +1268,59 @@ router.delete(
       res.status(200).json({ message: "Wiadomość została usunięta." });
     } catch (error) {
       console.error("Error deleting message:", error);
-      res.status(500).json({ message: "Błąd serwera podczas usuwania wiadomości." });
+      res
+        .status(500)
+        .json({ message: "Błąd serwera podczas usuwania wiadomości." });
     }
   }
 );
 
 // PATCH /api/participations/:id - zaktualizuj uczestnictwo (np. wynagrodzenie)
-router.patch(
-  "/participations/:id",
-  requireConductor,
-  async (req, res) => {
-    try {
-      const { fee } = req.body;
-      const participationId = req.params.id;
+router.patch("/participations/:id", requireConductor, async (req, res) => {
+  try {
+    const { fee } = req.body;
+    const participationId = req.params.id;
 
-      // Walidacja
-      if (fee === undefined || typeof fee !== 'number' || fee < 0) {
-        return res.status(400).json({ message: "Nieprawidłowa wartość wynagrodzenia (fee)." });
-      }
-
-      const participation = await Participation.findById(participationId);
-      if (!participation) {
-        return res.status(404).json({ message: "Uczestnictwo nie zostało znalezione." });
-      }
-      
-      // Sprawdź, czy dyrygent ma prawo edytować to uczestnictwo (czy jest dyrygentem wydarzenia)
-      const event = await Event.findById(participation.eventId);
-      if (!event || event.conductorId.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: "Brak uprawnień do edycji tego uczestnictwa." });
-      }
-
-      // Aktualizuj i zapisz
-      participation.fee = fee;
-      await participation.save();
-
-      res.json({
-        message: "Uczestnictwo zostało zaktualizowane.",
-        participation,
-      });
-
-    } catch (error) {
-      console.error("Error updating participation:", error);
-      res.status(500).json({ message: "Błąd serwera podczas aktualizacji uczestnictwa." });
+    // Walidacja
+    if (fee === undefined || typeof fee !== "number" || fee < 0) {
+      return res
+        .status(400)
+        .json({ message: "Nieprawidłowa wartość wynagrodzenia (fee)." });
     }
+
+    const participation = await Participation.findById(participationId);
+    if (!participation) {
+      return res
+        .status(404)
+        .json({ message: "Uczestnictwo nie zostało znalezione." });
+    }
+
+    // Sprawdź, czy dyrygent ma prawo edytować to uczestnictwo (czy jest dyrygentem wydarzenia)
+    const event = await Event.findById(participation.eventId);
+    if (!event || event.conductorId.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Brak uprawnień do edycji tego uczestnictwa." });
+    }
+
+    // Aktualizuj i zapisz
+    participation.fee = fee;
+    await participation.save();
+
+    res.json({
+      message: "Uczestnictwo zostało zaktualizowane.",
+      participation,
+    });
+  } catch (error) {
+    console.error("Error updating participation:", error);
+    res
+      .status(500)
+      .json({ message: "Błąd serwera podczas aktualizacji uczestnictwa." });
   }
-);
+});
 
 // POST /api/events/contracts - Stwórz nową umowę
-router.post('/contracts', requireConductor, async (req, res) => {
+router.post("/contracts", requireConductor, async (req, res) => {
   try {
     const conductorId = req.user._id;
     const contractData = req.body;
@@ -1234,21 +1328,32 @@ router.post('/contracts', requireConductor, async (req, res) => {
     // Walidacja podstawowych danych
     const { eventId, participationId } = contractData;
     if (!eventId || !participationId) {
-      return res.status(400).json({ message: 'Brak ID wydarzenia lub uczestnictwa.' });
+      return res
+        .status(400)
+        .json({ message: "Brak ID wydarzenia lub uczestnictwa." });
     }
 
     // Sprawdzenie, czy dyrygent ma uprawnienia do tego wydarzenia
     const event = await Event.findById(eventId);
     if (!event || event.conductorId.toString() !== conductorId.toString()) {
-      return res.status(403).json({ message: 'Brak uprawnień do zarządzania umowami dla tego wydarzenia.' });
+      return res
+        .status(403)
+        .json({
+          message: "Brak uprawnień do zarządzania umowami dla tego wydarzenia.",
+        });
     }
 
     // Sprawdzenie, czy dla tego uczestnictwa nie istnieje już umowa
     const existingContract = await Contract.findOne({ participationId });
     if (existingContract) {
-      return res.status(409).json({ message: 'Umowa dla tego uczestnika już istnieje. Możesz ją edytować.' });
+      return res
+        .status(409)
+        .json({
+          message:
+            "Umowa dla tego uczestnika już istnieje. Możesz ją edytować.",
+        });
     }
-    
+
     // Stworzenie nowej umowy
     const newContract = new Contract({
       ...contractData,
@@ -1259,52 +1364,59 @@ router.post('/contracts', requireConductor, async (req, res) => {
 
     // Aktualizacja statusu w dokumencie Participation
     await Participation.findByIdAndUpdate(participationId, {
-      contractStatus: 'ready',
+      contractStatus: "ready",
       contractId: savedContract._id,
     });
 
     res.status(201).json({
-      message: 'Umowa została pomyślnie utworzona.',
+      message: "Umowa została pomyślnie utworzona.",
       contract: savedContract,
     });
-
   } catch (error) {
-    console.error('Błąd podczas tworzenia umowy:', error);
-    res.status(500).json({ message: 'Wystąpił błąd serwera podczas tworzenia umowy.' });
+    console.error("Błąd podczas tworzenia umowy:", error);
+    res
+      .status(500)
+      .json({ message: "Wystąpił błąd serwera podczas tworzenia umowy." });
   }
 });
 
 // GET /api/events/contracts/:id - Pobierz konkretną umowę
-router.get('/contracts/:id', requireUser, async (req, res) => {
-    try {
-        const contract = await Contract.findById(req.params.id)
-            .populate('eventId', 'title date')
-            .populate('conductorId', 'name')
-            .populate({
-                path: 'participationId',
-                populate: {
-                    path: 'userId',
-                    select: 'name'
-                }
-            });
+router.get("/contracts/:id", requireUser, async (req, res) => {
+  try {
+    const contract = await Contract.findById(req.params.id)
+      .populate("eventId", "title date")
+      .populate("conductorId", "name")
+      .populate({
+        path: "participationId",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      });
 
-        if (!contract) {
-            return res.status(404).json({ message: 'Umowa nie została znaleziona.' });
-        }
-
-        const isConductor = req.user.role === 'conductor' && contract.conductorId._id.toString() === req.user._id.toString();
-        const isMusician = req.user.role === 'musician' && contract.participationId.userId._id.toString() === req.user._id.toString();
-
-        if (!isConductor && !isMusician) {
-            return res.status(403).json({ message: 'Brak uprawnień do wyświetlenia tej umowy.' });
-        }
-
-        res.json(contract);
-
-    } catch (error) {
-        console.error('Błąd podczas pobierania umowy:', error);
-        res.status(500).json({ message: 'Wystąpił błąd serwera.' });
+    if (!contract) {
+      return res.status(404).json({ message: "Umowa nie została znaleziona." });
     }
+
+    const isConductor =
+      req.user.role === "conductor" &&
+      contract.conductorId._id.toString() === req.user._id.toString();
+    const isMusician =
+      req.user.role === "musician" &&
+      contract.participationId.userId._id.toString() ===
+        req.user._id.toString();
+
+    if (!isConductor && !isMusician) {
+      return res
+        .status(403)
+        .json({ message: "Brak uprawnień do wyświetlenia tej umowy." });
+    }
+
+    res.json(contract);
+  } catch (error) {
+    console.error("Błąd podczas pobierania umowy:", error);
+    res.status(500).json({ message: "Wystąpił błąd serwera." });
+  }
 });
 
 export default router;

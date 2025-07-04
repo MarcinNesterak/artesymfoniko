@@ -1,23 +1,29 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { encrypt, decrypt } from '../utils/encryption.js';
+import { encrypt, decrypt } from "../utils/encryption.js";
 
-const addressSchema = new mongoose.Schema({
+const addressSchema = new mongoose.Schema(
+  {
     street: { type: String, get: decrypt, set: encrypt },
     city: { type: String, get: decrypt, set: encrypt },
     postalCode: { type: String, get: decrypt, set: encrypt },
     country: { type: String, default: "Polska" },
-}, { _id: false, toJSON: { getters: true }, toObject: { getters: true } });
+  },
+  { _id: false, toJSON: { getters: true }, toObject: { getters: true } }
+);
 
-const personalDataSchema = new mongoose.Schema({
-  firstName: { type: String, trim: true },
-  lastName: { type: String, trim: true },
-  phone: { type: String, trim: true, get: decrypt, set: encrypt },
-  address: addressSchema,
-  pesel: { type: String, trim: true, get: decrypt, set: encrypt },
-  bankAccountNumber: { type: String, trim: true, get: decrypt, set: encrypt },
-}, { _id: false, toJSON: { getters: true }, toObject: { getters: true } });
+const personalDataSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, trim: true },
+    lastName: { type: String, trim: true },
+    phone: { type: String, trim: true, get: decrypt, set: encrypt },
+    address: addressSchema,
+    pesel: { type: String, trim: true, get: decrypt, set: encrypt },
+    bankAccountNumber: { type: String, trim: true, get: decrypt, set: encrypt },
+  },
+  { _id: false, toJSON: { getters: true }, toObject: { getters: true } }
+);
 
 const userSchema = new mongoose.Schema(
   {
@@ -101,7 +107,7 @@ const userSchema = new mongoose.Schema(
 
     emailVerified: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     emailVerificationToken: String,
@@ -113,26 +119,26 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: {
-        getters: true,
-        transform: function (doc, ret) {
-            delete ret.password;
-            delete ret.emailVerificationToken;
-            delete ret.emailVerificationExpires;
-            delete ret.passwordResetToken;
-            delete ret.passwordResetExpires;
-            return ret;
-        }
+      getters: true,
+      transform: function (doc, ret) {
+        delete ret.password;
+        delete ret.emailVerificationToken;
+        delete ret.emailVerificationExpires;
+        delete ret.passwordResetToken;
+        delete ret.passwordResetExpires;
+        return ret;
+      },
     },
     toObject: {
-        getters: true
-    }
+      getters: true,
+    },
   }
 );
 
 // Hash password przed zapisem
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password") || this.isImporting) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -156,16 +162,16 @@ userSchema.virtual("fullName").get(function () {
 });
 
 // Metoda do generowania tokenu weryfikacji email
-userSchema.methods.generateEmailVerificationToken = function() {
-  const token = crypto.randomBytes(32).toString('hex');
+userSchema.methods.generateEmailVerificationToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
   this.emailVerificationToken = token;
   this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 godziny
   return token;
 };
 
 // Metoda do generowania tokenu resetowania hasła
-userSchema.methods.generatePasswordResetToken = function() {
-  const token = crypto.randomBytes(32).toString('hex');
+userSchema.methods.generatePasswordResetToken = function () {
+  const token = crypto.randomBytes(32).toString("hex");
   this.passwordResetToken = token;
   this.passwordResetExpires = Date.now() + 1 * 60 * 60 * 1000; // 1 godzina
   return token;
