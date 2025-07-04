@@ -44,8 +44,13 @@ const createContract = async (contractData) => {
     },
     body: JSON.stringify(contractData),
   });
-  if (!response.ok)
-    throw new Error((await response.json()).message || "Błąd tworzenia umowy");
+  if (!response.ok) {
+    const errorData = await response.json();
+    // Użyj szczegółowego błędu z serwera, jeśli jest dostępny
+    const errorMessage =
+      errorData.error || errorData.message || "Błąd tworzenia umowy";
+    throw new Error(errorMessage);
+  }
   return response.json();
 };
 // Koniec lokalnych funkcji API
