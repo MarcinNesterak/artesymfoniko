@@ -175,12 +175,12 @@ function App() {
             } 
           />
           
+          {/* Public routes */}
+          <Route path="/polityka-prywatnosci" element={<PrivacyPolicy />} />
+
           {/* Redirect to login if no route matches */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-        <Routes>
-          <Route path="/polityka-prywatnosci" element={<PrivacyPolicy />} />
         </Routes>
       </div>
     </BrowserRouter>
