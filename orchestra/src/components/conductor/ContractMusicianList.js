@@ -350,14 +350,14 @@ const ContractMusicianList = () => {
               </div>
               <div className="form-group">
                 <label htmlFor="contract-number-template">
-                  Szablon numeru umowy
+                  Numeru umowy
                 </label>
                 <input
                   type="text"
                   id="contract-number-template"
                   value={contractNumberTemplate}
                   onChange={(e) => setContractNumberTemplate(e.target.value)}
-                  placeholder="Szablon numeru"
+                  placeholder="Numer umowy"
                 />
                 <small>
                   Znaczniki: {"{tytul-wydarzenia}"}, {"{imie-nazwisko}"}, {"{rok}"},{" "}
