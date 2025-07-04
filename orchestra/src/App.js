@@ -100,7 +100,7 @@ function App() {
             } 
           />
           <Route 
-            path="/conductor/events/:eventId/contracts/:participationId"
+            path="/conductor/events/:eventId/contracts/:contractId"
             element={
               <ProtectedRoute allowedRole="conductor">
                 <ContractDetails />
