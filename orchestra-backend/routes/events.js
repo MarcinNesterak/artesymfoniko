@@ -1364,17 +1364,9 @@ router.post("/contracts", requireConductor, async (req, res) => {
     });
   } catch (error) {
     console.error("Błąd podczas tworzenia umowy:", error);
-    if (error.name === "ValidationError") {
-      const messages = Object.values(error.errors).map((err) => err.message);
-      return res.status(400).json({
-        message: "Błąd walidacji danych umowy.",
-        errors: messages,
-      });
-    }
-    res.status(500).json({
-      message: "Wystąpił nieoczekiwany błąd serwera.",
-      error: JSON.stringify(error, Object.getOwnPropertyNames(error)),
-    });
+    res
+      .status(500)
+      .json({ message: "Wystąpił błąd serwera podczas tworzenia umowy." });
   }
 });
 

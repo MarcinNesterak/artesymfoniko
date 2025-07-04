@@ -46,10 +46,7 @@ const createContract = async (contractData) => {
   });
   if (!response.ok) {
     const errorData = await response.json();
-    const errorMessage = `Szczegółowy błąd serwera: ${
-      errorData.error || errorData.message || "Brak dodatkowych informacji."
-    }`;
-    throw new Error(errorMessage);
+    throw new Error(errorData.message || "Błąd tworzenia umowy");
   }
   return response.json();
 };

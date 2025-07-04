@@ -352,6 +352,15 @@ export const eventsAPI = {
     });
     return handleResponse(response);
   },
+
+  // Pobierz kontrakt wydarzenia
+  getContract: async (contractId) => {
+    const response = await fetch(`${API_BASE_URL}/api/events/contracts/${contractId}`, {
+      method: "GET",
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
 };
 
 // Private Messages API
