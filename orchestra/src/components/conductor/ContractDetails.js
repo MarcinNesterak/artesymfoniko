@@ -68,42 +68,39 @@ const ContractDetails = () => {
       <div className="contract-preview">
         {/* --- UMOWA O DZIEŁO --- */}
         <div className="page-break">
-          <h3>Umowa o dzieło nr {numerUmowy}</h3>
-          <p style={{ textAlign: "center" }}>
+          <h1>Umowa o dzieło nr {numerUmowy}</h1>
+          <p>
             <strong>
               {miejsceZawarcia}, {formatDate(dataZawarcia)}
             </strong>
           </p>
-          <p style={{ textAlign: "center" }}>
-            Zawarta w dniu {formatDate(dataZawarcia)} pomiędzy:
-          </p>
-          <p style={{ textAlign: "center" }}>
+          <p>Zawarta w dniu {formatDate(dataZawarcia)} pomiędzy:</p>
+          <p>
             <strong>{zamawiajacy.nazwa}</strong>, z siedzibą przy{" "}
             {zamawiajacy.adres}, NIP: {zamawiajacy.nip}, REGON:{" "}
             {zamawiajacy.regon}, reprezentowana przez {zamawiajacy.reprezentant}{" "}
             zwanego dalej Zamawiającym.
           </p>
-          <p style={{ textAlign: "center" }}>a</p>
-          <p style={{ textAlign: "center" }}>
+          <p>a</p>
+          <p>
             <strong>{wykonawca.imieNazwisko}</strong>, zamieszkały/a pod adresem{" "}
             {wykonawca.adres}, posługujący/a się numerem PESEL:{" "}
             {wykonawca.pesel}, zwanym dalej Wykonawcą.
           </p>
 
-          <h4 style={{ textAlign: "center" }}>§1 - Przedmiot umowy</h4>
-          <p style={{ textAlign: "center" }}>
+          <h4>§1 - Przedmiot umowy</h4>
+          <p>
             Zamawiający zamawia, a Wykonawca przyjmuje do wykonania dzieło
             polegające na: {przedmiotUmowy}
           </p>
 
-          <h4 style={{ textAlign: "center" }}>§2 - Czas trwania umowy</h4>
-          <p style={{ textAlign: "center" }}>
-            Termin rozpoczęcia prac strony ustaliły na{" "}
-            {formatDate(dataZawarcia)}, a termin ukończenia dzieła na{" "}
-            {formatDate(dataWykonaniaDziela)}.
+          <h4>§2 - Czas trwania umowy</h4>
+          <p>
+            Termin rozpoczęcia prac strony ustaliły na {formatDate(dataZawarcia)}, a
+            termin ukończenia dzieła na {formatDate(dataWykonaniaDziela)}.
           </p>
 
-          <h4 style={{ textAlign: "center" }}>§3 - Wynagrodzenie</h4>
+          <h4>§3 - Wynagrodzenie</h4>
           <ol>
             <li>
               Z tytułu wykonywanych czynności opisanych w §1 niniejszej umowy
@@ -130,9 +127,7 @@ const ContractDetails = () => {
             </li>
           </ol>
 
-          <h4 style={{ textAlign: "center" }}>
-            §4 - Przeniesienie praw autorskich
-          </h4>
+          <h4>§4 - Przeniesienie praw autorskich</h4>
           <ol>
             <li>
               Wykonawca z chwilą przekazania dzieła przenosi w całości na
@@ -142,9 +137,7 @@ const ContractDetails = () => {
             </li>
           </ol>
 
-          <h4 style={{ textAlign: "center" }}>
-            §5 - Warunki wykonywania umowy
-          </h4>
+          <h4>§5 - Warunki wykonywania umowy</h4>
           <ol>
             <li>
               Wykonawca zobowiązuje się wykonać powierzone dzieło z należytą
@@ -156,7 +149,7 @@ const ContractDetails = () => {
             </li>
           </ol>
 
-          <h4 style={{ textAlign: "center" }}>§6 - Klauzula informacyjna</h4>
+          <h4>§6 - Klauzula informacyjna</h4>
           <ol>
             <li>
               Administratorem danych osobowych jest {zamawiajacy.nazwa} z
@@ -164,7 +157,7 @@ const ContractDetails = () => {
             </li>
           </ol>
 
-          <h4 style={{ textAlign: "center" }}>§7 - Inne postanowienia</h4>
+          <h4>§7 - Inne postanowienia</h4>
           <ol>
             <li>
               W sprawach nie unormowanych niniejszą umową mają zastosowanie
@@ -186,12 +179,12 @@ const ContractDetails = () => {
 
           <div className="signatures">
             <div>
-              <p style={{ textAlign: "center" }}>____________________</p>
-              <p style={{ textAlign: "center" }}>Zamawiający</p>
+              <p>____________________</p>
+              <p>Zamawiający</p>
             </div>
             <div>
-              <p style={{ textAlign: "center" }}>____________________</p>
-              <p style={{ textAlign: "center" }}>Wykonawca</p>
+              <p>____________________</p>
+              <p>Wykonawca</p>
             </div>
           </div>
         </div>
@@ -199,21 +192,17 @@ const ContractDetails = () => {
         {/* --- RACHUNEK --- */}
         <div className="page-break">
           <h1>Rachunek do umowy o dzieło nr {numerUmowy}</h1>
-          <p style={{ textAlign: "center" }}>
+          <p>
             <strong>
               {miejsceZawarcia}, {formatDate(dataWykonaniaDziela)}
             </strong>
           </p>
           <hr />
-          <h4 style={{ textAlign: "center" }}>
-            Rachunek do umowy o dzieło nr {numerUmowy}
-          </h4>
-          <p style={{ textAlign: "center" }}>
-            z dnia {formatDate(dataZawarcia)}
-          </p>
+          <h4>Rachunek do umowy o dzieło nr {numerUmowy}</h4>
+          <p>z dnia {formatDate(dataZawarcia)}</p>
 
           <h3>Zamawiający:</h3>
-          <p style={{ textAlign: "center" }}>
+          <p>
             <strong>{zamawiajacy.nazwa}</strong>
             <br />z siedzibą przy {zamawiajacy.adres},<br />
             NIP: {zamawiajacy.nip}, REGON: {zamawiajacy.regon},<br />
@@ -221,7 +210,7 @@ const ContractDetails = () => {
           </p>
 
           <h3>Wykonawca:</h3>
-          <p style={{ textAlign: "center" }}>
+          <p>
             <strong>{wykonawca.imieNazwisko}</strong>
             <br />
             zamieszkały/a pod adresem {wykonawca.adres},<br />
@@ -229,7 +218,7 @@ const ContractDetails = () => {
             zwanym/ą dalej Wykonawcą
           </p>
 
-          <p style={{ textAlign: "center" }}>
+          <p>
             Dzieło zostało wykonane w dniu {formatDate(dataWykonaniaDziela)}.
           </p>
 
@@ -271,7 +260,7 @@ const ContractDetails = () => {
             </tbody>
           </table>
 
-          <p style={{ textAlign: "center" }}>
+          <p>
             <strong>Sposób zapłaty:</strong> przelew
             <br />
             <strong>NUMER KONTA BANKOWEGO:</strong> {wykonawca.numerKonta}
@@ -279,8 +268,8 @@ const ContractDetails = () => {
 
           <div className="signatures">
             <div>
-              <p style={{ textAlign: "center" }}>____________________</p>
-              <p style={{ textAlign: "center" }}>Wykonawca</p>
+              <p>____________________</p>
+              <p>Wykonawca</p>
             </div>
           </div>
         </div>

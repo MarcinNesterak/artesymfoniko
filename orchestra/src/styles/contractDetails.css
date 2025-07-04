@@ -2,7 +2,9 @@
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #f9f9f9;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .contract-paper {
@@ -13,9 +15,11 @@
 }
 
 .contract-actions {
-  margin-bottom: 2rem;
   display: flex;
   justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
 }
 
 .contract-title {
@@ -70,6 +74,82 @@
   margin-top: 1rem;
 }
 
+.contract-preview {
+  font-family: 'Times New Roman', Times, serif;
+  color: #333;
+  line-height: 1.2;
+}
+
+.contract-preview h1,
+.contract-preview h3,
+.contract-preview h4,
+.contract-preview p {
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+}
+
+.contract-preview h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.contract-preview h3 {
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+}
+
+.contract-preview h4 {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  font-weight: bold;
+}
+
+.contract-preview strong {
+  font-weight: bold;
+}
+
+.contract-preview ol {
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.contract-preview li {
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4rem;
+}
+
+.signatures div {
+  width: 40%;
+  text-align: center;
+}
+
+.page-break {
+  page-break-after: always;
+}
+
+.contract-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem auto;
+}
+
+.contract-preview td {
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+}
+
+.contract-preview td:first-child {
+  width: 60%;
+}
+
 /* Style do druku */
 @media print {
   body, .contract-details-container {
@@ -87,5 +167,12 @@
     border: none;
     box-shadow: none;
     padding: 0;
+  }
+
+  .contract-preview {
+    width: 210mm; /* A4 width */
+    min-height: 297mm; /* A4 height */
+    padding: 20mm;
+    box-sizing: border-box;
   }
 } 
