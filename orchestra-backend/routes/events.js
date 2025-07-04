@@ -1347,11 +1347,11 @@ router.post("/contracts", requireConductor, async (req, res) => {
     }
 
     // Sprawdzenie, czy umowa dla tego uczestnictwa już nie istnieje i usunięcie jej
-    const existingContract = await Contract.findOne({
-      participationId: contractData.participationId,
-    });
-    if (existingContract) {
-      await Contract.findByIdAndDelete(existingContract._id);
+    if (participation.contractId) {
+      await Contract.findByIdAndDelete(participation.contractId);
+      participation.contractStatus = "pending";
+      participation.contractId = null; 
+      await participation.save();
     }
 
     const newContract = new Contract({
