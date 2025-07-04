@@ -68,7 +68,7 @@ const ContractDetails = () => {
       <div className="contract-preview">
         {/* --- UMOWA O DZIEŁO --- */}
         <div className="page-break">
-          <h1>Umowa o dzieło nr {numerUmowy}</h1>
+          <h3>Umowa o dzieło nr {numerUmowy}</h3>
           <p style={{ textAlign: "center" }}>
             <strong>
               {miejsceZawarcia}, {formatDate(dataZawarcia)}
@@ -98,8 +98,9 @@ const ContractDetails = () => {
 
           <h4 style={{ textAlign: "center" }}>§2 - Czas trwania umowy</h4>
           <p style={{ textAlign: "center" }}>
-            Termin rozpoczęcia prac strony ustaliły na {formatDate(dataZawarcia)}, a
-            termin ukończenia dzieła na {formatDate(dataWykonaniaDziela)}.
+            Termin rozpoczęcia prac strony ustaliły na{" "}
+            {formatDate(dataZawarcia)}, a termin ukończenia dzieła na{" "}
+            {formatDate(dataWykonaniaDziela)}.
           </p>
 
           <h4 style={{ textAlign: "center" }}>§3 - Wynagrodzenie</h4>
@@ -186,13 +187,6 @@ const ContractDetails = () => {
           <div className="signatures">
             <div>
               <p style={{ textAlign: "center" }}>____________________</p>
-              <p style={{ textAlign: "center" }}>
-                <strong>{zamawiajacy.nazwa}</strong>
-              </p>
-              <p style={{ textAlign: "center" }}>{zamawiajacy.adres}</p>
-              <p style={{ textAlign: "center" }}>
-                NIP {zamawiajacy.nip}, REGON {zamawiajacy.regon}
-              </p>
               <p style={{ textAlign: "center" }}>Zamawiający</p>
             </div>
             <div>
