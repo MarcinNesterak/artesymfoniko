@@ -1364,12 +1364,11 @@ router.post("/contracts", requireConductor, async (req, res) => {
     });
 
     const savedContract = await newContract.save();
-
-    // Aktualizacja statusu w dokumencie Participation
-    await Participation.findByIdAndUpdate(participationId, {
-      contractStatus: "ready",
-      contractId: savedContract._id,
-    });
+    
+    // Oznacz uczestnictwo jako mające umowę
+    participation.contractStatus = "ready";
+    participation.contractId = savedContract._id; // Przypisz ID umowy
+    await participation.save();
 
     res.status(201).json({
       message: "Umowa została pomyślnie utworzona.",

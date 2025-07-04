@@ -62,7 +62,7 @@ const ContractMusicianList = () => {
 
   const [bulkContractAmount, setBulkContractAmount] = useState("");
   const [contractNumberTemplate, setContractNumberTemplate] = useState(
-    "UOD/{tytul-wydarzenia}/{imie-nazwisko}/{rok}"
+    ""
   );
   const [showBulkGenerateForm, setShowBulkGenerateForm] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -481,9 +481,21 @@ const ContractMusicianList = () => {
                       p.contractStatus || "pending"
                     }`}
                   >
-                    {p.contractStatus === "completed"
-                      ? "Umowa gotowa"
-                      : "Brak umowy"}
+                    {p.contractStatus === "ready" && p.contractId ? (
+                      <a
+                        href={`/conductor/events/${eventId}/contracts/${p.contractId}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(
+                            `/conductor/events/${eventId}/contracts/${p.contractId}`
+                          );
+                        }}
+                      >
+                        Umowa gotowa
+                      </a>
+                    ) : (
+                      "Brak umowy"
+                    )}
                   </span>
                 </label>
               </div>
