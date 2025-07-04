@@ -6,7 +6,7 @@ const PrivacyPolicy = () => {
     <div className="form-container" style={{ maxWidth: "800px", margin: "2rem auto" }}>
       <h2>Polityka Prywatności</h2>
       <p>
-        Data wejścia w życie: {new Date().toLocaleDateString("pl-PL")}
+        Data wejścia w życie: 04.07.2025 r.
       </p>
 
       <h3>§1. Postanowienia ogólne</h3>
@@ -14,10 +14,10 @@ const PrivacyPolicy = () => {
         <li>
           Niniejsza polityka prywatności ma charakter informacyjny i określa
           zasady przetwarzania i ochrony danych osobowych przekazanych przez
-          Użytkowników w związku z korzystaniem przez nich z aplikacji ArteSymfoniko.
+          Użytkowników w związku z korzystaniem przez nich z aplikacji Artesymfoniko.
         </li>
         <li>
-          Administratorem Danych Osobowych (ADO) jest [Nazwa Administratora, np. Fundacja ArteSymfoniko] z siedzibą w [Adres], NIP: [NIP], REGON: [REGON], zwany dalej "Administratorem".
+          Administratorem Danych Osobowych (ADO) jest MIECZYSŁAW SMYDA AGENCJA ARTYSTYCZNA VIOLIN & CLASSIC z siedzibą w Powroźnik 123, 33-370 Muszyna, NIP: 734-145-41-48, REGON: 492698947, reprezentowana przez Mieczysława Smyda, zwanego dalej "Administratorem".
         </li>
         <li>
           Dbamy o Twoją prywatność i bezpieczeństwo Twoich danych. W tym celu
