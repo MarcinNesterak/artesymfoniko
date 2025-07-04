@@ -158,22 +158,18 @@ const ContractMusicianList = () => {
       return;
     }
 
-    const participantsToProcess = participants.filter(
-      (p) =>
-        selectedParticipants.has(p._id) &&
-        (p.contractStatus === "pending" || !p.contractStatus)
+    const participantsToProcess = participants.filter((p) =>
+      selectedParticipants.has(p._id)
     );
 
     if (participantsToProcess.length === 0) {
-      setErrorMessages([
-        "Wybierz przynajmniej jednego muzyka, który nie ma jeszcze gotowej umowy.",
-      ]);
+      setErrorMessages(["Proszę wybrać przynajmniej jednego muzyka."]);
       return;
     }
 
     if (
       !window.confirm(
-        `Czy na pewno chcesz wygenerować ${participantsToProcess.length} umów?`
+        `Czy na pewno chcesz wygenerować ${participantsToProcess.length} umów? Istniejące umowy zostaną nadpisane.`
       )
     ) {
       return;

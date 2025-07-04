@@ -1346,18 +1346,14 @@ router.post("/contracts", requireConductor, async (req, res) => {
         });
     }
 
-    // Sprawdzenie, czy dla tego uczestnictwa nie istnieje już umowa
-    const existingContract = await Contract.findOne({ participationId });
+    // Sprawdzenie, czy umowa dla tego uczestnictwa już nie istnieje i usunięcie jej
+    const existingContract = await Contract.findOne({
+      participationId: contractData.participationId,
+    });
     if (existingContract) {
-      return res
-        .status(409)
-        .json({
-          message:
-            "Umowa dla tego uczestnika już istnieje. Możesz ją edytować.",
-        });
+      await Contract.findByIdAndDelete(existingContract._id);
     }
 
-    // Stworzenie nowej umowy
     const newContract = new Contract({
       ...contractData,
       conductorId, // Ustawienie ID dyrygenta, który tworzy umowę
