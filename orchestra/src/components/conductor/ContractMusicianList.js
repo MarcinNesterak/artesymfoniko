@@ -86,10 +86,10 @@ const ContractMusicianList = () => {
     const wynagrodzenieNetto = wynagrodzenieBrutto - zaliczkaNaPodatek;
     return {
       wynagrodzenieBrutto,
-      kosztyUzyskaniaPrzychodu: kosztyUzyskaniaPrzychodu.toFixed(2),
+      kosztyUzyskaniaPrzychodu: parseFloat(kosztyUzyskaniaPrzychodu.toFixed(2)),
       podstawaOpodatkowania,
-      zaliczkaNaPodatek: zaliczkaNaPodatek.toFixed(2),
-      wynagrodzenieNetto: wynagrodzenieNetto.toFixed(2),
+      zaliczkaNaPodatek: parseFloat(zaliczkaNaPodatek.toFixed(2)),
+      wynagrodzenieNetto: parseFloat(wynagrodzenieNetto.toFixed(2)),
     };
   }, []);
 
@@ -155,6 +155,11 @@ const ContractMusicianList = () => {
   const handleGenerateAllContracts = async () => {
     if (!bulkContractAmount || parseFloat(bulkContractAmount) <= 0) {
       setErrorMessages(["Proszę podać prawidłową kwotę wynagrodzenia."]);
+      return;
+    }
+
+    if (!contractNumberTemplate || contractNumberTemplate.trim() === "") {
+      setErrorMessages(["Szablon numeru umowy nie może być pusty."]);
       return;
     }
 
