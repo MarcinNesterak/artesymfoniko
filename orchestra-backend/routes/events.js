@@ -1325,33 +1325,27 @@ router.patch("/participations/:id", requireConductor, async (req, res) => {
 // POST /api/events/contracts - Stwórz nową umowę
 router.post("/contracts", requireConductor, async (req, res) => {
   try {
-    const conductorId = req.user._id;
     const contractData = req.body;
+    const conductorId = req.user._id;
 
-    // Walidacja podstawowych danych
-    const { eventId, participationId } = contractData;
-    if (!eventId || !participationId) {
-      return res
-        .status(400)
-        .json({ message: "Brak ID wydarzenia lub uczestnictwa." });
+    const participation = await Participation.findById(
+      contractData.participationId
+    );
+    if (!participation) {
+      return res.status(404).json({ message: "Uczestnictwo nie istnieje." });
     }
 
-    // Sprawdzenie, czy dyrygent ma uprawnienia do tego wydarzenia
-    const event = await Event.findById(eventId);
+    // Walidacja, czy dyrygent jest właścicielem wydarzenia
+    const event = await Event.findById(contractData.eventId);
     if (!event || event.conductorId.toString() !== conductorId.toString()) {
       return res
         .status(403)
-        .json({
-          message: "Brak uprawnień do zarządzania umowami dla tego wydarzenia.",
-        });
+        .json({ message: "Brak uprawnień do tworzenia umowy dla tego wydarzenia." });
     }
-
+    
     // Sprawdzenie, czy umowa dla tego uczestnictwa już nie istnieje i usunięcie jej
     if (participation.contractId) {
       await Contract.findByIdAndDelete(participation.contractId);
-      participation.contractStatus = "pending";
-      participation.contractId = null; 
-      await participation.save();
     }
 
     const newContract = new Contract({
@@ -1379,38 +1373,22 @@ router.post("/contracts", requireConductor, async (req, res) => {
 });
 
 // GET /api/events/contracts/:id - Pobierz konkretną umowę
-router.get("/contracts/:id", requireUser, async (req, res) => {
+router.get("/contracts/:id", requireConductor, async (req, res) => {
   try {
-    const contract = await Contract.findById(req.params.id)
-      .populate("eventId", "title date")
-      .populate("conductorId", "name")
-      .populate({
-        path: "participationId",
-        populate: {
-          path: "userId",
-          select: "name",
-        },
-      });
+    const { id } = req.params;
+    const contract = await Contract.findById(id);
 
     if (!contract) {
       return res.status(404).json({ message: "Umowa nie została znaleziona." });
     }
 
-    const isConductor =
-      req.user.role === "conductor" &&
-      contract.conductorId._id.toString() === req.user._id.toString();
-    const isMusician =
-      req.user.role === "musician" &&
-      contract.participationId.userId._id.toString() ===
-        req.user._id.toString();
-
-    if (!isConductor && !isMusician) {
-      return res
-        .status(403)
-        .json({ message: "Brak uprawnień do wyświetlenia tej umowy." });
+    // Sprawdź, czy dyrygent ma uprawnienia do tego wydarzenia
+    const event = await Event.findById(contract.eventId);
+    if (!event || event.conductorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Brak uprawnień do tej umowy." });
     }
 
-    res.json(contract);
+    res.json({ contract });
   } catch (error) {
     console.error("Błąd podczas pobierania umowy:", error);
     res.status(500).json({ message: "Wystąpił błąd serwera." });

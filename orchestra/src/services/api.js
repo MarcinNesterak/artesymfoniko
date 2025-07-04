@@ -352,6 +352,11 @@ export const eventsAPI = {
     });
     return handleResponse(response);
   },
+
+  createContract: (contractData) =>
+    api.post("/events/contracts", contractData),
+
+  getContract: (contractId) => api.get(`/events/contracts/${contractId}`),
 };
 
 // Private Messages API
