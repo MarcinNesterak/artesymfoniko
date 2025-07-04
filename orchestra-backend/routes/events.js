@@ -1373,7 +1373,6 @@ router.post("/contracts", requireConductor, async (req, res) => {
         errors: messages,
       });
     }
-    // Zwróć szczegółowy błąd serwera
     res.status(500).json({
       message: "Wystąpił nieoczekiwany błąd serwera.",
       error: JSON.stringify(error, Object.getOwnPropertyNames(error)),

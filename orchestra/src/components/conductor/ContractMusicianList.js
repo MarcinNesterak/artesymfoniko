@@ -249,7 +249,7 @@ const ContractMusicianList = () => {
         przedmiotUmowy: `Wykonanie partii ${musician.instrument} podczas koncertu "${event.title}"`,
         ...financials,
       };
-      return createContract(contractData);
+      return eventsAPI.createContract(contractData);
     });
 
     const results = await Promise.allSettled(promises);
@@ -261,7 +261,9 @@ const ContractMusicianList = () => {
     );
 
     if (failedPromises.length > 0) {
-      const newErrorMessages = failedPromises.map((p) => p.reason.message);
+      const newErrorMessages = failedPromises.map(
+        (p) => p.reason.message || "Wystąpił nieznany błąd"
+      );
       setErrorMessages(newErrorMessages);
       console.error(
         "Błędy przy generowaniu umów:",
