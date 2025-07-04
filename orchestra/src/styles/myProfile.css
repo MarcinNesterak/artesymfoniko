@@ -11,7 +11,7 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .profile-header h1 {
@@ -19,17 +19,17 @@
 }
 
 .profile-section {
-  background-color: #fff;
+  background-color: var(--card-bg);
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
   margin-bottom: 2rem;
 }
 
 .profile-section h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .profile-section h3 {
@@ -150,16 +150,17 @@
 
 /* Danger Zone */
 .danger-zone {
-  border: 2px solid #e53e3e;
-  background-color: #fff5f5;
+  border: 2px solid var(--error);
+  background-color: rgba(207, 102, 121, 0.1);
 }
 
 .danger-zone h2 {
-  color: #c53030;
+  color: var(--error);
 }
 
 .danger-zone p {
   margin-bottom: 1rem;
+  color: var(--text-secondary);
 }
 
 /* Modal styles */
@@ -177,7 +178,7 @@
 }
 
 .modal-content {
-  background-color: #fff;
+  background-color: var(--card-bg);
   padding: 2rem;
   border-radius: 8px;
   max-width: 500px;
@@ -187,6 +188,7 @@
 
 .modal-content h3 {
   margin-top: 0;
+  color: var(--text-primary);
 }
 
 .modal-actions {
