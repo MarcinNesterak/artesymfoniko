@@ -184,16 +184,15 @@ const ContractMusicianList = () => {
     setSuccessMessage("");
 
     const promises = participantsToProcess.map(async (p) => {
-      const musicianDetails = await usersAPI.getMusician(p.userId._id);
+      const musician = p.userId;
 
-      if (!musicianDetails?.user) {
+      if (!musician) {
         return Promise.reject(
           new Error(
-            `Nie udało się pobrać danych dla muzyka o ID uczestnictwa: ${p._id}`
+            `Brak danych userId dla uczestnictwa o ID: ${p._id}`
           )
         );
       }
-      const musician = musicianDetails.user;
 
       const personalData = musician.personalData || {};
       const address = personalData.address || {};
@@ -359,10 +358,7 @@ const ContractMusicianList = () => {
                   onChange={(e) => setContractNumberTemplate(e.target.value)}
                   placeholder="Numer umowy"
                 />
-                <small>
-                  Znaczniki: {"{tytul-wydarzenia}"}, {"{imie-nazwisko}"}, {"{rok}"},{" "}
-                  {"{miesiac}"}, {"{dzien}"}
-                </small>
+                
               </div>
               <div className="form-group">
                 <label htmlFor="conductor-zamawiajacy">Zamawiający</label>

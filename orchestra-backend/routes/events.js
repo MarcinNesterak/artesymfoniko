@@ -213,7 +213,10 @@ router.get("/:id", apiLimiter, requireUser, async (req, res) => {
 
     const participations = await Participation.find({
       eventId: req.params.id,
-    }).populate("userId", "name email instrument");
+    }).populate(
+      "userId",
+      "name email instrument personalData.address personalData.pesel personalData.bankAccountNumber"
+    );
 
     res.json({
       message: "Szczegóły wydarzenia",
