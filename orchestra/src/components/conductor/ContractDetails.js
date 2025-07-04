@@ -189,7 +189,13 @@ const ContractDetails = () => {
             </div>
           </div>
         </div>
-
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
         {/* --- RACHUNEK --- */}
         <div className="page-break">
           <h1>Rachunek do umowy o dzieło nr {numerUmowy}</h1>
