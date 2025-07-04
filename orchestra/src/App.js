@@ -18,6 +18,7 @@ import MusicianArchive from './components/musician/MusicianArchive';
 import MyProfile from './components/musician/MyProfile';
 import Navbar from './components/common/Navbar';
 import MessagesPage from './components/messages/MessagesPage';
+import PrivacyPolicy from './components/common/PrivacyPolicy';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -177,6 +178,9 @@ function App() {
           {/* Redirect to login if no route matches */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+        <Routes>
+          <Route path="/polityka-prywatnosci" element={<PrivacyPolicy />} />
         </Routes>
       </div>
     </BrowserRouter>

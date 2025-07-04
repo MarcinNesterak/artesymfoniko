@@ -2,6 +2,8 @@ import express from "express";
 import User from "../models/User.js";
 import { authenticate, requireConductor } from "../middleware/auth.js";
 import { apiLimiter } from "../middleware/rateLimiter.js";
+import Participation from '../models/Participation';
+import Event from '../models/Event';
 
 const router = express.Router();
 
@@ -346,6 +348,78 @@ router.patch("/profile", authenticate, async (req, res) => {
       error: "Server error",
       message: "Wystąpił błąd podczas aktualizacji profilu",
     });
+  }
+});
+
+// PATCH /api/users/me/profile
+// @desc    Update current user's personal data
+// @access  Private
+router.patch("/me/profile", authenticate, async (req, res) => {
+  try {
+    const { personalData, privacyPolicyAccepted } = req.body;
+    
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Użytkownik nie znaleziony." });
+    }
+
+    // Aktualizuj dane osobowe
+    if (personalData) {
+      user.personalData = { ...user.personalData, ...personalData };
+    }
+
+    // Aktualizuj status zgody na politykę prywatności
+    if (privacyPolicyAccepted !== undefined) {
+      user.privacyPolicyAccepted = privacyPolicyAccepted;
+    }
+    
+    // Zaktualizuj imię i nazwisko na głównym poziomie, jeśli się zmieniły
+    if (personalData.firstName && personalData.lastName) {
+      user.name = `${personalData.firstName} ${personalData.lastName}`;
+    }
+
+    await user.save();
+
+    res.json({ message: "Profil został zaktualizowany.", user });
+
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ message: "Błąd serwera podczas aktualizacji profilu." });
+  }
+});
+
+// DELETE /api/users/me - usuń konto użytkownika (zalogowany użytkownik)
+router.delete("/me", authenticate, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Znajdź wszystkie udziały muzyka, które zostały przez niego zaakceptowane
+    const acceptedParticipations = await Participation.find({
+      musician: userId,
+      status: 'accepted', 
+    }).populate('event');
+
+    // Sprawdź, czy którekolwiek z tych wydarzeń jest w przyszłości
+    const hasUpcomingCommitments = acceptedParticipations.some(p => {
+      // p.event może być null, jeśli wydarzenie zostało usunięte
+      return p.event && new Date(p.event.date) >= new Date();
+    });
+
+    if (hasUpcomingCommitments) {
+      return res.status(400).json({
+        message: "Nie można usunąć konta, ponieważ masz zaplanowane przyszłe koncerty, w których zgodziłeś/aś się wziąć udział. Skontaktuj się z dyrygentem.",
+      });
+    }
+
+    // Usuń użytkownika
+    await User.findByIdAndDelete(userId);
+    
+    res.json({ message: "Konto zostało pomyślnie usunięte." });
+
+  } catch (error) {
+    console.error("Error deleting user account:", error);
+    res.status(500).json({ message: "Błąd serwera podczas usuwania konta." });
   }
 });
 

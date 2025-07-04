@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { authAPI, usersAPI, storage } from "../../services/api";
 import "../../styles/myProfile.css";
 
 const MyProfile = () => {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -32,6 +33,11 @@ const MyProfile = () => {
   });
   const [profileLoading, setProfileLoading] = useState(false);
 
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
   const user = storage.getUser();
 
   useEffect(() => {
@@ -48,6 +54,7 @@ const MyProfile = () => {
       const userData = response.user;
 
       setUserData(userData);
+      setPrivacyAccepted(userData.privacyPolicyAccepted || false);
 
       // Initialize profile form with existing data
       setProfileData({
@@ -151,34 +158,37 @@ const MyProfile = () => {
     setError("");
     setSuccess("");
 
+    if (!privacyAccepted) {
+      setError("Musisz zaakceptować politykę prywatności, aby zapisać zmiany.");
+      setProfileLoading(false);
+      return;
+    }
+
     try {
-      const updatedData = {
-        firstName: profileData.firstName,
-        lastName: profileData.lastName,
-        phone: profileData.phone,
-        address: {
-          street: profileData.street,
-          city: profileData.city,
-          postalCode: profileData.postalCode,
-          country: profileData.country,
-        },
-        pesel: profileData.pesel,
-        bankAccountNumber: profileData.bankAccountNumber,
+      const updatedProfileData = {
+        personalData: profileData,
+        privacyPolicyAccepted: privacyAccepted,
       };
-
-      const response = await usersAPI.updateProfile(updatedData);
-
-      // Update localStorage
-      const updatedUser = { ...user, ...response.user };
-      storage.setUser(updatedUser);
-
-      setSuccess("Dane zostały zaktualizowane pomyślnie");
-      fetchUserData(); // Refresh data
+      const response = await usersAPI.updateProfile(updatedProfileData);
+      setSuccess("Profil został zaktualizowany pomyślnie.");
+      setUserData(response.user);
     } catch (error) {
-      console.error("Error updating profile:", error);
-      setError(error.message || "Wystąpił błąd podczas aktualizacji danych");
+      setError(error.message || 'Nie udało się zaktualizować profilu.');
     } finally {
       setProfileLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteError("");
+    try {
+      const response = await usersAPI.deleteCurrentUser();
+      alert(response.message);
+      setIsDeleteModalOpen(false);
+      storage.logout();
+      navigate('/login');
+    } catch (err) {
+      setDeleteError(err.message || "Nie udało się usunąć konta. Spróbuj ponownie.");
     }
   };
 
@@ -423,13 +433,31 @@ const MyProfile = () => {
             />
           </div>
 
+          <div className="form-group">
+            <label className="checkbox-label" htmlFor="privacy-consent">
+              <input
+                type="checkbox"
+                id="privacy-consent"
+                checked={privacyAccepted}
+                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+              />
+              <span>
+                Wyrażam zgodę na przetwarzanie moich danych osobowych zgodnie z{" "}
+                <a href="/polityka-prywatnosci" target="_blank" rel="noopener noreferrer">
+                  Polityką Prywatności
+                </a>
+                .
+              </span>
+            </label>
+          </div>
+
           <div className="form-actions">
             <button
               type="submit"
-              disabled={profileLoading}
+              disabled={profileLoading || (!userData.privacyPolicyAccepted && !privacyAccepted)}
               className="btn-primary"
             >
-              {profileLoading ? "Zapisywanie..." : "Zapisz Zmiany"}
+              {profileLoading ? "Zapisywanie..." : "Zapisz Zmiany w Profilu"}
             </button>
           </div>
         </form>
@@ -461,6 +489,44 @@ const MyProfile = () => {
           </div>
         </div>
       </div>
+
+      <div className="profile-section danger-zone">
+        <h2>Strefa Niebezpieczna</h2>
+        <p>
+          Operacje w tej strefie są nieodwracalne. Prosimy o ostrożność.
+        </p>
+        <button 
+          onClick={() => setIsDeleteModalOpen(true)} 
+          className="btn-danger"
+        >
+          Usuń Moje Konto
+        </button>
+      </div>
+
+      {isDeleteModalOpen && (
+        <div className="modal-backdrop">
+          <div className="modal-content">
+            <h3>Czy na pewno chcesz usunąć konto?</h3>
+            {deleteError && <div className="error-message">{deleteError}</div>}
+            <p>
+              Ta operacja jest nieodwracalna. Wszystkie Twoje dane zostaną usunięte z systemu.
+            </p>
+            <p>
+              <strong>Uwaga:</strong> Jeśli posiadasz aktywne lub niearchiwizowanie umowy,
+              usunięcie konta może nie być możliwe natychmiast. Twoje dane zostaną usunięte
+              dopiero po wypełnieniu wszystkich zobowiązań prawnych i okresów archiwizacyjnych.
+            </p>
+            <div className="modal-actions">
+              <button onClick={() => setIsDeleteModalOpen(false)} className="btn-secondary">
+                Anuluj
+              </button>
+              <button onClick={handleDeleteAccount} className="btn-danger">
+                Tak, usuń konto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -164,6 +164,22 @@ export const usersAPI = {
     });
     return handleResponse(response);
   },
+
+  updateUser: async (userId, userData) => {
+    // ...
+  },
+
+  deleteUser: async (userId) => {
+    // ...
+  },
+  
+  deleteCurrentUser: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
 };
 
 // Participations API
