@@ -2,8 +2,8 @@ import express from "express";
 import User from "../models/User.js";
 import { authenticate, requireConductor } from "../middleware/auth.js";
 import { apiLimiter } from "../middleware/rateLimiter.js";
-import Participation from '../models/Participation';
-import Event from '../models/Event';
+import Participation from '../models/Participation.js';
+import Event from '../models/Event.js';
 
 const router = express.Router();
 
