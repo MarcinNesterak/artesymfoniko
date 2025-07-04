@@ -249,7 +249,7 @@ const ContractMusicianList = () => {
         przedmiotUmowy: `Wykonanie partii ${musician.instrument} podczas koncertu "${event.title}"`,
         ...financials,
       };
-      return eventsAPI.createContract(contractData);
+      return createContract(contractData);
     });
 
     const results = await Promise.allSettled(promises);
