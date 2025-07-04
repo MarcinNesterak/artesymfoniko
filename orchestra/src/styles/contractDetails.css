@@ -87,6 +87,7 @@
   text-align: center;
   margin: 0 0 0.5rem 0;
   padding: 0;
+  color: #000;
 }
 
 .contract-preview h1 {
@@ -157,26 +158,48 @@
 /* Style do druku */
 @media print {
   body, .contract-details-container {
-    background-color: #fff;
     margin: 0;
     padding: 0;
     box-shadow: none;
+    background-color: #fff;
+    font-size: 10pt; /* Standardowy rozmiar czcionki do druku */
   }
 
-  .no-print, .navbar, .contract-actions {
-    display: none !important;
-  }
-
-  .contract-paper {
-    border: none;
-    box-shadow: none;
-    padding: 0;
+  .contract-actions {
+    display: none;
   }
 
   .contract-preview {
-    width: 210mm; /* A4 width */
-    min-height: 297mm; /* A4 height */
-    padding: 20mm;
+    width: 100%;
+    min-height: 0;
+    padding: 15mm; /* Marginesy strony */
     box-sizing: border-box;
+    line-height: 1.15; /* Bardziej zwarta interlinia */
+  }
+  
+  .contract-preview h1,
+  .contract-preview h3,
+  .contract-preview h4,
+  .contract-preview p {
+     margin: 0 0 0.3rem 0; /* Minimalne marginesy dolne */
+  }
+
+  .contract-preview h1 {
+    font-size: 14pt;
+    margin-bottom: 1rem;
+  }
+  
+  .contract-preview h3 {
+    font-size: 12pt;
+    margin-top: 1rem;
+  }
+
+  .contract-preview h4 {
+    font-size: 11pt;
+    margin-top: 1rem;
+  }
+
+  .signatures {
+    margin-top: 2rem; /* Znacznie zmniejszony margines nad podpisami */
   }
 } 
