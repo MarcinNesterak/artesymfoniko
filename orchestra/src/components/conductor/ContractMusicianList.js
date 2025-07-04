@@ -46,8 +46,9 @@ const createContract = async (contractData) => {
   });
   if (!response.ok) {
     const errorData = await response.json();
-    // Użyj szczegółowego błędu z serwera, jeśli jest dostępny
-    const errorMessage = `Szczegółowy błąd serwera: ${errorData.error || errorData.message || 'Brak dodatkowych informacji.'}`;
+    const errorMessage = `Szczegółowy błąd serwera: ${
+      errorData.error || errorData.message || "Brak dodatkowych informacji."
+    }`;
     throw new Error(errorMessage);
   }
   return response.json();
