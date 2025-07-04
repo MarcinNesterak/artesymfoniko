@@ -352,26 +352,6 @@ export const eventsAPI = {
     });
     return handleResponse(response);
   },
-
-  createContract: async (contractData) => {
-    try {
-      const response = await fetchWithAuth("/api/events/contracts", {
-        method: "POST",
-        body: JSON.stringify(contractData),
-      });
-      return response;
-    } catch (error) {
-      if (error.response && error.response.data) {
-        const errorDetails =
-          error.response.data.error || error.response.data.message;
-        throw new Error(`Błąd serwera: ${errorDetails}`);
-      }
-      throw error;
-    }
-  },
-
-  getContract: (contractId) =>
-    fetchWithAuth(`/api/events/contracts/${contractId}`),
 };
 
 // Private Messages API
