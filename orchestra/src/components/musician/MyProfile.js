@@ -154,6 +154,17 @@ const MyProfile = () => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
+    
+    // Walidacja danych przed wysłaniem
+    if (profileData.pesel && !/^\d{11}$/.test(profileData.pesel)) {
+      setError("Numer PESEL musi składać się z dokładnie 11 cyfr.");
+      return;
+    }
+    if (profileData.bankAccountNumber && !/^\d{26}$/.test(profileData.bankAccountNumber)) {
+      setError("Numer konta bankowego musi składać się z dokładnie 26 cyfr (bez liter i spacji).");
+      return;
+    }
+
     setProfileLoading(true);
     setError("");
     setSuccess("");
