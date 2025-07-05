@@ -94,9 +94,13 @@ router.patch("/me/profile", authenticate, async (req, res) => {
     await user.save();
 
     // Zwróć zaktualizowany obiekt użytkownika, aby frontend miał świeże dane
-    const updatedUser = await User.findById(user._id).select('-password');
+    const updatedUserDoc = await User.findById(user._id).select('-password');
+    
+    // Użyj .toObject(), aby upewnić się, że wszystkie gettery (w tym decrypt)
+    // zostaną zastosowane, zwłaszcza w zagnieżdżonych schematach.
+    const userObject = updatedUserDoc.toObject();
 
-    res.json({ message: "Profil został zaktualizowany.", user: updatedUser });
+    res.json({ message: "Profil został zaktualizowany.", user: userObject });
 
   } catch (error) {
     console.error("Error updating user profile:", error);
