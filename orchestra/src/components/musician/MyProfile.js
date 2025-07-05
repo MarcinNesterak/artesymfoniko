@@ -8,7 +8,7 @@ const MyProfile = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   // Password change state
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -44,15 +44,6 @@ const MyProfile = () => {
     fetchUserData();
   }, []);
 
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        setSuccess("");
-      }, 5000); // Komunikat znika po 5 sekundach
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
-
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -64,6 +55,7 @@ const MyProfile = () => {
 
       setUserData(userData);
       setPrivacyAccepted(userData.privacyPolicyAccepted || false);
+      setLastUpdated(userData.updatedAt);
 
       // Initialize profile form with existing data
       setProfileData({
@@ -117,7 +109,6 @@ const MyProfile = () => {
     e.preventDefault();
     setPasswordLoading(true);
     setError("");
-    setSuccess("");
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setError("Nowe hasła nie są identyczne");
@@ -138,13 +129,6 @@ const MyProfile = () => {
         : passwordData.currentPassword;
 
       await authAPI.changePassword(currentPassword, passwordData.newPassword);
-
-      setSuccess("Hasło zostało zmienione pomyślnie");
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
 
       // Update local user data
       setUserData((prev) => ({
@@ -180,7 +164,6 @@ const MyProfile = () => {
     
     // Czyścimy komunikaty dopiero po pomyślnej walidacji
     setError("");
-    setSuccess("");
     setProfileLoading(true);
 
     try {
@@ -206,12 +189,10 @@ const MyProfile = () => {
 
       const response = await usersAPI.updateProfile(updatedProfileData);
       
-      let successMessage = "Profil został zaktualizowany pomyślnie.";
-      if (privacyAccepted && !userData.privacyPolicyAccepted) {
-        // ... existing code ...
-      }
-      setSuccess(successMessage);
+      // Ustawienie daty ostatniej aktualizacji na podstawie odpowiedzi z serwera
       setUserData(response.user);
+      setLastUpdated(response.user.updatedAt);
+
     } catch (error) {
       setError(error.message || 'Nie udało się zaktualizować profilu.');
     } finally {
@@ -254,7 +235,6 @@ const MyProfile = () => {
       </div>
 
       {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">{success}</div>}
 
       {(showPasswordForm || userData.isTemporaryPassword) && (
         <div className="profile-section">
@@ -490,6 +470,15 @@ const MyProfile = () => {
               </span>
             </label>
           </div>
+
+          {lastUpdated && (
+            <div className="form-group-static">
+              <p className="update-timestamp">
+                Ostatnie zmiany zapisano:{" "}
+                {new Date(lastUpdated).toLocaleString("pl-PL")}
+              </p>
+            </div>
+          )}
 
           <div className="form-actions">
             <button
