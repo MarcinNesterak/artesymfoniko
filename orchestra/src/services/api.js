@@ -157,7 +157,6 @@ export const usersAPI = {
 
   // Aktualizuj własny profil (muzyk)
   updateProfile: async (profileData) => {
-    console.log("Krok 2 (Warstwa API): Otrzymano dane do wysłania:", profileData);
     const response = await fetch(`${API_BASE_URL}/api/users/me/profile`, {
       method: "PATCH",
       headers: getHeaders(true),
