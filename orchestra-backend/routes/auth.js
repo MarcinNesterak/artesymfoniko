@@ -373,21 +373,23 @@ router.patch('/change-password', authenticate, async (req, res) => {
   }
 });
 
-// GET /api/auth/me (sprawdź aktualnego użytkownika)
-router.get('/me', authenticate, (req, res) => {
-  res.json({
-    user: {
-      id: req.user._id,
-      email: req.user.email,
-      name: req.user.name,
-      role: req.user.role,
-      instrument: req.user.instrument,
-      isTemporaryPassword: req.user.isTemporaryPassword,
-      personalData: req.user.personalData,
-      active: req.user.active,
-      lastLogin: req.user.lastLogin
+// GET /api/auth/me - pobierz dane zalogowanego użytkownika
+router.get("/me", authenticate, async (req, res) => {
+  try {
+    const userDoc = await User.findById(req.user.id).select("-password");
+    if (!userDoc) {
+      return res.status(404).json({ message: "Użytkownik nie znaleziony" });
     }
-  });
+    
+    // Użyj .toObject(), aby Mongoose poprawnie zastosował wszystkie gettery (decrypt)
+    const userObject = userDoc.toObject();
+    
+    res.json({ user: userObject });
+    
+  } catch (error) {
+    console.error("Server error in /me route:", error);
+    res.status(500).json({ message: "Błąd serwera podczas pobierania danych użytkownika" });
+  }
 });
 
 // POST /api/auth/verify-email/:token
