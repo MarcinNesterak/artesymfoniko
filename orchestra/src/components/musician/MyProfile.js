@@ -159,11 +159,26 @@ const MyProfile = () => {
     setSuccess("");
 
     try {
+      // Destrukturyzacja płaskiego stanu `profileData`
+      const { 
+        street, city, postalCode, country, 
+        ...otherPersonalData 
+      } = profileData;
+
+      // Stworzenie poprawnej, zagnieżdżonej struktury danych dla API
       const updatedProfileData = {
-        personalData: profileData,
+        personalData: {
+          ...otherPersonalData,
+          address: {
+            street,
+            city,
+            postalCode,
+            country,
+          },
+        },
         privacyPolicyAccepted: privacyAccepted,
       };
-      
+
       const response = await usersAPI.updateProfile(updatedProfileData);
       
       let successMessage = "Profil został zaktualizowany pomyślnie.";
