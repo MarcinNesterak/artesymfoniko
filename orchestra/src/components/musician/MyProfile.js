@@ -44,6 +44,15 @@ const MyProfile = () => {
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess("");
+      }, 5000); // Komunikat znika po 5 sekundach
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const fetchUserData = async () => {
     try {
       setLoading(true);
