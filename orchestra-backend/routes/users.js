@@ -78,6 +78,10 @@ router.patch("/me/profile", authenticate, async (req, res) => {
         user.personalData.address.city = personalData.address.city;
         user.personalData.address.postalCode = personalData.address.postalCode;
         user.personalData.address.country = personalData.address.country;
+        
+        // Kluczowe: Ręcznie oznacz zagnieżdżony obiekt jako zmodyfikowany.
+        // Mongoose czasami nie wykrywa zmian w zagnieżdżonych obiektach (sub-dokumentach).
+        user.markModified('personalData.address');
       }
       
       // Zaktualizuj pole 'name' na głównym poziomie, jeśli dane się zmieniły
