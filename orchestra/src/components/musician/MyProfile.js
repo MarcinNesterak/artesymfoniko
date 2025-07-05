@@ -103,6 +103,10 @@ const MyProfile = () => {
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
+    // Wyczyść błędy walidacji, gdy użytkownik zaczyna pisać
+    if (error) {
+      setError("");
+    }
     setProfileData((prev) => ({
       ...prev,
       [name]: value,
@@ -173,10 +177,11 @@ const MyProfile = () => {
       setError("Numer konta bankowego musi składać się z dokładnie 26 cyfr (bez liter i spacji).");
       return;
     }
-
-    setProfileLoading(true);
+    
+    // Czyścimy komunikaty dopiero po pomyślnej walidacji
     setError("");
     setSuccess("");
+    setProfileLoading(true);
 
     try {
       // Destrukturyzacja płaskiego stanu `profileData`
