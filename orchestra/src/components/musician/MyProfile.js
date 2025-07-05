@@ -164,10 +164,12 @@ const MyProfile = () => {
         privacyPolicyAccepted: privacyAccepted,
       };
       
-      console.log("Krok 1 (Frontend): Próba wysłania danych:", updatedProfileData);
       const response = await usersAPI.updateProfile(updatedProfileData);
       
       let successMessage = "Profil został zaktualizowany pomyślnie.";
+      if (privacyAccepted && !userData.privacyPolicyAccepted) {
+        // ... existing code ...
+      }
       setSuccess(successMessage);
       setUserData(response.user);
     } catch (error) {

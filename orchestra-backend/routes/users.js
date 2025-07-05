@@ -48,7 +48,6 @@ router.delete("/me", authenticate, async (req, res) => {
 router.patch("/me/profile", authenticate, async (req, res) => {
   try {
     const { personalData, privacyPolicyAccepted } = req.body;
-    console.log("Krok 3 (Backend): Otrzymano żądanie z danymi:", { personalData, privacyPolicyAccepted });
 
     const user = await User.findById(req.user._id);
 
