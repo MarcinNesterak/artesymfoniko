@@ -55,36 +55,48 @@ router.patch("/me/profile", authenticate, async (req, res) => {
       return res.status(404).json({ message: "Użytkownik nie znaleziony." });
     }
 
-    // Aktualizuj dane osobowe
+    // Zainicjuj puste obiekty, jeśli nie istnieją, aby uniknąć błędów
+    if (!user.personalData) {
+      user.personalData = {};
+    }
+    if (personalData && !user.personalData.address) {
+      user.personalData.address = {};
+    }
+
+    // Bezpośrednia aktualizacja pól - Mongoose automatycznie użyje setterów (szyfrowania)
     if (personalData) {
-      // Przypisujemy pola pojedynczo, aby Mongoose prawidłowo obsłużył gettery/settery (szyfrowanie)
-      Object.keys(personalData).forEach(key => {
-        if (key === 'address') {
-          if (!user.personalData.address) {
-            user.personalData.address = {};
-          }
-          Object.keys(personalData.address).forEach(addressKey => {
-            user.personalData.address[addressKey] = personalData.address[addressKey];
-          });
-        } else {
-          user.personalData[key] = personalData[key];
-        }
-      });
+      // Przypisujemy każde pole, które może przyjść z frontendu
+      user.personalData.firstName = personalData.firstName;
+      user.personalData.lastName = personalData.lastName;
+      user.personalData.phone = personalData.phone;
+      user.personalData.pesel = personalData.pesel;
+      user.personalData.bankAccountNumber = personalData.bankAccountNumber;
+      
+      // Obsługa zagnieżdżonego adresu
+      if (personalData.address) {
+        user.personalData.address.street = personalData.address.street;
+        user.personalData.address.city = personalData.address.city;
+        user.personalData.address.postalCode = personalData.address.postalCode;
+        user.personalData.address.country = personalData.address.country;
+      }
+      
+      // Zaktualizuj pole 'name' na głównym poziomie, jeśli dane się zmieniły
+      if (personalData.firstName && personalData.lastName) {
+        user.name = `${personalData.firstName} ${personalData.lastName}`;
+      }
     }
 
     // Aktualizuj status zgody na politykę prywatności
-    if (privacyPolicyAccepted !== undefined) {
+    if (typeof privacyPolicyAccepted === 'boolean') {
       user.privacyPolicyAccepted = privacyPolicyAccepted;
-    }
-    
-    // Zaktualizuj imię i nazwisko na głównym poziomie, jeśli się zmieniły
-    if (personalData.firstName && personalData.lastName) {
-      user.name = `${personalData.firstName} ${personalData.lastName}`;
     }
 
     await user.save();
 
-    res.json({ message: "Profil został zaktualizowany.", user });
+    // Zwróć zaktualizowany obiekt użytkownika, aby frontend miał świeże dane
+    const updatedUser = await User.findById(user._id).select('-password');
+
+    res.json({ message: "Profil został zaktualizowany.", user: updatedUser });
 
   } catch (error) {
     console.error("Error updating user profile:", error);
