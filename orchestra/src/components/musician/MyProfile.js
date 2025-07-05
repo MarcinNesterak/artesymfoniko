@@ -479,6 +479,14 @@ const MyProfile = () => {
               </p>
             </div>
           )}
+          
+          <div className="form-group-static">
+            <p className="privacy-consent-status">
+              {privacyAccepted
+                ? "Udzieliłeś zgody na przetwarzanie danych."
+                : "Nie udzieliłeś zgody na przetwarzanie danych."}
+            </p>
+          </div>
 
           <div className="form-actions">
             <button
