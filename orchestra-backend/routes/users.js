@@ -2,8 +2,8 @@ import express from "express";
 import User from "../models/User.js";
 import { authenticate, requireConductor } from "../middleware/auth.js";
 import { apiLimiter } from "../middleware/rateLimiter.js";
-import Participation from '../models/Participation.js';
-import Event from '../models/Event.js';
+import Participation from "../models/Participation.js";
+import Event from "../models/Event.js";
 
 const router = express.Router();
 
@@ -17,25 +17,25 @@ router.delete("/me", authenticate, async (req, res) => {
     // Znajdź wszystkie udziały muzyka, które zostały przez niego zaakceptowane
     const acceptedParticipations = await Participation.find({
       musician: userId,
-      status: 'accepted',
-    }).populate('event');
+      status: "accepted",
+    }).populate("event");
 
     // Sprawdź, czy którekolwiek z tych wydarzeń jest w przyszłości
-    const hasUpcomingCommitments = acceptedParticipations.some(p => {
+    const hasUpcomingCommitments = acceptedParticipations.some((p) => {
       return p.event && new Date(p.event.date) >= new Date();
     });
 
     if (hasUpcomingCommitments) {
       return res.status(400).json({
-        message: "Nie można usunąć konta, ponieważ masz zaplanowane przyszłe koncerty, w których zgodziłeś/aś się wziąć udział. Skontaktuj się z dyrygentem.",
+        message:
+          "Nie można usunąć konta, ponieważ masz zaplanowane przyszłe koncerty, w których zgodziłeś/aś się wziąć udział. Skontaktuj się z dyrygentem.",
       });
     }
 
     // Usuń użytkownika
     await User.findByIdAndDelete(userId);
-    
-    res.json({ message: "Konto zostało pomyślnie usunięte." });
 
+    res.json({ message: "Konto zostało pomyślnie usunięte." });
   } catch (error) {
     console.error("Error deleting user account:", error);
     res.status(500).json({ message: "Błąd serwera podczas usuwania konta." });
@@ -71,19 +71,19 @@ router.patch("/me/profile", authenticate, async (req, res) => {
       user.personalData.phone = personalData.phone;
       user.personalData.pesel = personalData.pesel;
       user.personalData.bankAccountNumber = personalData.bankAccountNumber;
-      
+
       // Obsługa zagnieżdżonego adresu
       if (personalData.address) {
         user.personalData.address.street = personalData.address.street;
         user.personalData.address.city = personalData.address.city;
         user.personalData.address.postalCode = personalData.address.postalCode;
         user.personalData.address.country = personalData.address.country;
-        
+
         // Kluczowe: Ręcznie oznacz zagnieżdżony obiekt jako zmodyfikowany.
         // Mongoose czasami nie wykrywa zmian w zagnieżdżonych obiektach (sub-dokumentach).
-        user.markModified('personalData.address');
+        user.markModified("personalData.address");
       }
-      
+
       // Zaktualizuj pole 'name' na głównym poziomie, jeśli dane się zmieniły
       if (personalData.firstName && personalData.lastName) {
         user.name = `${personalData.firstName} ${personalData.lastName}`;
@@ -91,24 +91,25 @@ router.patch("/me/profile", authenticate, async (req, res) => {
     }
 
     // Aktualizuj status zgody na politykę prywatności
-    if (typeof privacyPolicyAccepted === 'boolean') {
+    if (typeof privacyPolicyAccepted === "boolean") {
       user.privacyPolicyAccepted = privacyPolicyAccepted;
     }
 
     await user.save();
 
     // Zwróć zaktualizowany obiekt użytkownika, aby frontend miał świeże dane
-    const updatedUserDoc = await User.findById(user._id).select('-password');
-    
+    const updatedUserDoc = await User.findById(user._id).select("-password");
+
     // Użyj .toObject(), aby upewnić się, że wszystkie gettery (w tym decrypt)
     // zostaną zastosowane, zwłaszcza w zagnieżdżonych schematach.
     const userObject = updatedUserDoc.toObject();
 
     res.json({ message: "Profil został zaktualizowany.", user: userObject });
-
   } catch (error) {
     console.error("Error updating user profile:", error);
-    res.status(500).json({ message: "Błąd serwera podczas aktualizacji profilu." });
+    res
+      .status(500)
+      .json({ message: "Błąd serwera podczas aktualizacji profilu." });
   }
 });
 

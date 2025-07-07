@@ -1,63 +1,63 @@
-import express from 'express';
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import { authenticate } from '../middleware/auth.js';
-import { loginLimiter, registerLimiter } from '../middleware/rateLimiter.js';
+import express from "express";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { authenticate } from "../middleware/auth.js";
+import { loginLimiter, registerLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
 // Funkcja generująca JWT token
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
 // POST /api/auth/login
-router.post('/login', loginLimiter, async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Email i hasło są wymagane'
+        error: "Validation error",
+        message: "Email i hasło są wymagane",
       });
     }
-    
+
     // Znajdź użytkownika po email
     const user = await User.findOne({ email: email.toLowerCase() });
-    
+
     if (!user) {
       return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Nieprawidłowy email lub hasło'
+        error: "Authentication failed",
+        message: "Nieprawidłowy email lub hasło",
       });
     }
-    
+
     // Sprawdź czy konto jest aktywne
     if (!user.active) {
       return res.status(401).json({
-        error: 'Account deactivated',
-        message: 'Konto zostało dezaktywowane. Skontaktuj się z dyrygentem.'
+        error: "Account deactivated",
+        message: "Konto zostało dezaktywowane. Skontaktuj się z dyrygentem.",
       });
     }
-    
+
     // Sprawdź hasło
     const isMatch = await user.comparePassword(password);
-    
+
     if (!isMatch) {
       return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Nieprawidłowy email lub hasło'
+        error: "Authentication failed",
+        message: "Nieprawidłowy email lub hasło",
       });
     }
-    
+
     // Aktualizuj ostatnie logowanie
     user.lastLogin = new Date();
     await user.save();
-    
+
     // Wygeneruj token
     const token = generateToken(user._id);
-    
+
     // Zwróć dane użytkownika (bez hasła)
     const userData = {
       id: user._id,
@@ -68,57 +68,57 @@ router.post('/login', loginLimiter, async (req, res) => {
       isTemporaryPassword: user.isTemporaryPassword,
       personalData: user.personalData,
       active: user.active,
-      lastLogin: user.lastLogin
+      lastLogin: user.lastLogin,
     };
-    
+
     res.json({
-      message: 'Zalogowano pomyślnie',
+      message: "Zalogowano pomyślnie",
       token,
       user: userData,
-      requiresPasswordChange: user.isTemporaryPassword
+      requiresPasswordChange: user.isTemporaryPassword,
     });
-    
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas logowania'
+      error: "Server error",
+      message: "Wystąpił błąd podczas logowania",
     });
   }
 });
 
 // POST /api/auth/register (tylko dla pierwszego dyrygenta)
-router.post('/register', registerLimiter, async (req, res) => {
+router.post("/register", registerLimiter, async (req, res) => {
   try {
     const { email, password, name } = req.body;
-    
+
     if (!email || !password || !name) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Email, hasło i imię są wymagane'
+        error: "Validation error",
+        message: "Email, hasło i imię są wymagane",
       });
     }
-    
+
     // Sprawdź czy użytkownik już istnieje
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({
-        error: 'User exists',
-        message: 'Użytkownik o podanym emailu już istnieje'
+        error: "User exists",
+        message: "Użytkownik o podanym emailu już istnieje",
       });
     }
-    
+
     // Sprawdź czy to pierwszy użytkownik (będzie dyrygentem)
     const userCount = await User.countDocuments();
-    const role = userCount === 0 ? 'conductor' : 'musician';
-    
-    if (userCount > 0 && role === 'conductor') {
+    const role = userCount === 0 ? "conductor" : "musician";
+
+    if (userCount > 0 && role === "conductor") {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Rejestracja dyrygenta jest dostępna tylko dla pierwszego użytkownika'
+        error: "Forbidden",
+        message:
+          "Rejestracja dyrygenta jest dostępna tylko dla pierwszego użytkownika",
       });
     }
-    
+
     // Utwórz nowego użytkownika
     const newUser = new User({
       email: email.toLowerCase(),
@@ -127,78 +127,77 @@ router.post('/register', registerLimiter, async (req, res) => {
       role,
       active: true,
       personalData: {
-        firstName: name.split(' ')[0] || '',
-        lastName: name.split(' ').slice(1).join(' ') || ''
-      }
+        firstName: name.split(" ")[0] || "",
+        lastName: name.split(" ").slice(1).join(" ") || "",
+      },
     });
-    
+
     await newUser.save();
-    
+
     // Wygeneruj token
     const token = generateToken(newUser._id);
-    
+
     // Zwróć dane użytkownika
     const userData = {
       id: newUser._id,
       email: newUser.email,
       name: newUser.name,
       role: newUser.role,
-      active: newUser.active
+      active: newUser.active,
     };
-    
+
     res.status(201).json({
-      message: 'Konto utworzone pomyślnie',
+      message: "Konto utworzone pomyślnie",
       token,
-      user: userData
+      user: userData,
     });
-    
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas rejestracji'
+      error: "Server error",
+      message: "Wystąpił błąd podczas rejestracji",
     });
   }
 });
 
 // POST /api/auth/create-musician (tylko dla dyrygenta)
-router.post('/create-musician', authenticate, async (req, res) => {
+router.post("/create-musician", authenticate, async (req, res) => {
   try {
     // Sprawdź czy użytkownik to dyrygent
-    if (req.user.role !== 'conductor') {
+    if (req.user.role !== "conductor") {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Tylko dyrygent może tworzyć konta muzyków'
+        error: "Forbidden",
+        message: "Tylko dyrygent może tworzyć konta muzyków",
       });
     }
-    
+
     const { email, firstName, lastName, instrument, phone } = req.body;
-    
+
     if (!email || !firstName || !lastName || !instrument) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Email, imię, nazwisko i instrument są wymagane'
+        error: "Validation error",
+        message: "Email, imię, nazwisko i instrument są wymagane",
       });
     }
-    
+
     // Sprawdź czy użytkownik już istnieje
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({
-        error: 'User exists',
-        message: 'Użytkownik o podanym emailu już istnieje'
+        error: "User exists",
+        message: "Użytkownik o podanym emailu już istnieje",
       });
     }
-    
+
     // Wygeneruj hasło tymczasowe
-    const tempPassword = 'haslo123';
-    
+    const tempPassword = "haslo123";
+
     // Utwórz nowego muzyka
     const newMusician = new User({
       email: email.toLowerCase(),
       name: `${firstName} ${lastName}`,
       password: tempPassword,
-      role: 'musician',
+      role: "musician",
       instrument,
       isTemporaryPassword: true,
       active: true,
@@ -206,169 +205,167 @@ router.post('/create-musician', authenticate, async (req, res) => {
       personalData: {
         firstName,
         lastName,
-        phone: phone || '',
+        phone: phone || "",
         address: {
-          country: 'Polska'
-        }
-      }
+          country: "Polska",
+        },
+      },
     });
-    
+
     await newMusician.save();
-    
+
     // Zwróć dane muzyka z hasłem tymczasowym
     res.status(201).json({
-      message: 'Konto muzyka utworzone pomyślnie',
+      message: "Konto muzyka utworzone pomyślnie",
       musician: {
         id: newMusician._id,
         email: newMusician.email,
         name: newMusician.name,
         instrument: newMusician.instrument,
         temporaryPassword: tempPassword,
-        active: newMusician.active
+        active: newMusician.active,
       },
-      temporaryPassword: tempPassword
+      temporaryPassword: tempPassword,
     });
-    
   } catch (error) {
-    console.error('Create musician error:', error);
+    console.error("Create musician error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas tworzenia konta muzyka'
+      error: "Server error",
+      message: "Wystąpił błąd podczas tworzenia konta muzyka",
     });
   }
 });
 
 // POST /api/auth/create-conductor (tylko dla istniejącego dyrygenta)
-router.post('/create-conductor', authenticate, async (req, res) => {
+router.post("/create-conductor", authenticate, async (req, res) => {
   try {
     // Sprawdź czy użytkownik to dyrygent
-    if (req.user.role !== 'conductor') {
+    if (req.user.role !== "conductor") {
       return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Tylko dyrygent może tworzyć konta innych dyrygentów'
+        error: "Forbidden",
+        message: "Tylko dyrygent może tworzyć konta innych dyrygentów",
       });
     }
-    
+
     const { email, firstName, lastName, phone } = req.body;
-    
+
     if (!email || !firstName || !lastName) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Email, imię i nazwisko są wymagane'
+        error: "Validation error",
+        message: "Email, imię i nazwisko są wymagane",
       });
     }
-    
+
     // Sprawdź czy użytkownik już istnieje
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({
-        error: 'User exists',
-        message: 'Użytkownik o podanym emailu już istnieje'
+        error: "User exists",
+        message: "Użytkownik o podanym emailu już istnieje",
       });
     }
-    
+
     // Wygeneruj hasło tymczasowe
-    const tempPassword = 'haslo123';
-    
+    const tempPassword = "haslo123";
+
     // Utwórz nowego dyrygenta
     const newConductor = new User({
       email: email.toLowerCase(),
       name: `${firstName} ${lastName}`,
       password: tempPassword,
-      role: 'conductor',
+      role: "conductor",
       active: true,
       isTemporaryPassword: true,
       createdBy: req.user._id,
       personalData: {
         firstName,
         lastName,
-        phone: phone || ''
-      }
+        phone: phone || "",
+      },
     });
-    
+
     await newConductor.save();
-    
+
     res.status(201).json({
-      message: 'Konto dyrygenta utworzone pomyślnie',
+      message: "Konto dyrygenta utworzone pomyślnie",
       conductor: {
         id: newConductor._id,
         email: newConductor.email,
         name: newConductor.name,
         role: newConductor.role,
         active: newConductor.active,
-        temporaryPassword: tempPassword
-      }
+        temporaryPassword: tempPassword,
+      },
     });
-    
   } catch (error) {
-    console.error('Create conductor error:', error);
+    console.error("Create conductor error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas tworzenia konta dyrygenta'
+      error: "Server error",
+      message: "Wystąpił błąd podczas tworzenia konta dyrygenta",
     });
   }
 });
 
 // PATCH /api/auth/change-password
-router.patch('/change-password', authenticate, async (req, res) => {
+router.patch("/change-password", authenticate, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    
+
     if (!newPassword) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Nowe hasło jest wymagane'
+        error: "Validation error",
+        message: "Nowe hasło jest wymagane",
       });
     }
-    
+
     if (newPassword.length < 6) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Nowe hasło musi mieć co najmniej 6 znaków'
+        error: "Validation error",
+        message: "Nowe hasło musi mieć co najmniej 6 znaków",
       });
     }
-    
-    if (newPassword === 'haslo123') {
+
+    if (newPassword === "haslo123") {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Nie możesz ustawić hasła "haslo123". Wybierz inne, bardziej bezpieczne hasło.'
+        error: "Validation error",
+        message:
+          'Nie możesz ustawić hasła "haslo123". Wybierz inne, bardziej bezpieczne hasło.',
       });
     }
-    
+
     const user = await User.findById(req.user._id);
-    
+
     // Jeśli nie ma hasła tymczasowego, sprawdź obecne hasło
     if (!user.isTemporaryPassword) {
       if (!currentPassword) {
         return res.status(400).json({
-          error: 'Validation error',
-          message: 'Obecne hasło jest wymagane'
+          error: "Validation error",
+          message: "Obecne hasło jest wymagane",
         });
       }
-      
+
       const isMatch = await user.comparePassword(currentPassword);
       if (!isMatch) {
         return res.status(401).json({
-          error: 'Authentication failed',
-          message: 'Obecne hasło jest nieprawidłowe'
+          error: "Authentication failed",
+          message: "Obecne hasło jest nieprawidłowe",
         });
       }
     }
-    
+
     // Zmień hasło
     user.password = newPassword;
     user.isTemporaryPassword = false;
     await user.save();
-    
+
     res.json({
-      message: 'Hasło zostało zmienione pomyślnie'
+      message: "Hasło zostało zmienione pomyślnie",
     });
-    
   } catch (error) {
-    console.error('Change password error:', error);
+    console.error("Change password error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas zmiany hasła'
+      error: "Server error",
+      message: "Wystąpił błąd podczas zmiany hasła",
     });
   }
 });
@@ -380,30 +377,31 @@ router.get("/me", authenticate, async (req, res) => {
     if (!userDoc) {
       return res.status(404).json({ message: "Użytkownik nie znaleziony" });
     }
-    
+
     // Użyj .toObject(), aby Mongoose poprawnie zastosował wszystkie gettery (decrypt)
     const userObject = userDoc.toObject();
-    
+
     res.json({ user: userObject });
-    
   } catch (error) {
     console.error("Server error in /me route:", error);
-    res.status(500).json({ message: "Błąd serwera podczas pobierania danych użytkownika" });
+    res
+      .status(500)
+      .json({ message: "Błąd serwera podczas pobierania danych użytkownika" });
   }
 });
 
 // POST /api/auth/verify-email/:token
-router.get('/verify-email/:token', async (req, res) => {
+router.get("/verify-email/:token", async (req, res) => {
   try {
     const user = await User.findOne({
       emailVerificationToken: req.params.token,
-      emailVerificationExpires: { $gt: Date.now() }
+      emailVerificationExpires: { $gt: Date.now() },
     });
 
     if (!user) {
       return res.status(400).json({
-        error: 'Invalid token',
-        message: 'Token weryfikacji email jest nieprawidłowy lub wygasł'
+        error: "Invalid token",
+        message: "Token weryfikacji email jest nieprawidłowy lub wygasł",
       });
     }
 
@@ -413,26 +411,26 @@ router.get('/verify-email/:token', async (req, res) => {
     await user.save();
 
     res.json({
-      message: 'Email został zweryfikowany pomyślnie'
+      message: "Email został zweryfikowany pomyślnie",
     });
   } catch (error) {
-    console.error('Email verification error:', error);
+    console.error("Email verification error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas weryfikacji email'
+      error: "Server error",
+      message: "Wystąpił błąd podczas weryfikacji email",
     });
   }
 });
 
 // POST /api/auth/forgot-password
-router.post('/forgot-password', async (req, res) => {
+router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Email jest wymagany'
+        error: "Validation error",
+        message: "Email jest wymagany",
       });
     }
 
@@ -440,7 +438,8 @@ router.post('/forgot-password', async (req, res) => {
     if (!user) {
       // Dla bezpieczeństwa zwracamy sukces nawet jeśli użytkownik nie istnieje
       return res.json({
-        message: 'Jeśli podany email istnieje w systemie, otrzymasz instrukcje resetowania hasła'
+        message:
+          "Jeśli podany email istnieje w systemie, otrzymasz instrukcje resetowania hasła",
       });
     }
 
@@ -451,56 +450,57 @@ router.post('/forgot-password', async (req, res) => {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
     await sendEmail({
       to: user.email,
-      subject: 'Reset hasła',
+      subject: "Reset hasła",
       text: `Aby zresetować hasło, kliknij w link: ${resetUrl}`,
       html: `
         <h1>Reset hasła</h1>
         <p>Aby zresetować hasło, kliknij w poniższy link:</p>
         <a href="${resetUrl}">Resetuj hasło</a>
         <p>Link wygaśnie za godzinę.</p>
-      `
+      `,
     });
 
     res.json({
-      message: 'Jeśli podany email istnieje w systemie, otrzymasz instrukcje resetowania hasła'
+      message:
+        "Jeśli podany email istnieje w systemie, otrzymasz instrukcje resetowania hasła",
     });
   } catch (error) {
-    console.error('Forgot password error:', error);
+    console.error("Forgot password error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas przetwarzania żądania resetowania hasła'
+      error: "Server error",
+      message: "Wystąpił błąd podczas przetwarzania żądania resetowania hasła",
     });
   }
 });
 
 // POST /api/auth/reset-password/:token
-router.post('/reset-password/:token', async (req, res) => {
+router.post("/reset-password/:token", async (req, res) => {
   try {
     const { password } = req.body;
 
     if (!password) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Nowe hasło jest wymagane'
+        error: "Validation error",
+        message: "Nowe hasło jest wymagane",
       });
     }
 
     if (password.length < 6) {
       return res.status(400).json({
-        error: 'Validation error',
-        message: 'Hasło musi mieć co najmniej 6 znaków'
+        error: "Validation error",
+        message: "Hasło musi mieć co najmniej 6 znaków",
       });
     }
 
     const user = await User.findOne({
       passwordResetToken: req.params.token,
-      passwordResetExpires: { $gt: Date.now() }
+      passwordResetExpires: { $gt: Date.now() },
     });
 
     if (!user) {
       return res.status(400).json({
-        error: 'Invalid token',
-        message: 'Token resetowania hasła jest nieprawidłowy lub wygasł'
+        error: "Invalid token",
+        message: "Token resetowania hasła jest nieprawidłowy lub wygasł",
       });
     }
 
@@ -511,13 +511,13 @@ router.post('/reset-password/:token', async (req, res) => {
     await user.save();
 
     res.json({
-      message: 'Hasło zostało zmienione pomyślnie'
+      message: "Hasło zostało zmienione pomyślnie",
     });
   } catch (error) {
-    console.error('Reset password error:', error);
+    console.error("Reset password error:", error);
     res.status(500).json({
-      error: 'Server error',
-      message: 'Wystąpił błąd podczas resetowania hasła'
+      error: "Server error",
+      message: "Wystąpił błąd podczas resetowania hasła",
     });
   }
 });

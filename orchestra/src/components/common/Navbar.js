@@ -93,6 +93,10 @@ const Navbar = () => {
           Artesymfoniko
         </Link>
         
+        {user.role === 'conductor' && unreadCount > 0 && (
+          <span className="mobile-unread-indicator">Nowa wiadomość!</span>
+        )}
+        
         {/* Desktop Menu */}
         <div className="navbar-menu">
           {navLinks}

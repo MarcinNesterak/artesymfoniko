@@ -173,7 +173,7 @@
 
 .chat-bubble.sent {
   background-color: var(--accent-primary);
-  color: white;
+  color: var(--text-on-accent, #000);
   align-self: flex-end;
   border-bottom-right-radius: 4px;
 }

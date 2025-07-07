@@ -172,10 +172,10 @@ export const usersAPI = {
   deleteUser: async (userId) => {
     // ...
   },
-  
+
   deleteCurrentUser: async () => {
     const response = await fetch(`${API_BASE_URL}/api/users/me`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: getHeaders(),
     });
     return handleResponse(response);
@@ -186,11 +186,14 @@ export const usersAPI = {
 export const participationsAPI = {
   // Aktualizuj uczestnictwo (np. wynagrodzenie)
   updateParticipation: async (id, data) => {
-    const response = await fetch(`${API_BASE_URL}/api/events/participations/${id}`, {
-      method: "PATCH",
-      headers: getHeaders(true),
-      body: JSON.stringify(data),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/participations/${id}`,
+      {
+        method: "PATCH",
+        headers: getHeaders(true),
+        body: JSON.stringify(data),
+      }
+    );
     return handleResponse(response);
   },
 };
@@ -363,7 +366,7 @@ export const eventsAPI = {
   // Zarchiwizuj wydarzenie (tylko dyrygent-właściciel)
   archiveEvent: async (id) => {
     const response = await fetch(`${API_BASE_URL}/api/events/${id}/archive`, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: getHeaders(true),
     });
     return handleResponse(response);
@@ -371,10 +374,13 @@ export const eventsAPI = {
 
   // Pobierz kontrakt wydarzenia
   getContract: async (contractId) => {
-    const response = await fetch(`${API_BASE_URL}/api/events/contracts/${contractId}`, {
-      method: "GET",
-      headers: getHeaders(true),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/events/contracts/${contractId}`,
+      {
+        method: "GET",
+        headers: getHeaders(true),
+      }
+    );
     return handleResponse(response);
   },
 };
@@ -383,19 +389,25 @@ export const eventsAPI = {
 export const privateMessagesAPI = {
   // Pobierz listę konwersacji
   getConversations: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations`, {
-      method: "GET",
-      headers: getHeaders(true),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/private-messages/conversations`,
+      {
+        method: "GET",
+        headers: getHeaders(true),
+      }
+    );
     return handleResponse(response);
   },
 
   // Pobierz historię konkretnej konwersacji
   getConversationHistory: async (otherUserId) => {
-    const response = await fetch(`${API_BASE_URL}/api/private-messages/conversations/${otherUserId}`, {
-      method: "GET",
-      headers: getHeaders(true),
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/api/private-messages/conversations/${otherUserId}`,
+      {
+        method: "GET",
+        headers: getHeaders(true),
+      }
+    );
     return handleResponse(response);
   },
 
@@ -412,13 +424,13 @@ export const privateMessagesAPI = {
     });
     return handleResponse(response);
   },
-  
+
   // Oznacz wiadomości jako przeczytane
   markAsRead: async (conversationId) => {
     const response = await fetch(`${API_BASE_URL}/api/private-messages/read`, {
-        method: 'POST',
-        headers: getHeaders(true),
-        body: JSON.stringify({ conversationId }),
+      method: "POST",
+      headers: getHeaders(true),
+      body: JSON.stringify({ conversationId }),
     });
     return handleResponse(response);
   },

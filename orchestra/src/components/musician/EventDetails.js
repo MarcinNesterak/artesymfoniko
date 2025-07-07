@@ -2,19 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { eventsAPI } from "../../services/api";
 import "../../styles/eventDetails.css";
-import SuccessMessage from '../common/SuccessMessage';
+import SuccessMessage from "../common/SuccessMessage";
 
 const DRESSCODE_DESCRIPTIONS = {
-  frak: 'frak, biała koszula, biała muszka',
-  black: 'czarna marynarka, czarna koszula',
-  casual: 'biała koszula, czarna marynarka',
+  frak: "frak, biała koszula, biała muszka",
+  black: "czarna marynarka, czarna koszula",
+  casual: "biała koszula, czarna marynarka",
 };
 
 const DRESSCODE_IMAGES = {
-  frak: '/img/frak.png',
-  black: '/img/black.png',
-  casual: '/img/casual.png',
-  other: '/img/other.png',
+  frak: "/img/frak.png",
+  black: "/img/black.png",
+  casual: "/img/casual.png",
+  other: "/img/other.png",
 };
 
 const EventDetails = () => {
@@ -89,14 +89,24 @@ const EventDetails = () => {
     if (!event) return;
     const startDate = new Date(event.date);
     const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // +2h
-    const formatDate = (date) => date.toISOString().replace(/-|:|\.\d+/g, '');
-    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
-    googleCalendarUrl.searchParams.append('action', 'TEMPLATE');
-    googleCalendarUrl.searchParams.append('text', event.title);
-    googleCalendarUrl.searchParams.append('dates', `${formatDate(startDate)}/${formatDate(endDate)}`);
-    googleCalendarUrl.searchParams.append('details', `${event.description || ''}\n\nHarmonogram:\n${event.schedule || ''}\n\nProgram:\n${event.program || ''}`);
-    googleCalendarUrl.searchParams.append('location', event.location || '');
-    window.open(googleCalendarUrl.toString(), '_blank');
+    const formatDate = (date) => date.toISOString().replace(/-|:|\.\d+/g, "");
+    const googleCalendarUrl = new URL(
+      "https://calendar.google.com/calendar/render"
+    );
+    googleCalendarUrl.searchParams.append("action", "TEMPLATE");
+    googleCalendarUrl.searchParams.append("text", event.title);
+    googleCalendarUrl.searchParams.append(
+      "dates",
+      `${formatDate(startDate)}/${formatDate(endDate)}`
+    );
+    googleCalendarUrl.searchParams.append(
+      "details",
+      `${event.description || ""}\n\nHarmonogram:\n${
+        event.schedule || ""
+      }\n\nProgram:\n${event.program || ""}`
+    );
+    googleCalendarUrl.searchParams.append("location", event.location || "");
+    window.open(googleCalendarUrl.toString(), "_blank");
     setCalendarAdded(true);
   };
 
@@ -197,10 +207,10 @@ const EventDetails = () => {
   };
 
   const getMusicianDisplayName = (musician) => {
-    if (!musician || !musician.name) return '';
-    const nameParts = musician.name.split(' ');
-    const lastName = nameParts.pop() || '';
-    const firstName = nameParts.join(' ');
+    if (!musician || !musician.name) return "";
+    const nameParts = musician.name.split(" ");
+    const lastName = nameParts.pop() || "";
+    const firstName = nameParts.join(" ");
     return `${lastName} ${firstName}`.trim();
   };
 
@@ -249,11 +259,11 @@ const EventDetails = () => {
   const dresscodeInfo = getDresscodeInfo();
 
   const sortedParticipants = [...participants].sort((a, b) => {
-    const nameA = a.userId?.name || '';
-    const nameB = b.userId?.name || '';
-    const lastNameA = nameA.split(' ').pop() || '';
-    const lastNameB = nameB.split(' ').pop() || '';
-    return lastNameA.localeCompare(lastNameB, 'pl', { sensitivity: 'base' });
+    const nameA = a.userId?.name || "";
+    const nameB = b.userId?.name || "";
+    const lastNameA = nameA.split(" ").pop() || "";
+    const lastNameB = nameB.split(" ").pop() || "";
+    return lastNameA.localeCompare(lastNameB, "pl", { sensitivity: "base" });
   });
 
   return (
@@ -269,33 +279,39 @@ const EventDetails = () => {
       </div>
 
       {/* Zaproszenie na górze */}
-          {userInvitation && !userParticipation && (
-        <div className="event-info-card invitation-card" style={{marginBottom: 24}}>
-              <h2>Zaproszenie</h2>
-              <p>Zostałeś zaproszony do tego wydarzenia.</p>
-              <div className="invitation-actions">
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/musician/events/${id}/participate/${userInvitation._id}`
-                    )
-                  }
-                  className="btn-respond"
-                >
-                  Odpowiedz na zaproszenie
-                </button>
-              </div>
+      {userInvitation && !userParticipation && (
+        <div
+          className="event-info-card invitation-card"
+          style={{ marginBottom: 24 }}
+        >
+          <h2>Zaproszenie</h2>
+          <p>Zostałeś zaproszony do tego wydarzenia.</p>
+          <div className="invitation-actions">
+            <button
+              onClick={() =>
+                navigate(
+                  `/musician/events/${id}/participate/${userInvitation._id}`
+                )
+              }
+              className="btn-respond"
+            >
+              Odpowiedz na zaproszenie
+            </button>
+          </div>
           {/* Przycisk kalendarza Google */}
           {!calendarAdded ? (
             <button
               onClick={addToGoogleCalendar}
               className="btn-calendar"
-              style={{marginTop: 16}}
+              style={{ marginTop: 16 }}
             >
               📅 Dodaj do kalendarza Google
             </button>
           ) : (
-            <div className="calendar-added-message" style={{marginTop: 16, color: 'var(--accent-color)'}}>
+            <div
+              className="calendar-added-message"
+              style={{ marginTop: 16, color: "var(--accent-color)" }}
+            >
               ✔️ Dodano do kalendarza Google!
             </div>
           )}
@@ -317,12 +333,15 @@ const EventDetails = () => {
               </div>
             </div>
             {dresscodeInfo && (
-              <div className="event-info-section" style={{ marginTop: '16px' }}>
+              <div className="event-info-section" style={{ marginTop: "16px" }}>
                 <h3>Dresscode</h3>
                 <div className="dresscode-display">
                   <div className="dresscode-column">
                     <div className="dresscode-image-container">
-                      <img src={dresscodeInfo.image} alt={dresscodeInfo.description} />
+                      <img
+                        src={dresscodeInfo.image}
+                        alt={dresscodeInfo.description}
+                      />
                     </div>
                     <div className="dresscode-details">
                       <span className="dresscode-label">Panowie</span>
@@ -361,7 +380,7 @@ const EventDetails = () => {
                     ))}
                   </ul>
                 ) : (
-                  <p>{event.schedule || 'Brak szczegółowego harmonogramu.'}</p>
+                  <p>{event.schedule || "Brak szczegółowego harmonogramu."}</p>
                 )}
               </div>
             )}
@@ -385,12 +404,15 @@ const EventDetails = () => {
                 <button
                   onClick={addToGoogleCalendar}
                   className="btn-calendar"
-                  style={{marginTop: 16}}
+                  style={{ marginTop: 16 }}
                 >
                   📅 Dodaj do kalendarza Google
                 </button>
               ) : (
-                <div className="calendar-added-message" style={{marginTop: 16, color: 'var(--accent-color)'}}>
+                <div
+                  className="calendar-added-message"
+                  style={{ marginTop: 16, color: "var(--accent-color)" }}
+                >
                   ✔️ Dodano do kalendarza Google!
                 </div>
               )}
@@ -435,7 +457,9 @@ const EventDetails = () => {
                   <div
                     key={msg._id}
                     className={`chat-message ${
-                      msg.userId._id === user.id ? "my-message" : "other-message"
+                      msg.userId._id === user.id
+                        ? "my-message"
+                        : "other-message"
                     }`}
                   >
                     <div className="message-header">
@@ -444,11 +468,15 @@ const EventDetails = () => {
                         {new Date(msg.createdAt).toLocaleString("pl-PL")}
                       </span>
                     </div>
-                    <p className={`message-content ${msg.isDeleted ? 'deleted-message' : ''}`}>
+                    <p
+                      className={`message-content ${
+                        msg.isDeleted ? "deleted-message" : ""
+                      }`}
+                    >
                       {msg.content}
                     </p>
                     {msg.userId._id === user.id && !msg.isDeleted && (
-                      <button 
+                      <button
                         onClick={() => handleDeleteMessage(msg._id)}
                         className="btn-delete-message"
                         title="Usuń wiadomość"
@@ -485,7 +513,10 @@ const EventDetails = () => {
           )}
         </div>
       </div>
-      <SuccessMessage message={successMessage} onClose={() => setSuccessMessage("")} />
+      <SuccessMessage
+        message={successMessage}
+        onClose={() => setSuccessMessage("")}
+      />
     </div>
   );
 };

@@ -49,17 +49,18 @@
 }
 
 .navbar-logout {
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: 6px 12px;
+  background: none;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .navbar-logout:hover {
-  background-color: var(--accent-secondary-hover);
+  background-color: var(--primary-color);
+  color: var(--background-color);
 }
 
 .messages-link {
@@ -77,6 +78,15 @@
   padding: 2px 5px;
   border-radius: 10px;
   border: 1px solid var(--bg-primary);
+}
+
+.mobile-unread-indicator {
+  display: none; /* Domyślnie ukryty na desktopie */
+  color: var(--danger-color);
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-left: 10px;
+  animation: pulse 1.5s infinite;
 }
 
 /* --- Mobile Menu --- */
@@ -165,6 +175,10 @@
     align-items: center;
     border-top: 1px solid var(--border-color);
     padding-top: 20px;
+  }
+
+  .mobile-unread-indicator {
+    display: inline; /* Widoczny tylko na mobile */
   }
 }
 

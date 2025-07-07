@@ -32,9 +32,7 @@ const MyProfile = () => {
     bankAccountNumber: "",
   });
   const [profileLoading, setProfileLoading] = useState(false);
-
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -151,27 +149,30 @@ const MyProfile = () => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Walidacja danych przed wysłaniem
     if (profileData.pesel && !/^\d{11}$/.test(profileData.pesel)) {
       setError("Numer PESEL musi składać się z dokładnie 11 cyfr.");
       return;
     }
-    if (profileData.bankAccountNumber && !/^\d{26}$/.test(profileData.bankAccountNumber)) {
-      setError("Numer konta bankowego musi składać się z dokładnie 26 cyfr (bez liter i spacji).");
+    if (
+      profileData.bankAccountNumber &&
+      !/^\d{26}$/.test(profileData.bankAccountNumber)
+    ) {
+      setError(
+        "Numer konta bankowego musi składać się z dokładnie 26 cyfr (bez liter i spacji)."
+      );
       return;
     }
-    
+
     // Czyścimy komunikaty dopiero po pomyślnej walidacji
     setError("");
     setProfileLoading(true);
 
     try {
       // Destrukturyzacja płaskiego stanu `profileData`
-      const { 
-        street, city, postalCode, country, 
-        ...otherPersonalData 
-      } = profileData;
+      const { street, city, postalCode, country, ...otherPersonalData } =
+        profileData;
 
       // Stworzenie poprawnej, zagnieżdżonej struktury danych dla API
       const updatedProfileData = {
@@ -188,13 +189,12 @@ const MyProfile = () => {
       };
 
       const response = await usersAPI.updateProfile(updatedProfileData);
-      
+
       // Ustawienie daty ostatniej aktualizacji na podstawie odpowiedzi z serwera
       setUserData(response.user);
       setLastUpdated(response.user.updatedAt);
-
     } catch (error) {
-      setError(error.message || 'Nie udało się zaktualizować profilu.');
+      setError(error.message || "Nie udało się zaktualizować profilu.");
     } finally {
       setProfileLoading(false);
     }
@@ -207,9 +207,11 @@ const MyProfile = () => {
       alert(response.message);
       setIsDeleteModalOpen(false);
       storage.logout();
-      navigate('/login');
+      navigate("/login");
     } catch (err) {
-      setDeleteError(err.message || "Nie udało się usunąć konta. Spróbuj ponownie.");
+      setDeleteError(
+        err.message || "Nie udało się usunąć konta. Spróbuj ponownie."
+      );
     }
   };
 
@@ -463,7 +465,11 @@ const MyProfile = () => {
               />
               <span>
                 Wyrażam zgodę na przetwarzanie moich danych osobowych zgodnie z{" "}
-                <Link to="/polityka-prywatnosci" target="_blank" rel="noopener noreferrer">
+                <Link
+                  to="/polityka-prywatnosci"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Polityką Prywatności
                 </Link>
                 .
@@ -479,7 +485,7 @@ const MyProfile = () => {
               </p>
             </div>
           )}
-          
+
           <div className="form-group-static">
             <p className="privacy-consent-status">
               {privacyAccepted
@@ -529,11 +535,9 @@ const MyProfile = () => {
 
       <div className="profile-section danger-zone">
         <h2>Strefa Niebezpieczna</h2>
-        <p>
-          Operacje w tej strefie są nieodwracalne. Prosimy o ostrożność.
-        </p>
-        <button 
-          onClick={() => setIsDeleteModalOpen(true)} 
+        <p>Operacje w tej strefie są nieodwracalne. Prosimy o ostrożność.</p>
+        <button
+          onClick={() => setIsDeleteModalOpen(true)}
           className="btn-danger"
         >
           Usuń Moje Konto
@@ -546,15 +550,20 @@ const MyProfile = () => {
             <h3>Czy na pewno chcesz usunąć konto?</h3>
             {deleteError && <div className="error-message">{deleteError}</div>}
             <p>
-              Ta operacja jest nieodwracalna. Wszystkie Twoje dane zostaną usunięte z systemu.
+              Ta operacja jest nieodwracalna. Wszystkie Twoje dane zostaną
+              usunięte z systemu.
             </p>
             <p>
-              <strong>Uwaga:</strong> Jeśli posiadasz aktywne lub niearchiwizowanie umowy,
-              usunięcie konta może nie być możliwe natychmiast. Twoje dane zostaną usunięte
-              dopiero po wypełnieniu wszystkich zobowiązań prawnych i okresów archiwizacyjnych.
+              <strong>Uwaga:</strong> Jeśli posiadasz aktywne lub
+              niearchiwizowanie umowy, usunięcie konta może nie być możliwe
+              natychmiast. Twoje dane zostaną usunięte dopiero po wypełnieniu
+              wszystkich zobowiązań prawnych i okresów archiwizacyjnych.
             </p>
             <div className="modal-actions">
-              <button onClick={() => setIsDeleteModalOpen(false)} className="btn-secondary">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="btn-secondary"
+              >
                 Anuluj
               </button>
               <button onClick={handleDeleteAccount} className="btn-danger">
