@@ -110,6 +110,7 @@
   border-radius: 8px;
   padding: 20px;
   box-shadow: var(--card-shadow);
+  min-width: 0; /* Kluczowa poprawka: pozwala elementowi siatki zwężać się poniżej minimalnej szerokości jego zawartości */
 }
 
 .chat-card {
