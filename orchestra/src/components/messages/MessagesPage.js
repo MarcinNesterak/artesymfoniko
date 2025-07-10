@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { privateMessagesAPI } from '../../services/messagesAPI';
+import { storage } from '../../services/api'; 
 import ConversationList from './ConversationList';
 import ChatWindow from './ChatWindow';
 import NewMessageComposer from './NewMessageComposer';
@@ -14,6 +15,7 @@ const MessagesPage = () => {
   
   const location = useLocation();
   const navigate = useNavigate();
+  const currentUser = storage.getUser();
   const isComposing = selectedConversationId === 'new';
 
   const fetchConversations = useCallback(async () => {
@@ -65,7 +67,10 @@ const MessagesPage = () => {
   const handleMessageSent = (recipientId) => {
     // Po wysłaniu wiadomości, odświeżamy listę i przechodzimy do nowej konwersacji
     fetchConversations().then(() => {
-       navigate(`/conductor/messages?with=${recipientId}`);
+       const url = currentUser.role === 'conductor' 
+         ? `/conductor/messages?with=${recipientId}`
+         : `/musician/messages?with=${recipientId}`;
+       navigate(url);
        setSelectedConversationId(recipientId);
     });
   };
@@ -90,12 +95,14 @@ const MessagesPage = () => {
     return <div className="error-message">{error}</div>;
   }
 
+  const newMessageButtonText = currentUser.role === 'musician' ? 'Napisz do dyrygenta' : 'Nowa wiadomość';
+
   return (
     <div className="messages-page">
       <div className="conversations-list-panel">
         <div className="conversations-header">
           <h2>Konwersacje</h2>
-          <button className="new-message-btn" onClick={handleStartNewMessage}>Nowa wiadomość</button>
+          <button className="new-message-btn" onClick={handleStartNewMessage}>{newMessageButtonText}</button>
         </div>
         <ConversationList
           conversations={displayedConversations}
@@ -105,7 +112,7 @@ const MessagesPage = () => {
       </div>
       <div className="chat-window-panel">
         {isComposing ? (
-          <NewMessageComposer onMessageSent={handleMessageSent} />
+          <NewMessageComposer onMessageSent={handleMessageSent} userRole={currentUser.role} />
         ) : selectedConversationId ? (
           <ChatWindow participantId={selectedConversationId} />
         ) : (

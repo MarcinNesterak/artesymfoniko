@@ -2,31 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { usersAPI } from '../../services/api';
 import { privateMessagesAPI } from '../../services/messagesAPI';
 
-const NewMessageComposer = ({ onMessageSent }) => {
+const NewMessageComposer = ({ onMessageSent, userRole }) => {
   const [musicians, setMusicians] = useState([]);
+  const [conductor, setConductor] = useState(null);
   const [selectedMusician, setSelectedMusician] = useState('');
   const [messageContent, setMessageContent] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchMusicians = async () => {
+    const fetchUsers = async () => {
       try {
-        const response = await usersAPI.getMusicians();
-        const musiciansList = response.musicians || [];
-        setMusicians(musiciansList.filter(user => user.role === 'musician' && user.active));
+        const response = await usersAPI.getMusicians(); // Ta funkcja pobiera wszystkich użytkowników
+        const allUsers = response.musicians || [];
+        
+        if (userRole === 'conductor') {
+          setMusicians(allUsers.filter(user => user.role === 'musician' && user.active));
+        } else if (userRole === 'musician') {
+          const foundConductor = allUsers.find(user => user.role === 'conductor');
+          if (foundConductor) {
+            setConductor(foundConductor);
+          } else {
+            setError('Nie znaleziono dyrygenta.');
+          }
+        }
       } catch (err) {
-        setError('Nie udało się wczytać listy muzyków.');
+        setError('Nie udało się wczytać listy użytkowników.');
         console.error(err);
       }
     };
-    fetchMusicians();
-  }, []);
+    fetchUsers();
+  }, [userRole]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedMusician || !messageContent.trim()) {
-      setError('Proszę wybrać muzyka i wpisać treść wiadomości.');
+    
+    const recipientId = userRole === 'conductor' ? selectedMusician : conductor?._id;
+
+    if (!recipientId || !messageContent.trim()) {
+      setError('Proszę wybrać odbiorcę i wpisać treść wiadomości.');
       return;
     }
 
@@ -34,16 +48,15 @@ const NewMessageComposer = ({ onMessageSent }) => {
     setError('');
 
     try {
-      await privateMessagesAPI.sendMessage(selectedMusician, messageContent.trim());
+      await privateMessagesAPI.sendMessage(recipientId, messageContent.trim());
       if (onMessageSent) {
-        onMessageSent(selectedMusician);
+        onMessageSent(recipientId);
       }
     } catch (err) {
       setError('Błąd podczas wysyłania wiadomości.');
       console.error(err);
       setLoading(false);
     }
-    // `setLoading(false)` nie jest tutaj potrzebne, bo komponent zostanie zastąpiony
   };
 
   return (
@@ -51,18 +64,24 @@ const NewMessageComposer = ({ onMessageSent }) => {
       <h3>Nowa wiadomość</h3>
       <form onSubmit={handleSubmit} className="new-message-form">
         <div className="form-group">
-          <label htmlFor="musician-select">Do:</label>
-          <select
-            id="musician-select"
-            value={selectedMusician}
-            onChange={(e) => setSelectedMusician(e.target.value)}
-            required
-          >
-            <option value="" disabled>Wybierz muzyka z listy...</option>
-            {musicians.map(m => (
-              <option key={m._id} value={m._id}>{m.name}</option>
-            ))}
-          </select>
+          <label htmlFor="recipient">Do:</label>
+          {userRole === 'conductor' ? (
+            <select
+              id="recipient"
+              value={selectedMusician}
+              onChange={(e) => setSelectedMusician(e.target.value)}
+              required
+            >
+              <option value="" disabled>Wybierz muzyka z listy...</option>
+              {musicians.map(m => (
+                <option key={m._id} value={m._id}>{m.name}</option>
+              ))}
+            </select>
+          ) : conductor ? (
+            <div className="recipient-display">{conductor.name}</div>
+          ) : (
+            <div className="recipient-display">Ładowanie...</div>
+          )}
         </div>
         <div className="form-group">
           <label htmlFor="message-content">Wiadomość:</label>
