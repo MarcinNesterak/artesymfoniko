@@ -103,6 +103,15 @@ export const usersAPI = {
     return handleResponse(response);
   },
 
+  // Pobierz dyrygenta (dla muzyków)
+  getConductor: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/users/conductor`, {
+      method: 'GET',
+      headers: getHeaders(true),
+    });
+    return handleResponse(response);
+  },
+
   // Pobierz konkretnego muzyka (tylko dyrygent)
   getMusician: async (id) => {
     const response = await fetch(`${API_BASE_URL}/api/users/${id}`, {

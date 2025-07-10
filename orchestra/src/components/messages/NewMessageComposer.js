@@ -13,13 +13,12 @@ const NewMessageComposer = ({ onMessageSent, userRole }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await usersAPI.getMusicians(); // Ta funkcja pobiera wszystkich użytkowników
-        const allUsers = response.musicians || [];
-        
         if (userRole === 'conductor') {
+          const response = await usersAPI.getMusicians();
+          const allUsers = response.musicians || [];
           setMusicians(allUsers.filter(user => user.role === 'musician' && user.active));
         } else if (userRole === 'musician') {
-          const foundConductor = allUsers.find(user => user.role === 'conductor');
+          const foundConductor = await usersAPI.getConductor();
           if (foundConductor) {
             setConductor(foundConductor);
           } else {

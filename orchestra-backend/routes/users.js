@@ -113,6 +113,23 @@ router.patch("/me/profile", authenticate, async (req, res) => {
   }
 });
 
+// @route   GET api/users/conductor
+// @desc    Get conductor's basic info
+// @access  Private (accessible by musicians)
+router.get("/conductor", apiLimiter, authenticate, async (req, res) => {
+  try {
+    const conductor = await User.findOne({ role: 'conductor' }).select('_id name');
+    if (!conductor) {
+      return res.status(404).json({ message: "Dyrygent nie został znaleziony." });
+    }
+    res.json(conductor);
+  } catch (error) {
+    console.error("Get conductor error:", error);
+    res.status(500).json({ message: "Błąd serwera podczas pobierania danych dyrygenta." });
+  }
+});
+
+
 // GET /api/users - pobierz wszystkich muzyków (tylko dyrygent)
 router.get("/", apiLimiter, requireConductor, async (req, res) => {
   try {
