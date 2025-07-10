@@ -93,7 +93,7 @@ const Navbar = () => {
           Artesymfoniko
         </Link>
         
-        {user.role === 'conductor' && unreadCount > 0 && (
+        {(unreadCount > 0) && (
           <span className="mobile-unread-indicator">Nowa wiadomość!</span>
         )}
         
