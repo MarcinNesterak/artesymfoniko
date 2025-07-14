@@ -137,7 +137,7 @@ router.get("/", apiLimiter, requireConductor, async (req, res) => {
       .select("-password")
       .populate("createdBy", "name email")
       .sort({ createdAt: -1 });
-
+    
     res.json({
       message: "Lista muzyków",
       count: musicians.length,
@@ -155,20 +155,20 @@ router.get("/", apiLimiter, requireConductor, async (req, res) => {
 // GET /api/users/:id - pobierz konkretnego muzyka (tylko dyrygent)
 router.get("/:id", apiLimiter, requireConductor, async (req, res) => {
   try {
-    const musician = await User.findOne({
-      _id: req.params.id,
+    const musician = await User.findOne({ 
+      _id: req.params.id, 
       role: "musician",
     })
       .select("-password")
       .populate("createdBy", "name email");
-
+    
     if (!musician) {
       return res.status(404).json({
         error: "Not found",
         message: "Muzyk nie został znaleziony",
       });
     }
-
+    
     res.json({
       message: "Dane muzyka",
       musician,
@@ -195,26 +195,26 @@ router.put("/:id", apiLimiter, requireConductor, async (req, res) => {
       pesel,
       bankAccountNumber,
     } = req.body;
-
-    const musician = await User.findOne({
-      _id: req.params.id,
+    
+    const musician = await User.findOne({ 
+      _id: req.params.id, 
       role: "musician",
     });
-
+    
     if (!musician) {
       return res.status(404).json({
         error: "Not found",
         message: "Muzyk nie został znaleziony",
       });
     }
-
+    
     // Sprawdź czy email już istnieje (jeśli się zmienił)
     if (email && email !== musician.email) {
-      const existingUser = await User.findOne({
+      const existingUser = await User.findOne({ 
         email: email.toLowerCase(),
         _id: { $ne: req.params.id },
       });
-
+      
       if (existingUser) {
         return res.status(400).json({
           error: "Email exists",
@@ -222,7 +222,7 @@ router.put("/:id", apiLimiter, requireConductor, async (req, res) => {
         });
       }
     }
-
+    
     // Aktualizuj dane
     if (email) musician.email = email.toLowerCase();
     if (firstName || lastName) {
@@ -231,7 +231,7 @@ router.put("/:id", apiLimiter, requireConductor, async (req, res) => {
       }`.trim();
     }
     if (instrument) musician.instrument = instrument;
-
+    
     // Aktualizuj personalData
     if (!musician.personalData) musician.personalData = {};
     if (firstName) musician.personalData.firstName = firstName;
@@ -240,7 +240,7 @@ router.put("/:id", apiLimiter, requireConductor, async (req, res) => {
     if (pesel !== undefined) musician.personalData.pesel = pesel;
     if (bankAccountNumber !== undefined)
       musician.personalData.bankAccountNumber = bankAccountNumber;
-
+    
     if (address) {
       if (!musician.personalData.address) musician.personalData.address = {};
       if (address.street !== undefined)
@@ -252,9 +252,9 @@ router.put("/:id", apiLimiter, requireConductor, async (req, res) => {
       if (address.country !== undefined)
         musician.personalData.address.country = address.country;
     }
-
+    
     await musician.save();
-
+    
     res.json({
       message: "Dane muzyka zostały zaktualizowane",
       musician: {
@@ -281,41 +281,41 @@ router.patch(
   apiLimiter,
   requireConductor,
   async (req, res) => {
-    try {
-      const musician = await User.findOne({
-        _id: req.params.id,
+  try {
+    const musician = await User.findOne({ 
+      _id: req.params.id, 
         role: "musician",
-      });
-
-      if (!musician) {
-        return res.status(404).json({
+    });
+    
+    if (!musician) {
+      return res.status(404).json({
           error: "Not found",
           message: "Muzyk nie został znaleziony",
-        });
-      }
-
-      // Wygeneruj nowe hasło tymczasowe
-      const newTempPassword = "haslo123";
-
-      musician.password = newTempPassword;
-      musician.isTemporaryPassword = true;
-      await musician.save();
-
-      res.json({
-        message: "Hasło zostało zresetowane",
-        musician: {
-          id: musician._id,
-          name: musician.name,
-          email: musician.email,
-        },
-        temporaryPassword: newTempPassword,
       });
-    } catch (error) {
+    }
+    
+    // Wygeneruj nowe hasło tymczasowe
+      const newTempPassword = "haslo123";
+    
+    musician.password = newTempPassword;
+    musician.isTemporaryPassword = true;
+    await musician.save();
+    
+    res.json({
+        message: "Hasło zostało zresetowane",
+      musician: {
+        id: musician._id,
+        name: musician.name,
+          email: musician.email,
+      },
+        temporaryPassword: newTempPassword,
+    });
+  } catch (error) {
       console.error("Reset password error:", error);
-      res.status(500).json({
+    res.status(500).json({
         error: "Server error",
         message: "Wystąpił błąd podczas resetowania hasła",
-      });
+    });
     }
   }
 );
@@ -326,39 +326,39 @@ router.patch(
   apiLimiter,
   requireConductor,
   async (req, res) => {
-    try {
-      const musician = await User.findOne({
-        _id: req.params.id,
+  try {
+    const musician = await User.findOne({ 
+      _id: req.params.id, 
         role: "musician",
-      });
-
-      if (!musician) {
-        return res.status(404).json({
+    });
+    
+    if (!musician) {
+      return res.status(404).json({
           error: "Not found",
           message: "Muzyk nie został znaleziony",
-        });
-      }
-
-      musician.active = !musician.active;
-      await musician.save();
-
-      res.json({
+      });
+    }
+    
+    musician.active = !musician.active;
+    await musician.save();
+    
+    res.json({
         message: `Konto muzyka zostało ${
           musician.active ? "aktywowane" : "dezaktywowane"
         }`,
-        musician: {
-          id: musician._id,
-          name: musician.name,
-          email: musician.email,
+      musician: {
+        id: musician._id,
+        name: musician.name,
+        email: musician.email,
           active: musician.active,
         },
-      });
-    } catch (error) {
+    });
+  } catch (error) {
       console.error("Toggle status error:", error);
-      res.status(500).json({
+    res.status(500).json({
         error: "Server error",
         message: "Wystąpił błąd podczas zmiany statusu konta",
-      });
+    });
     }
   }
 );
@@ -366,18 +366,18 @@ router.patch(
 // DELETE /api/users/:id - usuń muzyka (tylko dyrygent)
 router.delete("/:id", requireConductor, async (req, res) => {
   try {
-    const musician = await User.findOne({
-      _id: req.params.id,
+    const musician = await User.findOne({ 
+      _id: req.params.id, 
       role: "musician",
     });
-
+    
     if (!musician) {
       return res.status(404).json({
         error: "Not found",
         message: "Muzyk nie został znaleziony",
       });
     }
-
+    
     // Sprawdź czy muzyk ma jakieś aktywne uczestnictwa
     const activeParticipations = await User.model(
       "Participation"
@@ -385,7 +385,7 @@ router.delete("/:id", requireConductor, async (req, res) => {
       userId: req.params.id,
       // Można dodać sprawdzenie czy ma nadchodzące wydarzenia
     });
-
+    
     if (activeParticipations > 0) {
       return res.status(400).json({
         error: "Cannot delete",
@@ -393,9 +393,9 @@ router.delete("/:id", requireConductor, async (req, res) => {
           "Nie można usunąć muzyka który ma aktywne uczestnictwa w wydarzeniach",
       });
     }
-
+    
     await User.findByIdAndDelete(req.params.id);
-
+    
     res.json({
       message: "Konto muzyka zostało usunięte",
       deletedMusician: {
@@ -418,9 +418,9 @@ router.patch("/profile", authenticate, async (req, res) => {
   try {
     const { firstName, lastName, phone, address, pesel, bankAccountNumber } =
       req.body;
-
+    
     const user = await User.findById(req.user._id);
-
+    
     if (!user) {
       return res.status(404).json({
         error: "Not found",
@@ -434,7 +434,7 @@ router.patch("/profile", authenticate, async (req, res) => {
       const newLastName = lastName || user.personalData.lastName;
       user.name = `${newFirstName} ${newLastName}`.trim();
     }
-
+    
     // Aktualizuj personalData
     if (!user.personalData) user.personalData = {};
     if (firstName) user.personalData.firstName = firstName;
@@ -443,7 +443,7 @@ router.patch("/profile", authenticate, async (req, res) => {
     if (pesel !== undefined) user.personalData.pesel = pesel;
     if (bankAccountNumber !== undefined)
       user.personalData.bankAccountNumber = bankAccountNumber;
-
+    
     if (address) {
       if (!user.personalData.address) user.personalData.address = {};
       if (address.street !== undefined)
@@ -455,12 +455,12 @@ router.patch("/profile", authenticate, async (req, res) => {
       if (address.country !== undefined)
         user.personalData.address.country = address.country;
     }
-
+    
     await user.save();
 
     // Zwróć zaktualizowane dane użytkownika
     const updatedUser = await User.findById(req.user._id).select("-password");
-
+    
     res.json({
       message: "Dane profilu zostały zaktualizowane",
       user: updatedUser,

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import webpush from "web-push";
 
 // Middleware
 import { apiLimiter } from "./middleware/rateLimiter.js";
@@ -14,6 +15,7 @@ import usersRoutes from "./routes/users.js";
 import authRoutes from "./routes/auth.js";
 import eventsRoutes from "./routes/events.js";
 import privateMessageRoutes from "./routes/privateMessages.js"; // IMPORT
+import notificationRoutes from "./routes/notifications.js";
 
 // Import models
 import User from "./models/User.js";
@@ -23,6 +25,19 @@ import Participation from "./models/Participation.js";
 
 // Load environment variables
 dotenv.config();
+
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+const vapidSubject = process.env.VAPID_SUBJECT;
+
+if (!vapidPublicKey || !vapidPrivateKey || !vapidSubject) {
+  console.error(
+    "VAPID keys are not configured. Please set VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT in your .env file."
+  );
+} else {
+  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+  console.log("✅ VAPID keys configured for web-push");
+}
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -96,6 +111,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/events", eventsRoutes);
 app.use("/api/private-messages", privateMessageRoutes); // UŻYCIE
+app.use("/api/notifications", notificationRoutes);
 
 // Health check routes
 app.get("/", (req, res) => {
