@@ -47,19 +47,36 @@ app.set("trust proxy", 1);
 
 // Security middleware
 app.use(helmet());
+
+// Nowa, bardziej elastyczna konfiguracja CORS
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://artesymfoniko.vercel.app",
+  /^https:\/\/artesymfoniko-.*\.vercel\.app$/,
+  "http://artesymfoniko.pl",
+  "https://artesymfoniko.pl",
+  "http://www.artesymfoniko.pl",
+  "https://www.artesymfoniko.pl",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://artesymfoniko.vercel.app",
-      "https://artesymfoniko-production.up.railway.app",
-      /^https:\/\/artesymfoniko-.*\.vercel\.app$/,
-      "http://artesymfoniko.pl",
-      "https://artesymfoniko.pl",
-      "http://www.artesymfoniko.pl",
-      "https://www.artesymfoniko.pl",
-    ],
+    origin: function (origin, callback) {
+      // Zezwalaj na żądania bez 'origin' (np. aplikacje mobilne, Postman)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.some(pattern => {
+        if (pattern instanceof RegExp) {
+          return pattern.test(origin);
+        }
+        return pattern === origin;
+      })) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
