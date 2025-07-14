@@ -842,13 +842,6 @@ const EventDetails = () => {
                 </div>
               </div>
             )}
-            <div className="info-item">
-              <span className="info-label">Dyrygent:</span>
-              <p>
-                {event.conductor &&
-                  `${event.conductor.firstName} ${event.conductor.lastName}`}
-              </p>
-            </div>
           </div>
           {event.description && (
             <div className="event-extra-info">
