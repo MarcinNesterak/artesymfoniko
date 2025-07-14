@@ -5,6 +5,26 @@ import SuccessMessage from "../common/SuccessMessage";
 import "../../styles/forms.css";
 import "../../styles/manageMusicians.css";
 
+const INSTRUMENT_ORDER = [
+  "skrzypce",
+  "altówka",
+  "wiolonczela",
+  "kontrabas",
+  "flet",
+  "obój",
+  "klarnet",
+  "fagot",
+  "saksofon",
+  "waltornia",
+  "trąbka",
+  "puzon",
+  "tuba",
+  "fortepian",
+  "akordeon",
+  "gitara",
+  "perkusja",
+];
+
 // Ponieważ edycja api.js się nie powiodła, definiujemy funkcje API lokalnie
 const API_BASE_URL =
   process.env.REACT_APP_API_URL ||
@@ -124,8 +144,32 @@ const ContractMusicianList = () => {
       const confirmedParticipants = eventResponse.participations.filter(
         (p) => p.status === "confirmed"
       );
+      
+      const sortedParticipants = confirmedParticipants.sort((a, b) => {
+        const instrumentA = a.userId.instrument?.toLowerCase() || "";
+        const instrumentB = b.userId.instrument?.toLowerCase() || "";
+
+        const indexA = INSTRUMENT_ORDER.indexOf(instrumentA);
+        const indexB = INSTRUMENT_ORDER.indexOf(instrumentB);
+
+        const effectiveIndexA = indexA === -1 ? Infinity : indexA;
+        const effectiveIndexB = indexB === -1 ? Infinity : indexB;
+
+        if (effectiveIndexA !== effectiveIndexB) {
+          return effectiveIndexA - effectiveIndexB;
+        }
+
+        const lastNameA =
+          a.userId.personalData?.lastName || a.userId.name.split(" ").pop() || "";
+        const lastNameB =
+          b.userId.personalData?.lastName || b.userId.name.split(" ").pop() || "";
+        return lastNameA.localeCompare(lastNameB, "pl", {
+          sensitivity: "base",
+        });
+      });
+
       setEvent(eventResponse.event);
-      setParticipants(confirmedParticipants);
+      setParticipants(sortedParticipants);
     } catch (err) {
       setErrorMessages(["Nie udało się załadować danych wydarzenia."]);
       console.error(err);

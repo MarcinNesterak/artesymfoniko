@@ -4,6 +4,26 @@ import { eventsAPI } from "../../services/api";
 import "../../styles/eventDetails.css";
 import SuccessMessage from "../common/SuccessMessage";
 
+const INSTRUMENT_ORDER = [
+  "skrzypce",
+  "altówka",
+  "wiolonczela",
+  "kontrabas",
+  "flet",
+  "obój",
+  "klarnet",
+  "fagot",
+  "saksofon",
+  "waltornia",
+  "trąbka",
+  "puzon",
+  "tuba",
+  "fortepian",
+  "akordeon",
+  "gitara",
+  "perkusja",
+];
+
 const DRESSCODE_DESCRIPTIONS = {
   frak: "frak, biała koszula, biała muszka",
   black: "czarna marynarka, czarna koszula",
@@ -125,7 +145,29 @@ const EventDetails = () => {
             (participation) => participation.status === "confirmed"
           ) || [];
 
-        setParticipants(confirmedParticipants);
+        const sortedParticipants = confirmedParticipants.sort((a, b) => {
+          const instrumentA = a.userId.instrument?.toLowerCase() || "";
+          const instrumentB = b.userId.instrument?.toLowerCase() || "";
+
+          const indexA = INSTRUMENT_ORDER.indexOf(instrumentA);
+          const indexB = INSTRUMENT_ORDER.indexOf(instrumentB);
+
+          const effectiveIndexA = indexA === -1 ? Infinity : indexA;
+          const effectiveIndexB = indexB === -1 ? Infinity : indexB;
+
+          if (effectiveIndexA !== effectiveIndexB) {
+            return effectiveIndexA - effectiveIndexB;
+          }
+
+          const lastNameA = (a.userId.name || "").split(" ").pop() || "";
+          const lastNameB = (b.userId.name || "").split(" ").pop() || "";
+
+          return lastNameA.localeCompare(lastNameB, "pl", {
+            sensitivity: "base",
+          });
+        });
+
+        setParticipants(sortedParticipants);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching event data:", error);
@@ -257,14 +299,6 @@ const EventDetails = () => {
   };
 
   const dresscodeInfo = getDresscodeInfo();
-
-  const sortedParticipants = [...participants].sort((a, b) => {
-    const nameA = a.userId?.name || "";
-    const nameB = b.userId?.name || "";
-    const lastNameA = nameA.split(" ").pop() || "";
-    const lastNameB = nameB.split(" ").pop() || "";
-    return lastNameA.localeCompare(lastNameB, "pl", { sensitivity: "base" });
-  });
 
   return (
     <div className="event-details">
@@ -433,7 +467,7 @@ const EventDetails = () => {
 
             {participants.length > 0 ? (
               <div className="musicians-list">
-                {sortedParticipants.map((participant) => {
+                {participants.map((participant) => {
                   const musician = participant.userId;
                   if (!musician) return null;
 
