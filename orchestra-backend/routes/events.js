@@ -14,6 +14,7 @@ import MessageRead from "../models/MessageRead.js";
 import { apiLimiter } from "../middleware/rateLimiter.js";
 import { body, validationResult } from "express-validator";
 import sendEmail from "../utils/email.js";
+import { sendPushNotification } from "../utils/notificationService.js";
 
 const router = express.Router();
 
@@ -305,7 +306,7 @@ router.post(
 
       const savedEvent = await newEvent.save();
 
-      // Utwórz zaproszenia dla wybranych muzyków
+      // Utwórz zaproszenia i wyślij powiadomienia
       if (inviteUserIds && inviteUserIds.length > 0) {
         const invitations = inviteUserIds.map((userId) => ({
           eventId: savedEvent._id,
@@ -313,12 +314,26 @@ router.post(
         }));
         await Invitation.insertMany(invitations);
 
-        // Wyślij powiadomienia e-mail do zaproszonych muzyków
+        // 1. Zbierz ID muzyków do powiadomień
+        const musicianIds = inviteUserIds.map((id) => id.toString());
+
+        // 2. Wyślij powiadomienia PUSH do wszystkich zaproszonych
+        const pushPayload = {
+          title: "Nowe zaproszenie!",
+          body: `Zostałeś zaproszony/a na wydarzenie: ${savedEvent.title}`,
+          url: `/musician/dashboard`,
+        };
+        // Celowo nie czekamy na wynik (fire and forget)
+        sendPushNotification(musicianIds, pushPayload);
+
+        // 3. Wyślij powiadomienia E-MAIL do wszystkich zaproszonych
         const invitedUsers = await User.find({
           _id: { $in: inviteUserIds },
         }).select("email name");
+
+        const { eventDate, eventTime } = formatEventDate(date);
+
         for (const user of invitedUsers) {
-          const { eventDate, eventTime } = formatEventDate(date);
           await sendEmail({
             to: user.email,
             subject: `Zaproszenie do udziału w wydarzeniu: ${title}`,
@@ -499,6 +514,23 @@ router.put(
       }
 
       const updatedEvent = await event.save();
+
+      // Wyślij powiadomienie do uczestników o zmianie
+      const participants = await Participation.find({
+        eventId: req.params.id,
+        status: "confirmed",
+      });
+
+      const participantIds = participants.map((p) => p.userId.toString());
+
+      if (participantIds.length > 0) {
+        const pushPayload = {
+          title: "Wydarzenie zaktualizowane",
+          body: `Wydarzenie "${updatedEvent.title}" zostało zaktualizowane.`,
+          url: `/musician/events/${updatedEvent._id}/details`,
+        };
+        sendPushNotification(participantIds, pushPayload);
+      }
 
       res.json({
         message: "Wydarzenie zostało pomyślnie zaktualizowane.",
