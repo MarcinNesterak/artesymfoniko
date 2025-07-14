@@ -380,7 +380,9 @@ const EventDetails = () => {
                     ))}
                   </ul>
                 ) : (
-                  <p>{event.schedule || "Brak szczegółowego harmonogramu."}</p>
+                  <pre>
+                    {event.schedule || "Brak szczegółowego harmonogramu."}
+                  </pre>
                 )}
               </div>
             )}

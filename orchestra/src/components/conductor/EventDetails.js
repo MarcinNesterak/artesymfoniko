@@ -868,11 +868,11 @@ const EventDetails = () => {
                   ))}
                 </ul>
               ) : (
-                <p>
+                <pre>
                   {event.schedule && !Array.isArray(event.schedule)
                     ? event.schedule
                     : "Brak szczegółowego harmonogramu."}
-                </p>
+                </pre>
               )}
             </div>
           )}
