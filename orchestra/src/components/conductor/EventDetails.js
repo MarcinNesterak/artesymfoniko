@@ -61,6 +61,7 @@ const EventDetails = () => {
     date: "",
     description: "",
     schedule: "",
+    importantInfo: "",
     program: "",
     location: "",
     dresscode: "",
@@ -140,6 +141,7 @@ const EventDetails = () => {
         program: eventData.program || "",
         location: eventData.location || "",
         dresscode: isStandardDresscode ? initialDresscode : "other",
+        importantInfo: eventData.importantInfo || "",
       });
 
       if (!isStandardDresscode) {
@@ -630,6 +632,23 @@ const EventDetails = () => {
               </div>
 
               <div className="form-group">
+                <label htmlFor="edit-important-info">Ważne informacje</label>
+                <textarea
+                  id="edit-important-info"
+                  value={editData.importantInfo}
+                  onChange={(e) =>
+                    setEditData((prev) => ({
+                      ...prev,
+                      importantInfo: e.target.value,
+                    }))
+                  }
+                  disabled={editLoading}
+                  rows="4"
+                  placeholder="Dodatkowe informacje, np. o próbach, stroju etc."
+                />
+              </div>
+
+              <div className="form-group">
                 <label htmlFor="edit-program">Program koncertu</label>
                 <textarea
                   id="edit-program"
@@ -868,6 +887,12 @@ const EventDetails = () => {
                 </pre>
               )}
             </div>
+          )}
+          {event.importantInfo && (
+          <div className="event-extra-info">
+            <h3>Ważne informacje</h3>
+            <pre>{event.importantInfo}</pre>
+          </div>
           )}
           {event.program && (
             <div className="event-extra-info">

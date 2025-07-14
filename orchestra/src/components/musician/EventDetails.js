@@ -386,6 +386,12 @@ const EventDetails = () => {
                 )}
               </div>
             )}
+            {event.importantInfo && (
+            <div className="event-extra-info">
+              <h3>Ważne informacje</h3>
+              <pre>{event.importantInfo}</pre>
+            </div>
+            )}
             {event.program && (
               <div className="event-extra-info">
                 <strong>Program koncertu:</strong>

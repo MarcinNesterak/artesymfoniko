@@ -26,6 +26,10 @@ const eventSchema = new mongoose.Schema(
       maxlength: [2000, "Harmonogram nie może być dłuższy niż 2000 znaków"],
     },
 
+    importantInfo: {
+      type: String,
+    },
+
     program: {
       type: String,
       trim: true,

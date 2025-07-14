@@ -9,6 +9,7 @@ const CreateEvent = () => {
   const [time, setTime] = useState('');
   const [description, setDescription] = useState('');
   const [schedule, setSchedule] = useState('');
+  const [importantInfo, setImportantInfo] = useState('');
   const [program, setProgram] = useState('');
   const [selectedMusicians, setSelectedMusicians] = useState([]);
   const [availableMusicians, setAvailableMusicians] = useState([]);
@@ -70,6 +71,7 @@ const CreateEvent = () => {
         date: eventDateTime.toISOString(),
         description,
         schedule,
+        importantInfo,
         program,
         inviteUserIds: selectedMusicians,
         dresscode: dresscode === 'other' ? customDresscode : dresscode,
@@ -163,7 +165,19 @@ const CreateEvent = () => {
             disabled={loading}
           ></textarea>
         </div>
-        
+
+        <div className="form-group">
+          <label htmlFor="importantInfo">Ważne informacje</label>
+          <textarea
+            id="importantInfo"
+            value={importantInfo}
+            onChange={(e) => setImportantInfo(e.target.value)}
+            rows="4"
+            placeholder="Np. Dodatkowe informacje dla muzyków"
+            disabled={loading}
+          ></textarea>
+        </div>
+
         <div className="form-group">
           <label htmlFor="program">Program (lista utworów)</label>
           <textarea
