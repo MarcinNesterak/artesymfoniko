@@ -484,9 +484,30 @@ const EventDetails = () => {
   }
 
   const invitedMusicianIds = invitations.map((inv) => inv.userId._id);
-  const availableMusicians = allMusicians.filter(
-    (m) => !invitedMusicianIds.includes(m._id)
-  );
+  const availableMusicians = allMusicians
+    .filter((m) => !invitedMusicianIds.includes(m._id))
+    .sort((a, b) => {
+      const instrumentA = a.instrument?.toLowerCase() || "";
+      const instrumentB = b.instrument?.toLowerCase() || "";
+
+      const indexA = INSTRUMENT_ORDER.indexOf(instrumentA);
+      const indexB = INSTRUMENT_ORDER.indexOf(instrumentB);
+
+      const effectiveIndexA = indexA === -1 ? Infinity : indexA;
+      const effectiveIndexB = indexB === -1 ? Infinity : indexB;
+
+      if (effectiveIndexA !== effectiveIndexB) {
+        return effectiveIndexA - effectiveIndexB;
+      }
+
+      const lastNameA =
+        a.personalData?.lastName || a.name.split(" ").pop() || "";
+      const lastNameB =
+        b.personalData?.lastName || b.name.split(" ").pop() || "";
+      return lastNameA.localeCompare(lastNameB, "pl", {
+        sensitivity: "base",
+      });
+    });
 
   const dresscodeInfo = getDresscodeInfo();
 
