@@ -516,20 +516,35 @@ router.put(
       const updatedEvent = await event.save();
 
       // Wyślij powiadomienie do uczestników o zmianie
-      const participants = await Participation.find({
+      const participations = await Participation.find({
         eventId: req.params.id,
         status: "confirmed",
-      });
+      }).populate("userId");
 
-      const participantIds = participants.map((p) => p.userId.toString());
+      const musicianIds = participations.map(p => p.userId._id);
+      
+      if (musicianIds.length > 0) {
+        const { eventDate, eventTime } = formatEventDate(updatedEvent.date);
 
-      if (participantIds.length > 0) {
+        // Przygotuj treść powiadomień
+        const emailSubject = `Aktualizacja wydarzenia: ${updatedEvent.title}`;
+        const emailText = `Wydarzenie "${updatedEvent.title}" zaplanowane na ${eventDate} o ${eventTime} zostało zaktualizowane. Sprawdź szczegóły w aplikacji.`;
         const pushPayload = {
-          title: "Wydarzenie zaktualizowane",
-          body: `Wydarzenie "${updatedEvent.title}" zostało zaktualizowane.`,
-          url: `/musician/events/${updatedEvent._id}/details`,
+            title: `Wydarzenie "${updatedEvent.title}" zostało zaktualizowane`,
+            body: `Sprawdź nowe szczegóły w aplikacji.`
         };
-        sendPushNotification(participantIds, pushPayload);
+
+        // Wyślij powiadomienia (E-mail + Push)
+        await Promise.all(participations.map(async (p) => {
+          if (p.userId && p.userId.email) {
+            sendEmail(p.userId.email, emailSubject, emailText);
+          }
+        }));
+        
+        // Wyślij powiadomienie push do wszystkich muzyków jednocześnie
+        await sendPushNotification(musicianIds, pushPayload);
+        
+        console.log(`Successfully sent update notifications for event ${updatedEvent._id} to ${musicianIds.length} musicians.`);
       }
 
       res.json({
