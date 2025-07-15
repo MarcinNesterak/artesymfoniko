@@ -192,4 +192,21 @@ userSchema.methods.generatePasswordResetToken = function () {
   return token;
 };
 
+// Metoda do deszyfrowania danych
+userSchema.methods.decrypt = function (field) {
+  try {
+    if (!this.personalData || !this.personalData[field]) {
+      return this.personalData ? this.personalData[field] : undefined;
+    }
+    const encryptedData = this.personalData[field];
+    if (typeof encryptedData !== "string" || !encryptedData.includes(":")) {
+      return encryptedData; // Zwróć niezmienione, jeśli dane nie wyglądają na zaszyfrowane
+    }
+    return decrypt(encryptedData);
+  } catch (e) {
+    console.error(`Błąd deszyfrowania pola '${field}' dla użytkownika z emailem: ${this.email}. Błąd: ${e.message}`);
+    return null; // Zwróć null lub pusty string w przypadku błędu
+  }
+};
+
 export default mongoose.model("User", userSchema);
