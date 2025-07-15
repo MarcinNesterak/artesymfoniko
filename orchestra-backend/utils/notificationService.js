@@ -1,6 +1,19 @@
 import webpush from "web-push";
 import User from "../models/User.js";
 
+// Konfiguracja VAPID - kluczowa część do autoryzacji
+const vapidKeys = {
+    publicKey: process.env.VAPID_PUBLIC_KEY,
+    privateKey: process.env.VAPID_PRIVATE_KEY
+};
+
+webpush.setVapidDetails(
+    'mailto:admin@example.com', // Adres e-mail administratora
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+);
+
+
 /**
  * Wysyła powiadomienie push do określonych użytkowników.
  * @param {string[]} userIds - Tablica ID użytkowników do powiadomienia.
