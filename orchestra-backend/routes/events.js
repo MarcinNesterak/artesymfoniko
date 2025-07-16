@@ -524,27 +524,19 @@ router.put(
       const musicianIds = participations.map(p => p.userId._id);
       
       if (musicianIds.length > 0) {
-        const { eventDate, eventTime } = formatEventDate(updatedEvent.date);
-
-        // Przygotuj treść powiadomień
-        const emailSubject = `Aktualizacja wydarzenia: ${updatedEvent.title}`;
-        const emailText = `Wydarzenie "${updatedEvent.title}" zaplanowane na ${eventDate} o ${eventTime} zostało zaktualizowane. Sprawdź szczegóły w aplikacji.`;
+        // Przygotuj treść powiadomienia Push
         const pushPayload = {
             title: `Wydarzenie "${updatedEvent.title}" zostało zaktualizowane`,
             body: `Sprawdź nowe szczegóły w aplikacji.`
         };
 
-        // Wyślij powiadomienia (E-mail + Push)
-        await Promise.all(participations.map(async (p) => {
-          if (p.userId && p.userId.email) {
-            sendEmail(p.userId.email, emailSubject, emailText);
-          }
-        }));
-        
-        // Wyślij powiadomienie push do wszystkich muzyków jednocześnie
-        await sendPushNotification(musicianIds, pushPayload);
-        
-        console.log(`Successfully sent update notifications for event ${updatedEvent._id} to ${musicianIds.length} musicians.`);
+        // Wyślij powiadomienie push do wszystkich muzyków
+        try {
+            await sendPushNotification(musicianIds, pushPayload);
+            console.log(`Successfully sent push notifications for event update ${updatedEvent._id} to ${musicianIds.length} musicians.`);
+        } catch (pushError) {
+            console.error(`Error sending push notifications for event update ${updatedEvent._id}:`, pushError);
+        }
       }
 
       res.json({
