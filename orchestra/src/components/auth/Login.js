@@ -39,7 +39,8 @@ const Login = () => {
       storage.setUser(userData);
 
       // Po udanym logowaniu, zainicjuj powiadomienia push
-      await initializePushNotifications(); // ZMIANA
+      console.log("--- Login.js: Zaraz wywołam initializePushNotifications ---"); // DODANY LOG
+      await initializePushNotifications();
       
       // Przekieruj w zależności od roli i statusu hasła
       if (response.user.role === 'conductor') {
