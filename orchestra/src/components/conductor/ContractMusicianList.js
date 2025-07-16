@@ -44,7 +44,7 @@ const updateParticipationFee = async (id, fee) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ fee }),
+    body: JSON.stringify({ fee }),
     }
   );
   if (!response.ok)
@@ -55,20 +55,20 @@ const updateParticipationFee = async (id, fee) => {
 };
 
 const createContract = async (contractData) => {
-  const token = getAuthToken();
-  const response = await fetch(`${API_BASE_URL}/api/events/contracts`, {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/api/events/contracts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(contractData),
-  });
+        body: JSON.stringify(contractData),
+    });
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.message || "Błąd tworzenia umowy");
   }
-  return response.json();
+    return response.json();
 };
 // Koniec lokalnych funkcji API
 
@@ -213,10 +213,10 @@ const ContractMusicianList = () => {
     const participantsToProcess = participants.filter((p) =>
       selectedParticipants.has(p._id)
     );
-
+    
     if (participantsToProcess.length === 0) {
       setErrorMessages(["Proszę wybrać przynajmniej jednego muzyka."]);
-      return;
+        return;
     }
 
     if (
@@ -224,7 +224,7 @@ const ContractMusicianList = () => {
         `Czy na pewno chcesz wygenerować ${participantsToProcess.length} umów? Istniejące umowy zostaną nadpisane.`
       )
     ) {
-      return;
+        return;
     }
 
     setIsGenerating(true);
@@ -261,17 +261,17 @@ const ContractMusicianList = () => {
 
       const financials = calculateFinancials(bulkContractAmount);
 
-      const contractData = {
-        eventId,
-        participationId: p._id,
-        zamawiajacy: {
-          nazwa: conductorData.zamawiajacy,
-          adres: `${conductorData.siedziba}, ${conductorData.kodPocztowy} ${conductorData.poczta}`,
-          nip: conductorData.nip,
-          regon: conductorData.regon,
-          reprezentant: conductorData.reprezentant,
-        },
-        wykonawca: {
+        const contractData = {
+            eventId,
+            participationId: p._id,
+            zamawiajacy: {
+                nazwa: conductorData.zamawiajacy,
+                adres: `${conductorData.siedziba}, ${conductorData.kodPocztowy} ${conductorData.poczta}`,
+                nip: conductorData.nip,
+                regon: conductorData.regon,
+                reprezentant: conductorData.reprezentant,
+            },
+            wykonawca: {
           imieNazwisko: musician.name,
           adres: musician.personalData?.address
             ? `${musician.personalData.address.street}, ${musician.personalData.address.postalCode} ${musician.personalData.address.city}`
@@ -288,9 +288,9 @@ const ContractMusicianList = () => {
         dataZawarcia: new Date().toISOString().split("T")[0],
         dataWykonaniaDziela: new Date(event.date).toISOString().split("T")[0],
         przedmiotUmowy: `Wykonanie partii ${musician.instrument} podczas koncertu "${event.title}"`,
-        ...financials,
-      };
-      return createContract(contractData);
+            ...financials,
+        };
+        return createContract(contractData);
     });
 
     const results = await Promise.allSettled(promises);
@@ -345,7 +345,7 @@ const ContractMusicianList = () => {
       </button>
       <h1>Zarządzanie umowami dla wydarzenia</h1>
       <h2>{event?.title}</h2>
-
+      
       <SuccessMessage
         message={successMessage}
         onClose={() => setSuccessMessage("")}
@@ -370,14 +370,14 @@ const ContractMusicianList = () => {
 
       <div className="contract-actions">
         {!showBulkGenerateForm ? (
-          <button
+        <button 
             onClick={() => setShowBulkGenerateForm(true)}
             className="button-primary"
-          >
+        >
             Generuj wszystkie umowy
-          </button>
+        </button>
         ) : (
-          <div className="bulk-generate-form">
+        <div className="bulk-generate-form">
             <h3>Dane Zamawiającego do umów</h3>
             <p>
               Poniższe dane zostaną użyte we wszystkich generowanych umowach.
@@ -503,10 +503,10 @@ const ContractMusicianList = () => {
                 className="button-secondary"
               >
                 Anuluj
-              </button>
+            </button>
             </div>
-          </div>
-        )}
+        </div>
+      )}
       </div>
 
       <hr />
@@ -552,9 +552,9 @@ const ContractMusicianList = () => {
             </div>
           ))}
         </div>
-      )}
+        )}
     </div>
   );
 };
 
-export default ContractMusicianList;
+export default ContractMusicianList; 

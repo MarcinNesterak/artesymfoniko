@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, storage } from '../../services/api';
+import { initializePushNotifications } from '../../services/pushNotifications'; // ZMIANA
 import '../../styles/auth.css';
 
 const Login = () => {
@@ -36,6 +37,9 @@ const Login = () => {
       };
       
       storage.setUser(userData);
+
+      // Po udanym logowaniu, zainicjuj powiadomienia push
+      await initializePushNotifications(); // ZMIANA
       
       // Przekieruj w zależności od roli i statusu hasła
       if (response.user.role === 'conductor') {

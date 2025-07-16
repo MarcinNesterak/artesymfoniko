@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authAPI, usersAPI, storage } from "../../services/api";
 import "../../styles/myProfile.css";
+import api from '../../services/api';
+import { sendSubscriptionToServer, unsubscribeFromServer } from '../../services/notificationService';
 
 const MyProfile = () => {
   const navigate = useNavigate();
@@ -35,6 +37,13 @@ const MyProfile = () => {
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscription, setSubscription] = useState(null);
+
 
   const user = storage.getUser();
 
@@ -215,6 +224,7 @@ const MyProfile = () => {
     }
   };
 
+  const handleSubscriptionToggle = async () => {
   if (loading) {
     return <div className="loading">Ładowanie danych profilu...</div>;
   }

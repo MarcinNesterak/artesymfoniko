@@ -14,7 +14,7 @@ const NewMessageComposer = ({ onMessageSent, userRole }) => {
     const fetchUsers = async () => {
       try {
         if (userRole === 'conductor') {
-          const response = await usersAPI.getMusicians();
+        const response = await usersAPI.getMusicians();
           const allUsers = response.musicians || [];
           setMusicians(allUsers.filter(user => user.role === 'musician' && user.active));
         } else if (userRole === 'musician') {
@@ -65,17 +65,17 @@ const NewMessageComposer = ({ onMessageSent, userRole }) => {
         <div className="form-group">
           <label htmlFor="recipient">Do:</label>
           {userRole === 'conductor' ? (
-            <select
+          <select
               id="recipient"
-              value={selectedMusician}
-              onChange={(e) => setSelectedMusician(e.target.value)}
-              required
-            >
-              <option value="" disabled>Wybierz muzyka z listy...</option>
-              {musicians.map(m => (
-                <option key={m._id} value={m._id}>{m.name}</option>
-              ))}
-            </select>
+            value={selectedMusician}
+            onChange={(e) => setSelectedMusician(e.target.value)}
+            required
+          >
+            <option value="" disabled>Wybierz muzyka z listy...</option>
+            {musicians.map(m => (
+              <option key={m._id} value={m._id}>{m.name}</option>
+            ))}
+          </select>
           ) : conductor ? (
             <div className="recipient-display">{conductor.name}</div>
           ) : (

@@ -177,7 +177,7 @@ function App() {
           
           {/* Public routes */}
           <Route path="/polityka-prywatnosci" element={<PrivacyPolicy />} />
-
+          
           {/* Redirect to login if no route matches */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />

@@ -9,3 +9,20 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+// Rejestracja Service Workera dla PWA i powiadomień push
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/service-worker.js")
+      .then((registration) => {
+        console.log(
+          "Service Worker zarejestrowany pomyślnie:",
+          registration.scope
+        );
+      })
+      .catch((error) => {
+        console.error("Błąd rejestracji Service Workera:", error);
+      });
+  });
+}
