@@ -16,53 +16,61 @@ function urlBase64ToUint8Array(base64String) {
 
 // Główna funkcja do subskrypcji użytkownika
 export async function subscribeUserToPush() {
+  console.log("--- 1. Rozpoczynam próbę subskrypcji powiadomień. ---");
+
   if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-    console.warn("Powiadomienia push nie są wspierane w tej przeglądarce.");
+    console.warn("--- X. BŁĄD KRYTYCZNY: Przeglądarka nie wspiera powiadomień push. ---");
     return;
   }
+  console.log("--- 2. Przeglądarka wspiera powiadomienia. Przechodzę dalej. ---");
 
   try {
     const registration = await navigator.serviceWorker.ready;
+    console.log("--- 3. Service Worker jest gotowy. ---");
+
     let subscription = await registration.pushManager.getSubscription();
 
     if (subscription) {
-      console.log("Użytkownik jest już zasubskrybowany. Synchronizuję z backendem.");
-      // Zawsze wysyłaj subskrypcję do backendu, aby upewnić się, że jest zsynchronizowana.
+      console.log("--- 4a. ZNALEZIONO ISTNIEJĄCĄ SUBSKRYPCJĘ. ---");
+      console.log("Istniejący obiekt subskrypcji:", subscription);
       await sendSubscriptionToBackend(subscription);
       return;
     }
 
-    // Klucz publiczny VAPID powinien być bezpiecznie przekazany z backendu
-    // Tutaj dla uproszczenia wstawiamy go bezpośrednio, ale w produkcji
-    // powinien być pobierany np. z endpointu konfiguracyjnego.
+    console.log("--- 4b. BRAK ISTNIEJĄCEJ SUBSKRYPCJI. Próbuję stworzyć nową. ---");
+    
     const vapidPublicKey =
       "BI87BRg2_feYPKWjrVgcqLQgeuvJo3IFDbgIdBOiBXgkn6kfcNAgVHCrE-ujEr_w0wWhl-8XVMjkIWvWXNAvxBc";
 
     if (!vapidPublicKey) {
-      console.error("Klucz VAPID publiczny nie jest dostępny.");
+      console.error("--- X. BŁĄD: Klucz VAPID publiczny nie jest dostępny. ---");
       return;
     }
+    console.log("--- 5. Klucz VAPID jest dostępny. ---");
 
     const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
 
+    console.log("--- 6. Proszę przeglądarkę o zgodę i nową subskrypcję... (Czekam na odpowiedź użytkownika lub przeglądarki) ---");
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey,
     });
+    console.log("--- 7. UDAŁO SIĘ! Otrzymano nową subskrypcję od przeglądarki. ---");
+    console.log("Nowy obiekt subskrypcji:", subscription);
 
-    console.log("Nowa subskrypcja:", subscription);
     await sendSubscriptionToBackend(subscription);
   } catch (error) {
-    console.error("Błąd podczas subskrypcji powiadomień push:", error);
+    console.error("--- X. BŁĄD KRYTYCZNY PODCZAS PROCESU SUBSKRYPCJI: ---", error);
   }
 }
 
 // Funkcja do wysyłania subskrypcji na backend
 async function sendSubscriptionToBackend(subscription) {
+  console.log("--- 8. Próbuję wysłać subskrypcję na backend... ---");
   try {
     const response = await notificationsAPI.subscribe(subscription);
-    console.log("Subskrypcja wysłana na backend:", response);
+    console.log("--- 9. SUKCES! Subskrypcja wysłana na backend. Odpowiedź serwera:", response);
   } catch (error) {
-    console.error("Błąd podczas wysyłania subskrypcji na backend:", error);
+    console.error("--- X. BŁĄD PODCZAS WYSYŁANIA SUBSKRYPCJI NA BACKEND: ---", error);
   }
 } 
