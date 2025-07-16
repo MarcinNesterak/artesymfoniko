@@ -224,7 +224,8 @@ const MyProfile = () => {
     }
   };
 
-  const handleSubscriptionToggle = async () => {
+  const handleSubscriptionToggle = async () => {};
+
   if (loading) {
     return <div className="loading">Ładowanie danych profilu...</div>;
   }
