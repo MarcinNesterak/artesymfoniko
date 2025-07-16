@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { authAPI, usersAPI, storage } from "../../services/api";
 import "../../styles/myProfile.css";
 import api from '../../services/api';
-import { sendSubscriptionToServer, unsubscribeFromServer } from '../../services/notificationService';
 
 const MyProfile = () => {
   const navigate = useNavigate();
