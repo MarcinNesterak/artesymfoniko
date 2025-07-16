@@ -198,9 +198,9 @@ export const participationsAPI = {
     const response = await fetch(
       `${API_BASE_URL}/api/events/participations/${id}`,
       {
-        method: "PATCH",
-        headers: getHeaders(true),
-        body: JSON.stringify(data),
+      method: "PATCH",
+      headers: getHeaders(true),
+      body: JSON.stringify(data),
       }
     );
     return handleResponse(response);
@@ -401,8 +401,8 @@ export const privateMessagesAPI = {
     const response = await fetch(
       `${API_BASE_URL}/api/private-messages/conversations`,
       {
-        method: "GET",
-        headers: getHeaders(true),
+      method: "GET",
+      headers: getHeaders(true),
       }
     );
     return handleResponse(response);
@@ -413,8 +413,8 @@ export const privateMessagesAPI = {
     const response = await fetch(
       `${API_BASE_URL}/api/private-messages/conversations/${otherUserId}`,
       {
-        method: "GET",
-        headers: getHeaders(true),
+      method: "GET",
+      headers: getHeaders(true),
       }
     );
     return handleResponse(response);
@@ -433,13 +433,26 @@ export const privateMessagesAPI = {
     });
     return handleResponse(response);
   },
-
+  
   // Oznacz wiadomości jako przeczytane
   markAsRead: async (conversationId) => {
     const response = await fetch(`${API_BASE_URL}/api/private-messages/read`, {
       method: "POST",
+        headers: getHeaders(true),
+        body: JSON.stringify({ conversationId }),
+    });
+    return handleResponse(response);
+  },
+};
+
+// Notifications API
+export const notificationsAPI = {
+  // Zapisz subskrypcję na serwerze
+  subscribe: async (subscription) => {
+    const response = await fetch(`${API_BASE_URL}/api/notifications/subscribe`, {
+      method: 'POST',
       headers: getHeaders(true),
-      body: JSON.stringify({ conversationId }),
+      body: JSON.stringify(subscription),
     });
     return handleResponse(response);
   },
