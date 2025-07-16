@@ -49,7 +49,7 @@ router.post("/subscribe", authenticate, async (req, res) => {
     const payload = {
       title: "ArteSymfoniko - Subskrypcja Aktywna",
       body: "Twoja subskrypcja powiadomień jest teraz aktywna.",
-      icon: "https://artesymfoniko.vercel.app/artesymfoniko-192x192.png",
+      icon: "https://artesymfoniko.pl/artesymfoniko-192x192.png",
     };
 
     try {
