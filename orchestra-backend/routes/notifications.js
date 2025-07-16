@@ -1,7 +1,8 @@
 import express from "express";
-import webpush from "web-push";
 import { authenticate } from "../middleware/auth.js";
 import User from "../models/User.js";
+import { sendPushNotification } from "../utils/notificationService.js";
+
 
 const router = express.Router();
 
@@ -44,15 +45,16 @@ router.post("/subscribe", authenticate, async (req, res) => {
 
     console.log(`Subscription saved successfully for user: ${userId}`);
 
-    // Wyślij powiadomienie testowe
-    const payload = JSON.stringify({
+    // Wyślij powiadomienie testowe używając naszego wrappera
+    const payload = {
       title: "ArteSymfoniko - Subskrypcja Aktywna",
       body: "Twoja subskrypcja powiadomień jest teraz aktywna.",
       icon: "https://artesymfoniko.vercel.app/artesymfoniko-192x192.png",
-    });
+    };
 
     try {
-      await webpush.sendNotification(subscription, payload);
+      // Używamy naszej funkcji, która na pewno jest poprawnie skonfigurowana
+      await sendPushNotification([userId], payload);
       console.log(`Test notification sent successfully to user: ${userId}`);
     } catch (pushError) {
       console.error(`Failed to send test notification for user ${userId}:`, pushError);
