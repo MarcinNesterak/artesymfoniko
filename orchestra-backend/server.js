@@ -58,6 +58,7 @@ const allowedOrigins = [
   "https://artesymfoniko.pl",
   "http://www.artesymfoniko.pl",
   "https://www.artesymfoniko.pl",
+  "https://artesymfoniko-production.up.railway.app",
 ];
 
 app.use(
