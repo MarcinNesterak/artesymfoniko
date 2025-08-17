@@ -224,7 +224,7 @@ input[type="date"], input[type="time"] {
     white-space: normal;
   }
   .musician-item .musician-instrument {
-    display: block;
+    display: flex;
     margin-left: 0;
     margin-top: 2px;
   }
