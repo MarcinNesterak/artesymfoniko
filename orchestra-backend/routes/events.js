@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import Invitation from "../models/Invitation.js";
 import Participation from "../models/Participation.js";
 import Contract from "../models/Contract.js";
+import EventAudit from "../models/EventAudit.js";
 import {
   authenticate,
   requireConductor,
@@ -219,11 +220,26 @@ router.get("/:id", apiLimiter, requireUser, async (req, res) => {
       "name email instrument personalData.address personalData.pesel personalData.bankAccountNumber"
     );
 
+    // --- START POBIERANIA HISTORII ZMIAN DLA MUZYKA ---
+    let recentChanges = [];
+    if (req.user.role === 'musician') {
+      const user = await User.findById(req.user._id).select('lastEventViews');
+      const lastView = user.lastEventViews.find(v => v.eventId.equals(event._id));
+      const lastViewedAt = lastView ? lastView.lastViewedAt : new Date(0);
+
+      recentChanges = await EventAudit.find({
+        eventId: req.params.id,
+        timestamp: { $gt: lastViewedAt }
+      }).sort({ timestamp: -1 }); // Najnowsze zmiany pierwsze
+    }
+    // --- KONIEC POBIERANIA HISTORII ZMIAN DLA MUZYKA ---
+
     res.json({
       message: "Szczegóły wydarzenia",
       event,
       invitations,
       participations,
+      recentChanges, // Dodajemy historię zmian do odpowiedzi
     });
   } catch (error) {
     console.error("Get event error:", error);
@@ -416,6 +432,35 @@ router.put(
           .json({ message: "Brak uprawnień do edycji tego wydarzenia." });
       }
 
+      // --- START ŚLEDZENIA ZMIAN ---
+      const detectedChanges = [];
+      const fieldsToTrack = ['title', 'date', 'description', 'schedule', 'importantInfo', 'program', 'dresscode', 'location'];
+
+      const newValues = req.body;
+
+      fieldsToTrack.forEach(field => {
+        // Specjalna obsługa dla daty, ponieważ obiekty Date są trudne do porównania
+        if (field === 'date' && newValues.date) {
+            const oldDate = new Date(event.date).toISOString();
+            const newDate = new Date(newValues.date).toISOString();
+            if (oldDate !== newDate) {
+                detectedChanges.push({
+                    field,
+                    oldValue: event.date,
+                    newValue: newValues.date
+                });
+            }
+        } else if (newValues[field] !== undefined && event[field] !== newValues[field]) {
+          detectedChanges.push({
+            field,
+            oldValue: event[field],
+            newValue: newValues[field]
+          });
+        }
+      });
+      // --- KONIEC ŚLEDZENIA ZMIAN ---
+
+
       // 1. Pobierz aktualne zaproszenia PRZED modyfikacją
       const originalInvitations = await Invitation.find({ eventId: event._id });
       const originalInvitedUserIds = originalInvitations.map((inv) =>
@@ -511,6 +556,16 @@ router.put(
       }
 
       const updatedEvent = await event.save();
+
+      // Zapisz zmiany w kolekcji EventAudit, jeśli jakieś wystąpiły
+      if (detectedChanges.length > 0) {
+        const audit = new EventAudit({
+          eventId: event._id,
+          editorId: req.user._id,
+          changes: detectedChanges
+        });
+        await audit.save();
+      }
 
       // Wyślij powiadomienie do uczestników o zmianie
       const participations = await Participation.find({
