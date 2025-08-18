@@ -9,6 +9,10 @@
   --error: #cf6679;
   --success: #03dac6;
   --warning: #ffd600;
+  --warning-bg: rgba(255, 214, 0, 0.15);
+  --warning-bg-light: rgba(255, 214, 0, 0.08);
+  --warning-border: rgba(255, 214, 0, 0.4);
+  --warning-text: #FFD600;
   --border-color: #3d3d3d;
   --card-bg: #23232b;
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
