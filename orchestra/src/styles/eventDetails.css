@@ -34,10 +34,20 @@
 .field--changed {
   background-color: var(--warning-bg-light);
   border-radius: 6px;
-  padding: 8px;
+  padding: 4px 8px; /* Zmniejszony padding dla lepszego dopasowania */
+  margin: -4px -8px; /* Negatywny margines, aby wizualnie nie rozpychać layoutu */
   box-shadow: 0 0 8px var(--warning-bg);
   animation: fadeInHighlight 1.5s ease-out;
+  display: inline-block; /* Zapewnia, że tło obejmuje tylko tekst, a nie całą szerokość */
 }
+
+/* Dostosowanie dla bloków, które powinny zajmować całą szerokość */
+.event-extra-info.field--changed {
+  display: block;
+  padding: 12px;
+  margin: 0;
+}
+
 
 @keyframes fadeInHighlight {
   from {

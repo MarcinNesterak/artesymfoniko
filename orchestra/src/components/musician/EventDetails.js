@@ -358,7 +358,7 @@ const EventDetails = () => {
   return (
     <div className="event-details">
       <div className="event-details-header">
-        <h1>{event.title}</h1>
+        <h1 className={wasFieldChanged('title') ? 'field--changed' : ''}>{event.title}</h1>
         <button
           onClick={() => navigate("/musician/dashboard")}
           className="btn-back"
@@ -425,7 +425,7 @@ const EventDetails = () => {
               </div>
             </div>
             {dresscodeInfo && (
-              <div className={`event-info-section ${wasFieldChanged('dresscode') ? 'field--changed' : ''}`} style={{ marginTop: "16px" }}>
+              <div className="event-info-section" style={{ marginTop: "16px" }}>
                 <h3>Dresscode</h3>
                 <div className="dresscode-display">
                   <div className="dresscode-column">
@@ -437,7 +437,7 @@ const EventDetails = () => {
                     </div>
                     <div className="dresscode-details">
                       <span className="dresscode-label">Panowie</span>
-                      <p className="dresscode-description">
+                      <p className={`dresscode-description ${wasFieldChanged('dresscode') ? 'field--changed' : ''}`}>
                         {dresscodeInfo.description}
                       </p>
                     </div>
