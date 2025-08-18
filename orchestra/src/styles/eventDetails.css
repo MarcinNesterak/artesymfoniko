@@ -3,6 +3,54 @@
   overflow-wrap: break-word;
 }
 
+/* --- Style dla podsumowania zmian --- */
+.changes-summary-card {
+  background-color: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.changes-summary-card h3 {
+  margin-top: 0;
+  color: var(--warning-text);
+}
+
+.changes-summary-card p {
+  margin-bottom: 12px;
+}
+
+.changes-summary-card ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.changes-summary-card li {
+  margin-bottom: 4px;
+}
+
+/* --- Style dla podświetlenia zmienionych pól --- */
+.field--changed {
+  background-color: var(--warning-bg-light);
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 0 8px var(--warning-bg);
+  animation: fadeInHighlight 1.5s ease-out;
+}
+
+@keyframes fadeInHighlight {
+  from {
+    background-color: transparent;
+    box-shadow: 0 0 0 transparent;
+  }
+  to {
+    background-color: var(--warning-bg-light);
+    box-shadow: 0 0 8px var(--warning-bg);
+  }
+}
+
+
 .event-details-header {
   display: flex;
   justify-content: space-between;

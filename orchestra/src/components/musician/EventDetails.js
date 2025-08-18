@@ -50,6 +50,19 @@ const EventDetails = () => {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [calendarAdded, setCalendarAdded] = useState(false);
+  const [recentChanges, setRecentChanges] = useState([]); // Nowy stan do przechowywania zmian
+
+  // --- Funkcja pomocnicza do sprawdzania, czy pole zostało zmienione ---
+  const wasFieldChanged = (fieldName) => {
+    if (!recentChanges || recentChanges.length === 0) {
+      return false;
+    }
+    // Sprawdzamy, czy w którymkolwiek audycie (zazwyczaj będzie jeden)
+    // znajduje się zmiana dla danego pola
+    return recentChanges.some(audit => 
+      audit.changes.some(change => change.field === fieldName)
+    );
+  };
 
   const userJson = localStorage.getItem("user");
   const user = userJson ? JSON.parse(userJson) : null;
@@ -138,6 +151,7 @@ const EventDetails = () => {
 
         setEvent(response.event);
         setInvitations(response.invitations || []);
+        setRecentChanges(response.recentChanges || []); // Zapisz zmiany w stanie
 
         // Wyciągnij uczestników z participations (tylko zaakceptowani)
         const confirmedParticipants =
@@ -300,6 +314,47 @@ const EventDetails = () => {
 
   const dresscodeInfo = getDresscodeInfo();
 
+  // --- Komponent do wyświetlania podsumowania zmian ---
+  const ChangesSummary = ({ changes }) => {
+    if (!changes || changes.length === 0) {
+      return null;
+    }
+
+    // Mapowanie nazw pól na bardziej przyjazne etykiety
+    const fieldLabels = {
+      title: 'Tytuł wydarzenia',
+      date: 'Data i godzina',
+      description: 'Opis',
+      schedule: 'Harmonogram',
+      importantInfo: 'Ważne informacje',
+      program: 'Program',
+      dresscode: 'Dresscode',
+      location: 'Miejsce'
+    };
+
+    // Grupujemy zmiany według audytu (jeśli jest ich kilka)
+    // i wyciągamy unikalne zmienione pola
+    const changedFields = new Set();
+    changes.forEach(audit => {
+      audit.changes.forEach(change => {
+        changedFields.add(fieldLabels[change.field] || change.field);
+      });
+    });
+
+    return (
+      <div className="changes-summary-card">
+        <h3>Wydarzenie zostało zaktualizowane</h3>
+        <p>Dyrygent wprowadził zmiany w następujących sekcjach:</p>
+        <ul>
+          {[...changedFields].map((field, index) => (
+            <li key={index}>{field}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+
   return (
     <div className="event-details">
       <div className="event-details-header">
@@ -311,6 +366,9 @@ const EventDetails = () => {
           Powrót do listy
         </button>
       </div>
+
+      {/* Wyświetlanie podsumowania zmian */}
+      <ChangesSummary changes={recentChanges} />
 
       {/* Zaproszenie na górze */}
       {userInvitation && !userParticipation && (
@@ -357,17 +415,17 @@ const EventDetails = () => {
           <div className="event-info-card">
             <h2>Informacje o wydarzeniu</h2>
             <div className="event-info-grid">
-              <div className="info-item">
+              <div className={`info-item ${wasFieldChanged('date') ? 'field--changed' : ''}`}>
                 <span className="info-label">Data:</span>
                 <span className="info-value">{formatDate(event.date)}</span>
               </div>
-              <div className="info-item">
+              <div className={`info-item ${wasFieldChanged('location') ? 'field--changed' : ''}`}>
                 <span className="info-label">Miejsce:</span>
                 <span className="info-value">{event.location}</span>
               </div>
             </div>
             {dresscodeInfo && (
-              <div className="event-info-section" style={{ marginTop: "16px" }}>
+              <div className={`event-info-section ${wasFieldChanged('dresscode') ? 'field--changed' : ''}`} style={{ marginTop: "16px" }}>
                 <h3>Dresscode</h3>
                 <div className="dresscode-display">
                   <div className="dresscode-column">
@@ -397,13 +455,13 @@ const EventDetails = () => {
               </div>
             )}
             {event.description && (
-              <div className="event-extra-info">
+              <div className={`event-extra-info ${wasFieldChanged('description') ? 'field--changed' : ''}`}>
                 <strong>Opis:</strong>
                 <pre>{event.description}</pre>
               </div>
             )}
             {event.schedule && (
-              <div className="event-extra-info">
+              <div className={`event-extra-info ${wasFieldChanged('schedule') ? 'field--changed' : ''}`}>
                 <h3>Harmonogram</h3>
                 {Array.isArray(event.schedule) ? (
                   <ul>
@@ -421,13 +479,13 @@ const EventDetails = () => {
               </div>
             )}
             {event.importantInfo && (
-            <div className="event-extra-info">
+            <div className={`event-extra-info ${wasFieldChanged('importantInfo') ? 'field--changed' : ''}`}>
               <h3>Ważne informacje</h3>
               <pre>{event.importantInfo}</pre>
-            </div>
+              </div>
             )}
             {event.program && (
-              <div className="event-extra-info">
+              <div className={`event-extra-info ${wasFieldChanged('program') ? 'field--changed' : ''}`}>
                 <strong>Program koncertu:</strong>
                 <pre>{event.program}</pre>
               </div>
