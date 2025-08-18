@@ -238,6 +238,7 @@ const EventDetails = () => {
         date: new Date(editData.date).toISOString(),
         description: editData.description,
         schedule: editData.schedule,
+        importantInfo: editData.importantInfo,
         program: editData.program,
         location: editData.location,
         dresscode:

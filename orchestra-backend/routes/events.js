@@ -409,6 +409,7 @@ router.put(
       .withMessage("Lokalizacja nie może być pusta."),
     body("description").optional().trim().escape(),
     body("schedule").optional().trim().escape(),
+    body("importantInfo").optional().trim().escape(), // <-- DODANE
     body("program").optional().trim().escape(),
     body("dresscode").optional().trim().escape(),
   ],
@@ -477,6 +478,7 @@ router.put(
         location,
         dresscode,
         inviteUserIds,
+        importantInfo, // <-- DODANE
       } = req.body;
       if (title) event.title = title;
       if (date) event.date = date;
@@ -485,6 +487,7 @@ router.put(
       if (program) event.program = program;
       if (location) event.location = location;
       if (dresscode) event.dresscode = dresscode;
+      if (importantInfo) event.importantInfo = importantInfo; // <-- DODANE
 
       // Oznacz jako zmodyfikowane
       event.lastModified = new Date();
