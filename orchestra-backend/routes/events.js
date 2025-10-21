@@ -717,7 +717,6 @@ router.post("/:id/invite", requireConductor, async (req, res) => {
       eventId: req.params.id,
     });
     event.invitedCount = totalInvitations;
-    event.lastModified = new Date();
     await event.save();
 
     // Wyślij powiadomienia e-mail do nowo zaproszonych
