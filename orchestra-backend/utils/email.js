@@ -12,9 +12,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS, // Hasło do aplikacji wygenerowane w Google
   },
-  tls: {
-    ciphers:'SSLv3'
-  }
 });
 
 /**
