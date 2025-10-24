@@ -15,6 +15,13 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 10000, // 10 sekund timeout połączenia
   greetingTimeout: 5000,    // 5 sekund timeout powitania
   socketTimeout: 10000,     // 10 sekund timeout socket
+  // Dodatkowe ustawienia dla lepszej kompatybilności
+  tls: {
+    rejectUnauthorized: false, // Nie odrzucaj certyfikatów
+    ciphers: 'SSLv3' // Dodaj z powrotem dla kompatybilności
+  },
+  debug: true, // Włącz debugowanie
+  logger: true // Włącz logowanie
 });
 
 /**
