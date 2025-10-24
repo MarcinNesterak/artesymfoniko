@@ -12,6 +12,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS, // Hasło do aplikacji wygenerowane w Google
   },
+  connectionTimeout: 10000, // 10 sekund timeout połączenia
+  greetingTimeout: 5000,    // 5 sekund timeout powitania
+  socketTimeout: 10000,     // 10 sekund timeout socket
 });
 
 /**
@@ -30,11 +33,21 @@ const sendEmail = async (options) => {
       html: options.html,
     };
 
+    console.log(`📧 Attempting to send email to: ${options.to}`);
+    const startTime = Date.now();
+    
     const info = await transporter.sendMail(mailOptions);
-    console.log('Wiadomość wysłana: %s', info.messageId);
+    const duration = Date.now() - startTime;
+    
+    console.log(`✅ Email sent successfully to ${options.to} in ${duration}ms. Message ID: ${info.messageId}`);
     return info;
   } catch (error) {
-    console.error('Błąd podczas wysyłania e-maila:', error);
+    const duration = Date.now() - startTime;
+    console.error(`❌ Failed to send email to ${options.to} after ${duration}ms:`, {
+      error: error.message,
+      code: error.code,
+      command: error.command
+    });
     // Nie rzucamy błędu dalej, aby nie przerywać głównych operacji (np. tworzenia wydarzenia)
   }
 };
