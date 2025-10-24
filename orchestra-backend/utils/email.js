@@ -6,8 +6,8 @@ dotenv.config();
 // Konfiguracja transportera email
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: 587, // Standardowy port dla SMTP z TLS
-  secure: false, // true dla portu 465, false dla innych portów
+  port: 465, // Port SSL zamiast TLS
+  secure: true, // true dla portu 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS, // Hasło do aplikacji wygenerowane w Google
