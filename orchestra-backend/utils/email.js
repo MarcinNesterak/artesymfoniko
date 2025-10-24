@@ -25,6 +25,8 @@ const transporter = nodemailer.createTransport({
  * @param {string} options.html - Treść maila w formacie HTML.
  */
 const sendEmail = async (options) => {
+  const startTime = Date.now(); // Przenieś poza try-catch
+  
   try {
     const mailOptions = {
       from: `"Artesymfoniko" <${process.env.EMAIL_USER}>`,
@@ -34,7 +36,6 @@ const sendEmail = async (options) => {
     };
 
     console.log(`📧 Attempting to send email to: ${options.to}`);
-    const startTime = Date.now();
     
     const info = await transporter.sendMail(mailOptions);
     const duration = Date.now() - startTime;
